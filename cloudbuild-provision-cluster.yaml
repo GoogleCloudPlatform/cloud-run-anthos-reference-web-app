@@ -1,0 +1,135 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+## The steps in this Cloud Build script set up the cluster
+## to be used by the project. This script is separate
+## from the regular infrastructure setup because it is intended
+## to be a one-time setup, whereas the steps in cloudbuild.yaml
+## are repeatable.
+
+steps:
+## CLUSTER CREATE ##
+
+# Create a new cluster with the appropriate configuration for this application
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Create Cluster
+  waitFor: ['-']
+  args: [
+    'beta', 'container', 'clusters', 'create', '${_CLUSTER_NAME}',
+    '--addons', 'HorizontalPodAutoscaling,HttpLoadBalancing,CloudRun',
+    '--machine-type', 'e2-standard-4',
+    '--num-nodes', '3',
+    '--cluster-version', '${_CLUSTER_GKE_VERSION}',
+    '--enable-stackdriver-kubernetes',
+    '--identity-namespace', '${PROJECT_ID}.svc.id.goog',
+    '--enable-ip-alias',
+    '--zone', '${_CLUSTER_LOCATION}'
+  ]
+
+## SERVICE ACCOUNT SETUP
+
+# Create a service account for Config Connecter (if one does not already exist)
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Create Config Connector service account
+  waitFor: ['-']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+      gcloud iam service-accounts describe cnrm-system@${PROJECT_ID}.iam.gserviceaccount.com || gcloud iam service-accounts create cnrm-system
+
+# Set up IAM role bindings for Config Connector
+# See: https://cloud.google.com/iam/docs/understanding-roles#primitive_role_definitions
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Grant Owner permissions
+  waitFor: ['Create Config Connector service account']
+  args: [
+      'projects','add-iam-policy-binding','${PROJECT_ID}',
+      '--member=serviceAccount:cnrm-system@${PROJECT_ID}.iam.gserviceaccount.com',
+      '--role=roles/owner'
+  ]
+
+# Set up the Workload Identity binding for Config Connector on the cluster
+# See: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Create IAM policy binding
+  waitFor: ['Create Config Connector service account', 'Create Cluster']
+  args: [
+      'iam','service-accounts','add-iam-policy-binding','cnrm-system@${PROJECT_ID}.iam.gserviceaccount.com',
+      '--member=serviceAccount:${PROJECT_ID}.svc.id.goog[cnrm-system/cnrm-controller-manager]',
+      '--role=roles/iam.workloadIdentityUser'
+  ]
+
+## CONFIG CONNECTOR INSTALL
+# See: https://cloud.google.com/config-connector/docs/how-to/install-upgrade-uninstall#installing_kcc
+
+# Download the latest release of Config Connector
+- name: 'gcr.io/cloud-builders/gsutil'
+  id: Download Config Connector
+  waitFor: ['-']
+  args: ['cp', 'gs://cnrm/latest/release-bundle.tar.gz', 'release-bundle.tar.gz']
+
+# Extract the release artifacts
+- name: 'alpine'
+  id: Extract Config Connector
+  waitFor: ['Download Config Connector']
+  entrypoint: /bin/tar
+  args: ['zxvf','release-bundle.tar.gz']
+
+# Substitute project ID into the YAML definitions
+- name: 'alpine'
+  id: Process Manifest
+  waitFor: ['Extract Config Connector']
+  entrypoint: /bin/ash
+  args: 
+  - '-c'
+  - |
+      sed -i 's/${PROJECT_ID?}/${PROJECT_ID}/' install-bundle-workload-identity/0-cnrm-system.yaml
+
+# Install Config Connector on the cluster
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Install Config Connector
+  waitFor: ['Create Cluster','Process Manifest']
+  args: ['apply', '-f', 'install-bundle-workload-identity/']
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
+# Create the web application namespace
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Create Namespace
+  waitFor: ['Create Cluster']
+  args: ['create', 'namespace', '${_NAMESPACE}']
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
+# Mark the namespace as managed by Config Connector
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Annotate Namespace
+  waitFor: ['Create Namespace']
+  args: ['annotate', 'namespace', '${_NAMESPACE}', 'cnrm.cloud.google.com/project-id=${PROJECT_ID}']
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
+# Add a Standalone NEG to the cluster ingress
+# See: https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Create NEG
+  waitFor: ['Create Cluster']
+  args: ['annotate', '--overwrite', '--namespace=${_ISTIO_INGRESS_NAMESPACE}', 'service', '${_ISTIO_INGRESS_SERVICE}', 'cloud.google.com/neg={"exposed_ports": {"80":{}}}']
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'

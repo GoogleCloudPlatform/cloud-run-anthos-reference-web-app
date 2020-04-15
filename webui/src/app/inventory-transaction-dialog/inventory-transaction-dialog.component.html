@@ -1,0 +1,59 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<form [formGroup]="inventoryTransactionForm" (ngSubmit)="onSubmit()">
+  <h2 mat-dialog-title>Inventory Transaction</h2>
+  <mat-dialog-content>
+    <mat-form-field appearance="fill">
+      <mat-label>Item</mat-label>
+      <mat-select formControlName="item_id" required>
+        <mat-option *ngFor="let item of items" [value]="item.id">
+          {{item.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="fill">
+      <mat-label>Location</mat-label>
+      <mat-select formControlName="location_id" required>
+        <mat-option *ngFor="let location of locations" [(value)]="location.id">
+          {{location.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <br>
+      <mat-radio-group formControlName="action" class="action-field">
+        <mat-radio-button value="ADD">ADD</mat-radio-button>
+        <mat-radio-button value="REMOVE">REMOVE</mat-radio-button>
+        <mat-radio-button value="RECOUNT">RECOUNT</mat-radio-button>
+      </mat-radio-group>
+    <br>
+    <mat-form-field appearance="fill">
+      <mat-label>Count</mat-label>
+      <input matInput type="number" formControlName="count">
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="fill">
+      <mat-label>Note</mat-label>
+      <textarea matInput formControlName="note"></textarea>
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions class="form-actions">
+    <button type="submit" mat-button color="primary">Submit</button>
+    <button type="reset" mat-button color="warn" (click)="onCancel()">Cancel</button>
+  </mat-dialog-actions>
+
+</form>

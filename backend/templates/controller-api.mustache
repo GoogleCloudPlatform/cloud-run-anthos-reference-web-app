@@ -1,0 +1,97 @@
+{{>partial_header}}
+package {{packageName}}
+
+import (
+	"encoding/json"
+  "log"
+	"net/http"
+	"strings"
+
+	"github.com/gorilla/mux"
+)
+
+// A {{classname}}Controller binds http requests to an api service and writes the service results to the http response
+type {{classname}}Controller struct {
+	service {{classname}}Servicer
+}
+
+// New{{classname}}Controller creates a default api controller
+func New{{classname}}Controller(s {{classname}}Servicer) Router {
+	return &{{classname}}Controller{ service: s }
+}
+
+// Routes returns all of the api route for the {{classname}}Controller
+func (c *{{classname}}Controller) Routes() Routes {
+	return Routes{ {{#operations}}{{#operation}}
+		{
+			"{{operationId}}",
+			strings.ToUpper("{{httpMethod}}"),
+			"{{{basePathWithoutHost}}}{{{path}}}",
+			c.{{operationId}},
+		},{{/operation}}{{/operations}}
+	}
+}{{#operations}}{{#operation}}
+
+// {{nickname}} - {{{summary}}}
+func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Request) { {{#hasFormParams}}
+	err := r.ParseForm()
+	if err != nil {
+		EncodeJSONStatus(http.StatusBadRequest, "Unable to parse form", w)
+		return
+	}
+	{{/hasFormParams}}{{#hasPathParams}}
+	params := mux.Vars(r){{/hasPathParams}}{{#hasQueryParams}}
+	query := r.URL.Query(){{/hasQueryParams}}{{#allParams}}{{#isPathParam}}{{#isLong}}
+	{{paramName}}, err := parseIntParameter(params["{{paramName}}"])
+	if err != nil {
+		message := "Unable to parse path parameter '{{paramName}}' as a long"
+		EncodeJSONStatus(http.StatusBadRequest, message, w)
+		return
+	}
+	{{/isLong}}{{^isLong}}
+	{{paramName}} := params["{{paramName}}"]{{/isLong}}{{/isPathParam}}{{#isQueryParam}}{{#isLong}}
+	{{paramName}}, err := parseIntParameter(query.Get("{{paramName}}"))
+	if err != nil {
+		message := "Unable to parse query parameter '{{paramName}}' as a long"
+		EncodeJSONStatus(http.StatusBadRequest, message, w)
+		return
+	}
+	{{/isLong}}{{^isLong}}
+	{{paramName}} := {{#isListContainer}}strings.Split({{/isListContainer}}query.Get("{{paramName}}"){{#isListContainer}}, ","){{/isListContainer}}{{/isLong}}{{/isQueryParam}}{{#isFormParam}}{{#isFile}}
+	{{paramName}}, err := ReadFormFileToTempFile(r, "{{paramName}}")
+	if err != nil {
+		message := "Unable to parse '{{paramName}}' as a list of longs"
+		EncodeJSONStatus(http.StatusBadRequest, message, w)
+		return
+	}
+	{{/isFile}}{{#isLong}}
+	{{paramName}}, err := parseIntParameter( r.FormValue("{{paramName}}"))
+	if err != nil {
+		message := "Unable to parse '{{paramName}}' as a long"
+		EncodeJSONStatus(http.StatusBadRequest, message, w)
+		return
+	}
+	{{/isLong}}{{^isFile}}{{^isLong}}
+	{{paramName}} := r.FormValue("{{paramName}}"){{/isLong}}{{/isFile}}{{/isFormParam}}{{#isHeaderParam}}
+	{{paramName}} := r.Header.Get("{{paramName}}"){{/isHeaderParam}}{{#isBodyParam}}
+	{{paramName}} := &{{dataType}}{}
+	if err := json.NewDecoder(r.Body).Decode(&{{paramName}}); err != nil {
+		message := "Unable to parse '{{paramName}}' as a JSON object"
+		EncodeJSONStatus(http.StatusBadRequest, message, w)
+		return
+	}
+	{{/isBodyParam}}{{/allParams}}
+	if err := c.service.{{nickname}}({{#allParams}}{{#isBodyParam}}*{{/isBodyParam}}{{paramName}}, {{/allParams}}w); err != nil {
+		log.Printf("%s %s %s", r.Method, r.RequestURI, err)
+		status := http.StatusInternalServerError
+		message := err.Error()
+		switch err.(type) {
+		case ResourceConflict:
+			status = http.StatusConflict
+		case ResourceNotFound:
+			status = http.StatusNotFound
+		default:
+		}
+		EncodeJSONStatus(status, message, w)
+	}
+}{{/operation}}{{/operations}}

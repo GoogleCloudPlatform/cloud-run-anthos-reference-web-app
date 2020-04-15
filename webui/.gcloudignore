@@ -1,0 +1,5 @@
+/api-client
+/dist
+/tmp
+/out-tsc
+/node_modules

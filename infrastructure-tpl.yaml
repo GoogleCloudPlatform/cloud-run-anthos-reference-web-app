@@ -1,0 +1,240 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+## This file contains the templated definitions for
+## the infrastructure that is managed by Config Connector.
+## See cloudbuild.yaml for usage.
+
+## Cloud Storage ##
+
+# GCS bucket configured for website hosting
+apiVersion: storage.cnrm.cloud.google.com/v1beta1
+kind: StorageBucket
+metadata:
+  name: ${DOMAIN}
+  namespace: ${NAMESPACE}
+  annotations:
+    cnrm.cloud.google.com/force-destroy: "true"
+spec:
+  website:
+    mainPageSuffix: index.html
+    # Configure notFound to also redirect to index.html to facilitate Angular routing
+    notFoundPage: index.html
+  location: US
+---
+# Storage Bucket ACL
+apiVersion: storage.cnrm.cloud.google.com/v1beta1
+kind: StorageBucketAccessControl
+metadata:
+  name: web-app-storage-bucket-access-control-1
+  namespace: ${NAMESPACE}
+spec:
+  bucketRef:
+    name: ${DOMAIN}
+  entity: allUsers
+  role: READER
+---
+# GCS Object ACL
+apiVersion: storage.cnrm.cloud.google.com/v1beta1
+kind: StorageDefaultObjectAccessControl
+metadata:
+  name: web-app-storage-bucket-default-access-control
+  namespace: ${NAMESPACE}
+spec:
+  bucketRef:
+    name: ${DOMAIN}
+  entity: allUsers
+  role: READER
+---
+## Load Balancing
+
+# Load balancer that forwards to GCS bucket
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeBackendBucket
+metadata:
+  name: web-app-backend-bucket
+  namespace: ${NAMESPACE}
+spec:
+  bucketRef:
+    name: ${DOMAIN}
+  description: contains a reference to a bucket for use with HTTP(S) load-balancing
+---
+# health check
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeHealthCheck
+metadata:
+  name: web-app-health-check
+  namespace: ${NAMESPACE}
+spec:
+  checkIntervalSec: 5
+  tcpHealthCheck:
+    port: 80
+  location: global
+---
+# URL map
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeURLMap
+metadata:
+  name: web-app-url-map
+  namespace: ${NAMESPACE}
+spec:
+  location: global
+  defaultService:
+    backendBucketRef:
+      name: web-app-backend-bucket
+  pathMatcher:
+    - name: allpaths
+      # Default all requests to the GCS bucket
+      defaultService:
+        backendBucketRef:
+          name: web-app-backend-bucket
+      pathRule:
+        # API requests go to the backend instead
+        - paths: ["/api", "/api/*"]
+          service:
+            backendServiceRef:
+              name: web-app-backend-service
+  hostRule:
+    - hosts: ["*"]
+      pathMatcher: allpaths
+---
+# HTTPS proxy
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeTargetHTTPSProxy
+metadata:
+  name: web-app-target-proxy-https
+  namespace: ${NAMESPACE}
+spec:
+  description: ""
+  urlMapRef:
+    name: web-app-url-map
+  sslPolicyRef:
+    name: web-app-ssl-policy
+  sslCertificates:
+    - external: ${SSL_CERT_NAME}
+  location: global
+---
+# SSL policy for the HTTPS proxy
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeSSLPolicy
+metadata:
+  name: web-app-ssl-policy
+  namespace: ${NAMESPACE}
+spec:
+  description: SSL policy for the web app
+---
+# Forwarding rule is entrypoint for all requests
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeForwardingRule
+metadata:
+  name: web-app-forwarding-rule
+  namespace: ${NAMESPACE}
+spec:
+  description: "A global forwarding rule"
+  target:
+    targetHTTPSProxyRef:
+      name: web-app-target-proxy-https
+  portRange: "443"
+  ipProtocol: "TCP"
+  ipVersion: "IPV4"
+  location: global
+---
+# CAA record allows auto-provisioning SSL certs
+apiVersion: dns.cnrm.cloud.google.com/v1beta1
+kind: DNSRecordSet
+metadata:
+  name: web-app-dns-caa-record
+  namespace: ${NAMESPACE}
+spec:
+  name: "${DOMAIN}."
+  type: "CAA"
+  ttl: 21600
+  managedZoneRef:
+    external: ${MANAGED_ZONE_NAME}
+  rrdatas:
+  - 0 issue "pki.goog"
+  - 0 issue "letsencrypt.org"
+---
+# The Google Cloud IAM service account to be used by the backend service
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMServiceAccount
+metadata:
+  name: ${BACKEND_GSA}
+  namespace: ${NAMESPACE}
+spec:
+  displayName: ${BACKEND_GSA}
+---
+# The Kubernetes service account to be used by the backend service
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ${BACKEND_KSA}
+  namespace: ${NAMESPACE}
+  annotations:
+    iam.gke.io/gcp-service-account: ${BACKEND_GSA}@${PROJECT_ID}.iam.gserviceaccount.com
+---
+# The Workload Identity binding that ties the Kubernetes service account to the IAM service account
+# See: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicy
+metadata:
+  name: iampolicy-workload-identity-backend
+  namespace: ${NAMESPACE}
+spec:
+  resourceRef:
+    apiVersion: iam.cnrm.cloud.google.com/v1beta1
+    kind: IAMServiceAccount
+    name: ${BACKEND_GSA}
+  bindings:
+    - role: roles/iam.workloadIdentityUser
+      members:
+        - serviceAccount:${PROJECT_ID}.svc.id.goog[${NAMESPACE}/${BACKEND_KSA}]
+---
+# IAM role bindings for the backend service account
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: iampolicymember-datastore-backend
+  namespace: ${NAMESPACE}
+spec:
+  member: serviceAccount:${BACKEND_GSA}@${PROJECT_ID}.iam.gserviceaccount.com
+  role: roles/datastore.user
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/${PROJECT_ID}
+---
+# Istio backend authentication policy
+# See: https://cloud.google.com/solutions/authenticating-cloud-run-on-gke-end-users-using-istio-and-identity-platform
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: api-origin-auth
+  namespace: ${ISTIO_INGRESS_NAMESPACE}
+spec:
+  targets:
+    - name: ${ISTIO_INGRESS_SERVICE}
+      ports:
+      - number: 80
+      - number: 443
+  origins:
+  - jwt:
+      issuer: "https://securetoken.google.com/${PROJECT_ID}"
+      audiences:
+      - ${PROJECT_ID}
+      jwksUri: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
+      triggerRules:
+      - includedPaths:
+        - prefix: /api
+  principalBinding: USE_ORIGIN

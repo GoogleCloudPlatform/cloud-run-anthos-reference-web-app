@@ -1,0 +1,467 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+openapi: 3.0.0
+info:
+  description: "Inventory API for the Cloud Run on GKE Reference Web App"
+  version: "1.0.0"
+  title: "Inventory API"
+servers:
+  - url: http://example.com/{basePath}
+    variables:
+      basePath:
+        default: api
+components:
+  schemas:
+    Status:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code
+        message:
+          type: string
+      example:
+        status: 404
+        message: Item with ID 34 not found
+    Item:
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        description:
+          type: string
+      example:
+        name: test item
+        id: item-uuid
+        description: awesome stuff
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        role:
+          type: string
+          enum: [worker, admin]
+      example:
+        name: Some Manager
+        id: user-uuid
+        role: admin
+    Location:
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        warehouse:
+          type: string
+      example:
+        name: shelf 3
+        id: location-uuid
+        warehouse: SEA
+    Inventory:
+      type: object
+      properties:
+        item_id:
+          type: string
+          format: uuid
+        location_id:
+          type: string
+          format: uuid
+        count:
+          type: integer
+          format: int64
+        last_updated:
+          type: string
+          format: date-time
+      example:
+        item_id: item-uuid
+        location_id: location-uuid
+        count: 100
+        last_updated: 2020-01-02 12:34:56Z
+    InventoryTransaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        item_id:
+          type: string
+          format: uuid
+        location_id:
+          type: string
+          format: uuid
+        action:
+          type: string
+          description: Expected to be one of ADD, REMOVE, or RECOUNT. Left as string for backwards/forwards compatibility.
+        count:
+          type: integer
+          format: int64
+        note:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+          format: uuid
+          description: the ID of the User who created the transaction
+      example:
+        id: uuid
+        item_id: item-uuid
+        location_id: location-uuid
+        action: ADD
+        count: 12
+        note: just in case
+        timestamp: 2020-01-02 12:34:56Z
+        created_by: user-uuid
+  parameters:
+    PathId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        minimum: 1
+  requestBodies:
+    ItemRequest:
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/Item'
+    LocationRequest:
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/Location'
+    InventoryRequest:
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/Inventory'
+    InventoryTransactionRequest:
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/InventoryTransaction'
+  responses:
+    StatusResponse:
+      description: Status response
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/Status'
+    ItemResponse:
+      description: Item response
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/Item'
+    LocationResponse:
+      description: Location response
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/Location'
+    InventoryResponse:
+      description: Inventory response
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/Inventory'
+    InventoryTransactionResponse:
+      description: InventoryTransaction response
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/InventoryTransaction'
+paths:
+  /items:
+    get:
+      summary: List all Items
+      operationId: listItems
+      tags: [inventory]
+      responses:
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          description: List of Items
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+    post:
+      summary: Create a new Item
+      operationId: newItem
+      tags: [inventory]
+      requestBody:
+        $ref: '#/components/requestBodies/ItemRequest'
+      responses:
+        '403':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          $ref: '#/components/responses/ItemResponse'
+  /items/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      summary: Get Item by ID
+      operationId: getItem
+      tags: [inventory]
+      responses:
+        '404':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          $ref: '#/components/responses/ItemResponse'
+    put:
+      summary: Update Item by ID
+      operationId: updateItem
+      tags: [inventory]
+      requestBody:
+        $ref: '#/components/requestBodies/ItemRequest'
+      responses:
+        '409':
+          $ref: '#/components/responses/StatusResponse'
+        '404':
+          $ref: '#/components/responses/StatusResponse'
+        '403':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '201':
+          $ref: '#/components/responses/ItemResponse'
+    delete:
+      summary: Delete Item by ID
+      operationId: deleteItem
+      tags: [inventory]
+      responses:
+        '404':
+          $ref: '#/components/responses/StatusResponse'
+        '403':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          $ref: '#/components/responses/StatusResponse'
+  /items/{id}/inventory:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      summary: List all Inventory of Item
+      tags: [inventory]
+      operationId: listItemInventory
+      responses:
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          description: List of Inventory
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Inventory'
+  /items/{id}/inventoryTransactions:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      summary: List all InventoryTransactions of Item
+      tags: [inventory]
+      operationId: listItemInventoryTransactions
+      responses:
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          description: List of Inventory Transactions
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryTransaction'
+  /locations:
+    get:
+      summary: List all Locations
+      operationId: listLocations
+      tags: [inventory]
+      responses:
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          description: List of Locations
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+    post:
+      summary: Create a new Location
+      operationId: newLocation
+      tags: [inventory]
+      requestBody:
+        $ref: '#/components/requestBodies/LocationRequest'
+      responses:
+        '403':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '201':
+          $ref: '#/components/responses/LocationResponse'
+  /locations/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      summary: Get Location by ID
+      operationId: getLocation
+      tags: [inventory]
+      responses:
+        '404':
+          $ref: '#/components/responses/StatusResponse'
+        '403':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          $ref: '#/components/responses/LocationResponse'
+    put:
+      summary: Update Location by ID
+      operationId: updateLocation
+      tags: [inventory]
+      requestBody:
+        $ref: '#/components/requestBodies/LocationRequest'
+      responses:
+        '409':
+          $ref: '#/components/responses/StatusResponse'
+        '404':
+          $ref: '#/components/responses/StatusResponse'
+        '403':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '201':
+          $ref: '#/components/responses/LocationResponse'
+    delete:
+      summary: Delete Location by ID
+      operationId: deleteLocation
+      tags: [inventory]
+      responses:
+        '404':
+          $ref: '#/components/responses/StatusResponse'
+        '403':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          $ref: '#/components/responses/StatusResponse'
+  /locations/{id}/inventory:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      summary: List all Inventory at location
+      tags: [inventory]
+      operationId: listLocationInventory
+      responses:
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          description: List of Inventory
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Inventory'
+  /locations/{id}/inventoryTransactions:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      summary: List all Inventory Transactions at location
+      tags: [inventory]
+      operationId: listLocationInventoryTransactions
+      responses:
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          description: List of Inventory Transactions
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryTransaction'
+  /inventoryTransactions:
+    get:
+      summary: List all Inventory Transactions
+      tags: [inventory]
+      operationId: listInventoryTransactions
+      responses:
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          description: List of InventoryTransactions
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryTransaction'
+    post:
+      summary: Create a new Inventory Transaction
+      tags: [inventory]
+      operationId: newInventoryTransaction
+      requestBody:
+        $ref: '#/components/requestBodies/InventoryTransactionRequest'
+      responses:
+        '403':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '201':
+          $ref: '#/components/responses/InventoryTransactionResponse'
+  /inventoryTransactions/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      summary: Get Inventory Transaction by ID
+      operationId: getInventoryTransaction
+      tags: [inventory]
+      responses:
+        '404':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          $ref: '#/components/responses/InventoryTransactionResponse'
+

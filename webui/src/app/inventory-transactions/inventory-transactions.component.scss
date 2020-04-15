@@ -1,0 +1,19 @@
+.mat-table {
+  width: 100%;
+}
+
+.add-button {
+  position: absolute;
+  right: 16px;
+  top: -28px;
+}
+
+.diff {
+  font-weight: 500;;
+  .ADD {
+    color: green;
+  }
+  .REMOVE {
+    color: red;
+  }
+}
