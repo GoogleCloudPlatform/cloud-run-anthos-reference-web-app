@@ -1,0 +1,149 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+## The steps in this Cloud Build script set up the infrastructure
+## for the application. That includes all the resources managed
+## by Config Connector (e.g. GCS bucket, IAM policies, DNS records).
+
+steps:
+
+# Use envsubst to substitute variable values into infrastructure-tpl.yaml
+- name: 'alpine'
+  id: Infrastructure YAML
+  waitFor: ['-']
+  entrypoint: /bin/ash
+  args:
+  - '-c'
+  - |
+     apk add gettext
+     cat infrastructure-tpl.yaml | \
+     envsubst > infrastructure.yaml
+  env:
+    - 'BACKEND_GSA=${_BACKEND_GSA}'
+    - 'BACKEND_KSA=${_BACKEND_KSA}'
+    - 'DOMAIN=${_DOMAIN}'
+    - 'ISTIO_INGRESS_NAMESPACE=${_ISTIO_INGRESS_NAMESPACE}'
+    - 'ISTIO_INGRESS_SERVICE=${_ISTIO_INGRESS_SERVICE}'
+    - 'MANAGED_ZONE_NAME=${_MANAGED_ZONE_NAME}'
+    - 'NAMESPACE=${_NAMESPACE}'
+    - 'PROJECT_ID=${PROJECT_ID}'
+    - 'SSL_CERT_NAME=${_SSL_CERT_NAME}'
+
+# apply/delete infrastructure
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Infrastructure Resources
+  waitFor: ['Infrastructure YAML']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    /builder/kubectl.bash ${_APPLY_OR_DELETE} -f infrastructure.yaml || [ "${_APPLY_OR_DELETE}" = "delete" ]
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
+# create an SSL certificate if one does not already exist
+# (when running a delete, this stage does nothing)
+- name: 'google/cloud-sdk:latest'
+  id: SSL certificate
+  waitFor: ['Infrastructure Resources']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    if [ "${_APPLY_OR_DELETE}" = "apply" ]
+    then
+      gcloud compute ssl-certificates describe ${_SSL_CERT_NAME} || \
+      gcloud beta compute ssl-certificates create ${_SSL_CERT_NAME} \
+        --description="Generated SSL certificate for cloud run web app" \
+        --domains=${_DOMAIN} \
+        --global
+    fi
+
+# Look up the standalone NEGs associated with the Istio ingress
+# See: https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Get Standalone NEGs
+  waitFor: ['-']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    gcloud container clusters get-credentials --project="${PROJECT_ID}" --zone="${_CLUSTER_LOCATION}" "${_CLUSTER_NAME}"
+    kubectl get service/${_ISTIO_INGRESS_SERVICE} --namespace=${_ISTIO_INGRESS_NAMESPACE} -o jsonpath="{$.metadata.annotations.cloud\.google\.com/neg-status}" > neg-status.json
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
+# Use jq to substitute SNEG values into the template for the backend service
+- name: 'alpine'
+  id: Generate Backend Service Definition
+  waitFor: ['Get Standalone NEGs']
+  entrypoint: /bin/ash
+  args:
+  - '-c'
+  - |
+    apk add --update --no-cache jq
+    jq -f backend-service-template.jq neg-status.json > backend-service-hydrated.json
+
+# Substitute the remaining variables into the backend service definition and apply/delete it
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Create Backend Service
+  waitFor: ['Generate Backend Service Definition']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    sed "s/$\[PROJECT_ID\]/${PROJECT_ID}/g" backend-service-hydrated.json | \
+    sed "s/$\[BACKEND_SERVICE_HOST_NAME\]/${_BACKEND_SERVICE_HOST_NAME}/g" | \
+    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f - || [ "${_APPLY_OR_DELETE}" = "delete" ]
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
+# Wait for the forwarding rule to have an external IP address
+# This can take some time due to Kubernetes reconciler wait times.
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Wait for external IP address
+  waitFor: ['Infrastructure Resources']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    if [ "${_APPLY_OR_DELETE}" = "apply" ]
+    then
+      /builder/kubectl.bash wait computeforwardingrule/web-app-forwarding-rule --namespace=${_NAMESPACE} --for=condition=Ready --timeout=15m
+    fi
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
+# Insert the IP address of the forwarding rule as an A record for the DNS zone
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: DNS A Records
+  waitFor: ['Wait for external IP address']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    export _EXTERNAL_IP_ADDRESS=$(kubectl get computeforwardingrule/web-app-forwarding-rule --namespace=${_NAMESPACE} -o jsonpath="{$.spec.ipAddress.addressRef.external}")
+    sed "s/$\[EXTERNAL_IP_ADDRESS\]/$$_EXTERNAL_IP_ADDRESS/g" dns-tpl.yaml | \
+    sed "s/$\[DOMAIN\]/${_DOMAIN}/g" | \
+    sed "s/$\[MANAGED_ZONE_NAME\]/${_MANAGED_ZONE_NAME}/g" | \
+    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f - || [ "${_APPLY_OR_DELETE}" = "delete" ]
+  timeout: 120s
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+timeout: 1200s

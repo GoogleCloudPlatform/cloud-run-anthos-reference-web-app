@@ -1,0 +1,38 @@
+// Copyright 2020 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+{{>partial_header}}
+package {{packageName}}
+
+import (
+	"net/http"{{#imports}}
+	"{{import}}"{{/imports}}
+)
+
+// {{classname}}Service is a service that implents the logic for the {{classname}}Servicer
+// This service should implement the business logic for every endpoint for the {{classname}} API.
+// Include any external packages or services that will be required by this service.
+type {{classname}}Service struct {
+}
+
+// New{{classname}}Service creates a default api service
+func New{{classname}}Service() {{classname}}Servicer {
+	return &{{classname}}Service{}
+}{{#operations}}{{#operation}}
+
+// {{nickname}} - {{summary}}
+func (s *{{classname}}Service) {{nickname}}({{#allParams}}{{paramName}} {{dataType}}, {{/allParams}}w http.ResponseWriter) error {
+	// TODO - update {{nickname}} with the required logic for this service method.
+	// Add {{classFilename}}_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	return EncodeJSONStatus(http.StatusTeapot, http.StatusText(http.StatusTeapot), w)
+}{{/operation}}{{/operations}}

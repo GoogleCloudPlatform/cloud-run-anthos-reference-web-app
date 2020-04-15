@@ -1,0 +1,35 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<mat-toolbar>
+  <span>Inventory Manager</span>
+  <button mat-button routerLink="/items" routerLinkActive="active">Items</button>
+  <button mat-button routerLink="/locations" routerLinkActive="active">Locations</button>
+  <button mat-button routerLink="/users" routerLinkActive="active">Users</button>
+
+  <span class="filler"></span>
+
+  <span *ngIf="afAuth.user | async as user; else showLogin">
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item (click)="signOut()">Sign out</button>
+    </mat-menu>
+    <img class="avatar" [src]="authProcess?.getUserPhotoUrl()" [matMenuTriggerFor]="userMenu"/>
+  </span>
+  <ng-template #showLogin>
+    <ngx-auth-firebaseui-providers layout="row" theme="fab" providers="['google']"></ngx-auth-firebaseui-providers>
+  </ng-template>
+</mat-toolbar>
+<router-outlet></router-outlet>
