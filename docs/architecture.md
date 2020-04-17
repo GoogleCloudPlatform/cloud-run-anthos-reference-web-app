@@ -1,6 +1,6 @@
 # Architecture
 
-![high level architecture](img/high-level-diagram.svg)
+![high level architecture](./img/architecture-diagram.png)
 
 ## Runtime
 
@@ -11,7 +11,7 @@ for persistence.
 
 ### Networking
 
-![networking diagram](/networking-diagram.svg)
+![networking diagram](./img/networking-diagram.png)
 
 For every incoming request, traffic is directed to either the static GCS bucket
 or the GKE cluster ingress using a [URL map][].
@@ -28,7 +28,7 @@ desired domain.
 
 ### Authentication
 
-![authentication diagram](https://storage.googleapis.com/spencersmall.run/assets/authentication-diagram.svg)
+![authentication diagram](./img/authentication-diagram.png)
 
 Authentication is provided by [Identity Platform][], which issues
 a [JSON Web Token (JWT)][] on the frontend that gets passed through
@@ -36,7 +36,7 @@ on subsequent requests and gets [validated by the Istio ingress][].
 
 ## Build & Infrastructure
 
-![build diagram](/build-diagram.svg)
+![build diagram](./img/build-diagram.png)
 
 Build and setup is performed using [Cloud Build][].
 
