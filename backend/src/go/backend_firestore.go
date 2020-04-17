@@ -333,4 +333,33 @@ func (fb *FirestoreBackend) UpdateLocation(ctx context.Context, location *Locati
 	return location, err
 }
 
+func (fb *FirestoreBackend) lookupInventory(ctx context.Context, itemID, locationID string) (*Inventory, error) {
+	client, err := fb.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Lookup the inventory id
+	invs := client.Collection("inventories")
+	var inv *Inventory
+	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+		// Find the inventory
+		q := invs.Where("ItemId", "==", itemID).Where("LocationId", "==", locationID)
+		docs, err := tx.Documents(q).GetAll()
+		if err != nil {
+			return err
+		}
+
+		if len(docs) > 2 {
+			log.Panicf("Found multiple inventories for item %q and location %q", itemID, locationID)
+		}
+
+		if len(docs) == 0 {
+			inv = &Inventory{ItemId: itemID, LocationId: locationID, LastUpdated: time.Now()}
+			return tx.Create(invs.NewDoc(), inv)
+		}
+
+		return	docs[0].DataTo(inv)
+	})
+	return inv, err
 }

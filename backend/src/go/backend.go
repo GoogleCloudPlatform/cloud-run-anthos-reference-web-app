@@ -61,4 +61,6 @@ type DatabaseBackend interface {
 
 	UpdateItem(ctx context.Context, item *Item) (*Item, error)
 	UpdateLocation(ctx context.Context, location *Location) (*Location, error)
+
+	lookupInventory(ctx context.Context, itemID, locationID string) (*Inventory, error)
 }
