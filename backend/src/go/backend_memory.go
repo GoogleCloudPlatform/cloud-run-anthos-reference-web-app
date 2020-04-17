@@ -86,7 +86,7 @@ func (mb *InMemoryBackend) ListItems(ctx context.Context) ([]*Item, error) {
 }
 
 func (mb *InMemoryBackend) ListItemInventory(ctx context.Context, id string) ([]*Inventory, error) {
-	var inventories []*Inventory
+	inventories := make([]*Inventory, 0)
 	if itemInvs, ok := mb.inventoryByItemByLocationIndex[id]; ok {
 		for _, inventory := range itemInvs {
 			inventories = append(inventories, inventory)
@@ -96,7 +96,7 @@ func (mb *InMemoryBackend) ListItemInventory(ctx context.Context, id string) ([]
 }
 
 func (mb *InMemoryBackend) ListItemInventoryTransactions(ctx context.Context, id string) ([]*InventoryTransaction, error) {
-	var txns []*InventoryTransaction
+	txns := make([]*InventoryTransaction, 0)
 	for _, txn := range mb.inventoryTransactions {
 		if txn.ItemId == id {
 			txns = append(txns, txn)
@@ -122,7 +122,7 @@ func (mb *InMemoryBackend) ListLocations(ctx context.Context) ([]*Location, erro
 }
 
 func (mb *InMemoryBackend) ListLocationInventory(ctx context.Context, id string) ([]*Inventory, error) {
-	var inventories []*Inventory
+	inventories := make([]*Inventory, 0)
 	if locInvs, ok := mb.inventoryByLocationByItemIndex[id]; ok {
 		for _, inventory := range locInvs {
 			inventories = append(inventories, inventory)
@@ -132,7 +132,7 @@ func (mb *InMemoryBackend) ListLocationInventory(ctx context.Context, id string)
 }
 
 func (mb *InMemoryBackend) ListLocationInventoryTransactions(ctx context.Context, id string) ([]*InventoryTransaction, error) {
-	var txns []*InventoryTransaction
+	txns := make([]*InventoryTransaction, 0, len(mb.inventoryTransactions))
 	for _, txn := range mb.inventoryTransactions {
 		if txn.LocationId == id {
 			txns = append(txns, txn)

@@ -47,7 +47,7 @@ func (fb *FirestoreBackend) deleteDoc(ctx context.Context, path, id string) erro
 	if err != nil {
 		return err
 	}
-	_, err = client.Collection(path).Doc(id).Delete(ctx)
+	_, err = client.Collection(path).Doc(id).Delete(ctx, firestore.Exists)
 	if err != nil && status.Code(err) == codes.NotFound {
 		return &ResourceNotFound{collection: path, id: id}
 	}
@@ -131,7 +131,7 @@ func (fb *FirestoreBackend) ListItems(ctx context.Context) ([]*Item, error) {
 		return nil, err
 	}
 
-	var items []*Item
+	items := make([]*Item, 0)
 	for _, doc := range docs {
 		item := &Item{}
 		if err = doc.DataTo(item); err != nil {
@@ -148,7 +148,7 @@ func (fb *FirestoreBackend) ListLocations(ctx context.Context) ([]*Location, err
 		return nil, err
 	}
 
-	var locations []*Location
+	locations := make([]*Location, 0)
 	for _, doc := range docs {
 		location := &Location{}
 		if err = doc.DataTo(location); err != nil {
@@ -165,7 +165,7 @@ func (fb *FirestoreBackend) listInventories(ctx context.Context, filters ...quer
 		return nil, err
 	}
 
-	var invs []*Inventory
+	invs := make([]*Inventory, 0)
 	for _, doc := range docs {
 		inv := &Inventory{}
 		if err = doc.DataTo(inv); err != nil {
@@ -182,7 +182,7 @@ func (fb *FirestoreBackend) listInventoryTransactions(ctx context.Context, filte
 		return nil, err
 	}
 
-	var txns []*InventoryTransaction
+	txns := make([]*InventoryTransaction, 0)
 	for _, doc := range docs {
 		txn := &InventoryTransaction{}
 		if err = doc.DataTo(txn); err != nil {
@@ -304,40 +304,33 @@ func (fb *FirestoreBackend) NewLocation(ctx context.Context, location *Location)
 	return location, err
 }
 
-func (fb *FirestoreBackend) UpdateItem(ctx context.Context, item *Item) (*Item, error) {
+func (fb *FirestoreBackend) update(ctx context.Context, path, id string, value interface{}) error {
 	client, err := fb.NewClient(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	dref := client.Collection("items").Doc(item.Id)
+	dref := client.Collection(path).Doc(id)
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		if _, err := tx.Get(dref); err != nil {
 			if status.Code(err) == codes.NotFound {
-				return ItemNotFound(item.Id)
+				return &ResourceNotFound{collection:path, id:id}
 			}
 			return err
 		}
-		return tx.Set(dref, item)
+		return tx.Set(dref, value)
 	})
 
+	return err
+}
+
+func (fb *FirestoreBackend) UpdateItem(ctx context.Context, item *Item) (*Item, error) {
+	err := fb.update(ctx, "items", item.Id, item)
 	return item, err
 }
 
 func (fb *FirestoreBackend) UpdateLocation(ctx context.Context, location *Location) (*Location, error) {
-	client, err := fb.NewClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-	dref := client.Collection("locations").Doc(location.Id)
-	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		if _, err := tx.Get(dref); err != nil {
-			if status.Code(err) == codes.NotFound {
-				return LocationNotFound(location.Id)
-			}
-			return err
-		}
-		return tx.Set(dref, location)
-	})
-
+	err := fb.update(ctx, "locations", location.Id, location)
 	return location, err
+}
+
 }
