@@ -32,9 +32,9 @@
 <text x="24" y="13" style="font-family:Roboto;font-size:8.5px;fill:rgb(255, 255, 255);" >Cloud Run for Anthos Reference Web App - Authentication</text>
 <rect x="0" y="245" width="479" height="10" style="fill:rgb(224, 224, 224);" />
 <rect x="15" y="112" width="40" height="40" style="fill:rgb(255, 255, 255);stroke:rgb(0, 0, 0);stroke-Width:0.06;filter:url(#drop-shadow);" />
-<image x="18" y="115" width="34" height="34" xlink:href="laptop.png" />
+<image x="18" y="115" width="34" height="34" xlink:href="img/laptop.png" />
 <rect x="85" y="30" width="379" height="195" style="fill:rgb(246, 246, 246);" />
-<image x="95" y="40" width="120" height="30" xlink:href="gcp_logo.png" />
+<image x="95" y="40" width="120" height="30" xlink:href="img/gcp_logo.png" />
 <rect x="100" y="120" width="109" height="45" style="fill:rgb(255, 255, 255);stroke:rgb(0, 0, 0);stroke-Width:0.06;filter:url(#drop-shadow);" />
 <image x="105" y="125" width="20" height="20" xlink:href="https://storage.googleapis.com/gcpdraw-icons/product/iam.png" />
 <text x="132" y="127" style="dominant-baseline:text-before-edge;font-family:Roboto;font-size:7.5px;fill:rgb(33, 33, 33);" >Identity Platform</text>
