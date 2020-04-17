@@ -44,6 +44,13 @@ Infrastructure is mostly orchestrated by [Cloud Config Connector][];
 the declarative infrastructure configuration can be found in
 [infrastructure.tpl][], [backend-service-template.jq][], and [dns-tpl.yaml][].
 
+### API Generation
+
+Both the frontend Typescript client and backend Golang server are
+generated off of the [OpenAPI spec][]. This way, changes to the API
+surface are automatically picked up by both the client and server
+on the next build.
+
 [high level architecture]: ./high-level-diagram.svg
 [Angular]: https://angular.io/
 [hosted in Google Cloud Storage]: https://cloud.google.com/storage/docs/hosting-static-website
@@ -65,3 +72,4 @@ the declarative infrastructure configuration can be found in
 [JSON Web Token (JWT)]: https://tools.ietf.org/html/rfc7519
 [validated by the Istio ingress]: https://cloud.google.com/solutions/authenticating-cloud-run-on-gke-end-users-using-istio-and-identity-platform
 [build diagram]: ./build-diagram.svg
+[OpenAPI spec]: ../openapi.yaml
