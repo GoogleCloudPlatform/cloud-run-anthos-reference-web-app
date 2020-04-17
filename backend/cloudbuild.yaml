@@ -27,7 +27,7 @@ steps:
         '--git-repo-id=${_GIT_REPO_ID}',
         '--package-name=service',
         '-t', 'backend/templates']
-# build the backend Go service and deploy it to Cloud Run on GKE
+# build the backend Go service and deploy it to Cloud Run for Anthos
 - name: 'mirror.gcr.io/library/golang'
   id: Go Build
   dir: 'backend/src/'

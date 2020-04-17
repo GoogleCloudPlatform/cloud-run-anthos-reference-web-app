@@ -14,7 +14,7 @@
 
 openapi: 3.0.0
 info:
-  description: "Inventory API for the Cloud Run on GKE Reference Web App"
+  description: "Inventory API for the Cloud Run for Anthos Reference Web App"
   version: "1.0.0"
   title: "Inventory API"
 servers:

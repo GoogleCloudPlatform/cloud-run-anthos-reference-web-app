@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/cloud-run-gke-reference-web-app
+module github.com/GoogleCloudPlatform/cloud-run-anthos-reference-web-app
 
 go 1.13
 
