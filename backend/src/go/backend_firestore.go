@@ -15,6 +15,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -235,7 +236,7 @@ func (fb *FirestoreBackend) NewInventoryTransaction(ctx context.Context, invTxn 
 		q := invs.Where("ItemId", "==", itemId).Where("LocationId", "==", locId)
 		docs, err := tx.Documents(q).GetAll()
 		if err != nil {
-			return err
+			return fmt.Errorf("error querying inventories collection: %v", err)
 		}
 
 		if len(docs) > 2 {

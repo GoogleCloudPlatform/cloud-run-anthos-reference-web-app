@@ -15,18 +15,29 @@
 ## The steps in this Cloud Build script build and test the backend code
 
 steps:
+# start the firestore emulator
+- name: gcr.io/cloud-builders/docker
+  id: Start Firestore emulator
+  args: ['run', '--detach', '--rm', '--network=cloudbuild', '--name=firestore-emulator', 'jdlk7/firestore-emulator']
+# wait for docker container to be serving
+- name: jwilder/dockerize:0.6.1
+  id: Wait for Firestore emulator serving
+  args: ['dockerize', '-timeout=60s', '-wait=tcp://firestore-emulator:9090']
 # generate OpenAPI server files
 - name: openapitools/openapi-generator-cli:v4.2.3
   id: Generate Server
+  waitFor: ["-"]
   args: ['generate', '-g','go-server','-i','openapi.yaml','-o','backend/src', '--api-name-suffix=', '--git-user-id=${_GIT_USER_ID}', '--git-repo-id=${_GIT_REPO_ID}', '--package-name=service', '-t', 'backend/templates']
 # build and test the Go backend
 - name: mirror.gcr.io/library/golang
   id: Build
+  waitFor: ['Generate Server']
   dir: 'backend/src'
   env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux']
   args: ['go','build','-mod=readonly', '-v', '-o', 'server']
 - name: mirror.gcr.io/library/golang
   id: Test
+  waitFor: ['Wait for Firestore emulator serving', 'Generate Server']
   dir: 'backend/src/go'
-  env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux']
+  env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux', 'FIRESTORE_EMULATOR_HOST=firestore-emulator:9090']
   args: ['go','test','-mod=readonly', '-v']

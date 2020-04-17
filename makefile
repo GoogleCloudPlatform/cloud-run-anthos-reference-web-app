@@ -104,7 +104,11 @@ lint-webui: webui/node_modules
 lint: check-license lint-webui
 
 test-backend-local: backend/src/api/openapi.yaml
-	cd backend/src/go && go test
+	docker stop firestore-emulator 2>/dev/null || true
+	docker run --detach --rm -p 9090:9090 --name=firestore-emulator jdlk7/firestore-emulator
+	docker run --network=host jwilder/dockerize:0.6.1 dockerize -timeout=60s -wait=tcp://localhost:9090
+	cd backend/src/go && FIRESTORE_EMULATOR_HOST=localhost:9090 go test -v
+	docker stop firestore-emulator
 
 test-webui-local: webui/api-client webui/node_modules
 	cd webui && npm run test
