@@ -154,4 +154,4 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [set up gcloud]: https://cloud.google.com/sdk/docs
 [`makefile`]: makefile
 [Owner permission]: https://console.cloud.google.com/iam-admin/roles/details/roles%3Cowner
-[architecture.md]: ./architecture.md
+[architecture.md]: ./docs/architecture.md

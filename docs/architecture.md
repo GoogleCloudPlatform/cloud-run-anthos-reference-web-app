@@ -1,6 +1,6 @@
 # Architecture
 
-![high level architecture](/high-level-diagram.svg)
+![high level architecture](img/high-level-diagram.svg)
 
 ## Runtime
 
@@ -28,7 +28,7 @@ desired domain.
 
 ### Authentication
 
-![authentication diagram](/authentication-diagram.svg)
+![authentication diagram](./img/authentication-diagram.svg)
 
 Authentication is provided by [Identity Platform][], which issues
 a [JSON Web Token (JWT)][] on the frontend that gets passed through
