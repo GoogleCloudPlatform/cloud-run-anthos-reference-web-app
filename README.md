@@ -4,6 +4,8 @@ This repository, including all associated workflows and automations, represents
 an opinionated set of best practices aimed at demonstrating a reference architecture
 for building a web application on Google Cloud using Cloud Run for Anthos.
 
+A detailed description of the architecture of the web app can be found in [architecture.md][].
+
 ## Prerequisites
 
 ### Development Environment
@@ -152,3 +154,4 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [set up gcloud]: https://cloud.google.com/sdk/docs
 [`makefile`]: makefile
 [Owner permission]: https://console.cloud.google.com/iam-admin/roles/details/roles%3Cowner
+[architecture.md]: ./architecture.md
