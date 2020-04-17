@@ -28,7 +28,7 @@ desired domain.
 
 ### Authentication
 
-![authentication diagram](./img/authentication-diagram.svg)
+![authentication diagram](https://storage.googleapis.com/spencersmall.run/assets/authentication-diagram.svg)
 
 Authentication is provided by [Identity Platform][], which issues
 a [JSON Web Token (JWT)][] on the frontend that gets passed through
