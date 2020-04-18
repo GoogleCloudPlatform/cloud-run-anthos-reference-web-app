@@ -26,6 +26,7 @@ import { MatTableDataSource } from '@angular/material/table';
 export class LocationsComponent implements OnInit {
   displayedColumns: string[] = ['name', 'warehouse'];
   dataSource = new MatTableDataSource<Location>();
+  loading = false;
 
   constructor(
     private inventoryService: InventoryService) {
@@ -36,8 +37,13 @@ export class LocationsComponent implements OnInit {
   }
 
   loadLocations(): void {
+    this.loading = true;
     this.inventoryService.listLocations().subscribe( res => {
       this.dataSource.data = res;
+      this.loading = false;
+    }, () => {
+      this.dataSource.data = [];
+      this.loading = false;
     });
   }
 }

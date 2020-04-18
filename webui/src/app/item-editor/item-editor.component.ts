@@ -27,6 +27,7 @@ import { InventoryService } from 'api-client';
 })
 export class ItemEditorComponent implements OnInit {
   isNew = true;
+  loading = false;
 
   itemForm = new FormGroup({
     name: new FormControl(''),
@@ -45,8 +46,12 @@ export class ItemEditorComponent implements OnInit {
     const itemId = this.route.snapshot.paramMap.get('id');
     if (itemId) {
       this.isNew = false;
+      this.loading = true;
       this.inventoryService.getItem(itemId).subscribe(item => {
         this.itemForm.setValue(item);
+        this.loading = false;
+      }, () => {
+        this.loading = false;
       });
     }
   }

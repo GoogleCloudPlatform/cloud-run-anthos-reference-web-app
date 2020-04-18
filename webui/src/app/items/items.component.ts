@@ -28,6 +28,7 @@ import { MatTableDataSource } from '@angular/material/table';
 export class ItemsComponent implements OnInit {
   displayedColumns: string[] = ['name', 'description'];
   dataSource = new MatTableDataSource<Item>();
+  loading = false;
 
   formControl = new FormControl('');
 
@@ -41,8 +42,13 @@ export class ItemsComponent implements OnInit {
   }
 
   getItems(): void {
+    this.loading = true;
     this.inventoryService.listItems().subscribe(items => {
       this.dataSource.data = items;
+      this.loading = false;
+    }, () => {
+      this.dataSource.data = [];
+      this.loading = false;
     });
   }
 
