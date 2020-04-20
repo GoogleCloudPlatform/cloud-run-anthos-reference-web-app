@@ -16,8 +16,12 @@
 
 <mat-card>
   <mat-card-title>Items</mat-card-title>
-  <mat-card-content>
 
+  <mat-card-content *ngIf="loading; else contentBlock">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </mat-card-content>
+
+  <ng-template #contentBlock>
     <table mat-table [dataSource]="dataSource">
       <mat-text-column name="id"></mat-text-column>
       <ng-container matColumnDef="name">
@@ -31,6 +35,9 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
+  </ng-template>
+
+  <mat-card-actions>
     <button mat-button class="create-btn" color="primary" routerLink="/items/new" routerLinkActive="active">Create</button>
-  </mat-card-content>
+  </mat-card-actions>
 </mat-card>

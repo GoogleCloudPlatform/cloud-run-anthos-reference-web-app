@@ -17,7 +17,11 @@
 
 <mat-card>
   <mat-card-title>Inventory Transaction</mat-card-title>
-  <mat-card-content>
+  <mat-card-content *ngIf="loading; else contentBlock">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </mat-card-content>
+
+  <ng-template #contentBlock>
     <button mat-fab class="add-button" (click)="addTransaction()">
       <mat-icon>add</mat-icon>
     </button>
@@ -59,5 +63,5 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
-  </mat-card-content>
+  </ng-template>
 </mat-card>

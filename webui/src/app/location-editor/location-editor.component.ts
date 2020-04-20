@@ -27,6 +27,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 })
 export class LocationEditorComponent implements OnInit {
   isNew = true;
+  loading = false;
 
   locationForm = new FormGroup({
     name: new FormControl(''),
@@ -45,8 +46,12 @@ export class LocationEditorComponent implements OnInit {
     const locationId = this.route.snapshot.paramMap.get('id');
     if (locationId) {
       this.isNew = false;
+      this.loading = true;
       this.inventoryService.getLocation(locationId).subscribe(location => {
         this.locationForm.setValue(location);
+        this.loading = false;
+      }, () => {
+        this.loading = false;
       });
     }
   }

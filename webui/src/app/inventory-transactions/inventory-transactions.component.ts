@@ -34,6 +34,7 @@ export class InventoryTransactionsComponent implements OnInit {
   dataSource = new MatTableDataSource<InventoryTransaction>();
   items: Item[] = [];
   locations: Location[] = [];
+  loading = false;
 
   constructor(
     private inventoryService: InventoryService,
@@ -64,22 +65,32 @@ export class InventoryTransactionsComponent implements OnInit {
   }
 
   loadTransactionByItemId(itemId: string): void {
+    this.loading = true;
     this.inventoryService.listItemInventoryTransactions(itemId).subscribe(transactions => {
       if (transactions) {
         this.dataSource.data = transactions.sort(this.sortByTime);
       } else {
         this.dataSource.data = [];
       }
+      this.loading = false;
+    }, () => {
+      this.dataSource.data = [];
+      this.loading = false;
     });
   }
 
   loadTransactionByLocationId(locationId: string): void {
+    this.loading = true;
     this.inventoryService.listLocationInventoryTransactions(locationId).subscribe(transactions => {
       if (transactions) {
         this.dataSource.data = transactions.sort(this.sortByTime);
       } else {
         this.dataSource.data = [];
       }
+      this.loading = false;
+    }, () => {
+      this.dataSource.data = [];
+      this.loading = false;
     });
   }
 

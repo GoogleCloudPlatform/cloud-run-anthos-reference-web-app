@@ -16,8 +16,13 @@
 
 <mat-card>
   <mat-card-title *ngIf="isNew; else editTitle">New Item</mat-card-title>
-  <ng-template #editTitle><mat-card-title>Edit Item {{this.itemForm.controls['id'].value}}</mat-card-title></ng-template>
-  <mat-card-content>
+  <ng-template #editTitle><mat-card-title>Edit Item</mat-card-title></ng-template>
+
+  <mat-card-content *ngIf="loading; else contentBlock">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </mat-card-content>
+
+  <ng-template #contentBlock>
     <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
       <input hidden formControlName="id">
       <mat-form-field appearance="fill">
@@ -34,5 +39,5 @@
       <button type="submit" mat-button>Submit</button>
       <button mat-button color="warn" onclick="onCancel()">Cancel</button>
     </form>
-  </mat-card-content>
+  </ng-template>
 </mat-card>
