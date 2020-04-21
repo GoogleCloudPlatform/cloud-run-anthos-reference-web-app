@@ -19,7 +19,6 @@ import (
 
 var inMemoryBackendTester = backendTester{
 	resetBackend: func(t *testing.T) DatabaseBackend {
-		t.Helper()
 		return NewInMemoryBackend()
 	},
 	initBackend: func(t *testing.T, state initialBackendState) DatabaseBackend {

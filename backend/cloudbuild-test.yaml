@@ -40,4 +40,4 @@ steps:
   waitFor: ['Wait for Firestore emulator serving', 'Generate Server']
   dir: 'backend/src/go'
   env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux', 'FIRESTORE_EMULATOR_HOST=firestore-emulator:9090']
-  args: ['go','test','-mod=readonly', '-v']
+  args: ['go','test','-mod=readonly', '-v', '-tags=emulator']

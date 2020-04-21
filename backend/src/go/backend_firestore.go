@@ -132,7 +132,7 @@ func (fb *FirestoreBackend) ListItems(ctx context.Context) ([]*Item, error) {
 		return nil, err
 	}
 
-	items := make([]*Item, 0)
+	items := make([]*Item, 0, len(docs))
 	for _, doc := range docs {
 		item := &Item{}
 		if err = doc.DataTo(item); err != nil {
@@ -149,7 +149,7 @@ func (fb *FirestoreBackend) ListLocations(ctx context.Context) ([]*Location, err
 		return nil, err
 	}
 
-	locations := make([]*Location, 0)
+	locations := make([]*Location, 0, len(docs))
 	for _, doc := range docs {
 		location := &Location{}
 		if err = doc.DataTo(location); err != nil {
@@ -166,7 +166,7 @@ func (fb *FirestoreBackend) listInventories(ctx context.Context, filters ...quer
 		return nil, err
 	}
 
-	invs := make([]*Inventory, 0)
+	invs := make([]*Inventory, 0, len(docs))
 	for _, doc := range docs {
 		inv := &Inventory{}
 		if err = doc.DataTo(inv); err != nil {
@@ -183,7 +183,7 @@ func (fb *FirestoreBackend) listInventoryTransactions(ctx context.Context, filte
 		return nil, err
 	}
 
-	txns := make([]*InventoryTransaction, 0)
+	txns := make([]*InventoryTransaction, 0, len(docs))
 	for _, doc := range docs {
 		txn := &InventoryTransaction{}
 		if err = doc.DataTo(txn); err != nil {

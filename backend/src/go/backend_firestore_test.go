@@ -11,6 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// +build emulator
+
 package service
 
 import (
@@ -22,7 +25,7 @@ import (
 
 const testProjectId = "foo"
 
-func resetFirestoreBackend(t *testing.T) DatabaseBackend {
+func clearFirestoreBackend(t *testing.T) DatabaseBackend {
 	t.Helper()
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, testProjectId)
@@ -50,10 +53,12 @@ func resetFirestoreBackend(t *testing.T) DatabaseBackend {
 }
 
 var firestoreBackendTester = backendTester{
-	resetBackend: resetFirestoreBackend,
+	resetBackend: func(t *testing.T) DatabaseBackend {
+		return clearFirestoreBackend(t)
+	},
 	initBackend: func(t *testing.T, state initialBackendState) DatabaseBackend {
 		t.Helper()
-		backend := resetFirestoreBackend(t)
+		backend := clearFirestoreBackend(t)
 		ctx := context.Background()
 		client, err := firestore.NewClient(ctx, testProjectId)
 		if err != nil {
