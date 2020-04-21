@@ -42,7 +42,7 @@ Build and setup is performed using [Cloud Build][].
 
 Infrastructure is mostly orchestrated by [Cloud Config Connector][];
 the declarative infrastructure configuration can be found in
-[infrastructure.tpl][], [backend-service-template.jq][], and [dns-tpl.yaml][].
+[infrastructure-tpl.yaml][], [backend-service-template.jq][], and [dns-tpl.yaml][].
 
 ### API Generation
 
@@ -58,9 +58,9 @@ on the next build.
 [Cloud Firestore]: https://cloud.google.com/firestore
 [networking diagram]: ./networking-diagram.svg
 [Cloud Config Connector]: https://cloud.google.com/config-connector/docs/overview
-[infrastructure.tpl]: infrastructure.tpl
-[backend-service-template.jq]: backend-service-template.jq
-[dns-tpl.yaml]: dns-tpl.yaml
+[infrastructure-tpl.yaml]: ../infrastructure-tpl.yaml
+[backend-service-template.jq]: ../backend-service-template.jq
+[dns-tpl.yaml]: ../dns-tpl.yaml
 [Cloud Build]: https://cloud.google.com/cloud-build
 [URL map]: https://cloud.google.com/load-balancing/docs/url-map
 [HTTPS target proxy]: https://cloud.google.com/load-balancing/docs/target-proxies
