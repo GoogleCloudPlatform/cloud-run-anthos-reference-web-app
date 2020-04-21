@@ -53,28 +53,28 @@ In order for the reference application to work, you must complete
 You can create a TXT record using the following steps:
 
 1. In [Cloud DNS][], navigate to the managed zone associated with your custom domain.
-2. Click **Add record set**.
-3. Set the **Resource Record Type** to **TXT**.
-4. In the **TXT data** field, paste the TXT record provided from following the
-[domain ownership verification][] steps.
-5. Click **Create**.
+1. Click **Add record set**.
+1. Set the **Resource Record Type** to **TXT**.
+1. In the **TXT data** field, paste the TXT record provided from following the
+   [domain ownership verification][] steps.
+1. Click **Create**.
 
 ### Setup Identity Platform for Auth
 
 1. Follow [Setting up OAuth 2.0 guide][] to setup [OAuth consent screen][].
-2. Enable Identity Platform and add **Google** as an Identity provider:
+1. Enable Identity Platform and add **Google** as an Identity provider:
    * Go to the [Identity Platform page in the GCP console][].
    * Select your project from the **Select a project** drop-down.
    * Click **Enable Identity Platform**.
    * On the **Providers** page, click **Add a provider**.
    * Select **Google** from the list.
    * Fill in the **Web Client ID** and **Web Client Secret** fields with those
-   from the OAuth client ID created in the previous step.
-3. Add your custom domain as Authorized Domain on
+     from the OAuth client ID created in the previous step.
+1. Add your custom domain as Authorized Domain on
 [Identity Platform -> Settings][] page, Security tab.
-4. Follow the example in [webui/firebaseConfig.js.sample](webui/firebaseConfig.js.sample)
-to create `webui/firebaseConfig.js`
-    * **apiKey** and **authDomain** can be found following the
+1. Follow the example in [webui/firebaseConfig.js.sample](webui/firebaseConfig.js.sample)
+   to create `webui/firebaseConfig.js`
+   * **apiKey** and **authDomain** can be found following the
     [Identity Platform quickstart guide][]
 
 ### Set up Firestore security rules
