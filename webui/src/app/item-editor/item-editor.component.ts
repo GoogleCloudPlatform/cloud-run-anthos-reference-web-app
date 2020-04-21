@@ -28,6 +28,7 @@ import { InventoryService } from 'api-client';
 export class ItemEditorComponent implements OnInit {
   isNew = true;
   loading = false;
+  submitting = false;
 
   itemForm = new FormGroup({
     name: new FormControl(''),
@@ -58,13 +59,20 @@ export class ItemEditorComponent implements OnInit {
 
   onSubmit() {
     const item = this.itemForm.value;
+    this.submitting = true;
     if (this.isNew) {
       this.inventoryService.newItem(item).subscribe((newItem) => {
         this.router.navigate(['/items', newItem.id]);
+        this.submitting = false;
+      }, () => {
+        this.submitting = false;
       });
     } else {
       this.inventoryService.updateItem(item.id, item).subscribe((newItem) => {
         this.router.navigate(['/items', newItem.id]);
+        this.submitting = false;
+      }, () => {
+        this.submitting = false;
       });
     }
   }

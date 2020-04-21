@@ -41,6 +41,10 @@ export class ItemsPage {
     return element(by.css('input[formcontrolname=description]'));
   }
 
+  getTextbox(name: string) {
+    return element(by.css(`input[formcontrolname=${name}]`));
+  }
+
   getSubmitButton() {
     return element(by.css('button[type=submit]'));
   }
@@ -51,6 +55,10 @@ export class ItemsPage {
 
   getItemDescription() {
     return element(by.css('.item-info mat-card-content'));
+  }
+
+  getButton(name: string) {
+    return element(by.buttonText(name));
   }
 
   getEditButton() {
@@ -72,4 +80,9 @@ export class ItemsPage {
   getLoadingSpinner() {
     return element(by.css('mat-progress-spinner'));
   }
+
+  getProgressBar() {
+    return element(by.css('mat-progress-bar'));
+  }
+
 }
