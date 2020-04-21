@@ -1,6 +1,6 @@
 # How to Contribute
 
-We are not actively accepting community contributions to this project. 
+We are not actively accepting community contributions to this project.
 We welcome [issue submissions](/issues/new) for bugs or feature requests,
 but we cannot guarantee a response to every issue.
 
