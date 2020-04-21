@@ -71,7 +71,7 @@ You can create a TXT record using the following steps:
    * Fill in the **Web Client ID** and **Web Client Secret** fields with those
      from the OAuth client ID created in the previous step.
 1. Add your custom domain as Authorized Domain on
-[Identity Platform -> Settings][] page, Security tab.
+   [Identity Platform -> Settings][] page, Security tab.
 1. Follow the example in [webui/firebaseConfig.js.sample](webui/firebaseConfig.js.sample)
    to create `webui/firebaseConfig.js`
    * **apiKey** and **authDomain** can be found following the
