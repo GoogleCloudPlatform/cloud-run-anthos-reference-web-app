@@ -6,7 +6,7 @@
 ### Prepare a test user
 
 1. Go to [Identity Platform Providers][] to enable "Email/Password" provider.
-2. Go to [Identity Platform Users][] to create a user for e2e test.
+1. Go to [Identity Platform Users][] to create a user for e2e test.
 
 ### Configure test credentials
 
