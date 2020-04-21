@@ -16,7 +16,7 @@ for persistence.
 For every incoming request, traffic is directed to either the static GCS bucket
 or the GKE cluster ingress using a [URL map][].
 
-By default, all requests are directed to the GCS bucket unless the request path
+[By default][], all requests are directed to the GCS bucket unless the request path
 begins with `/api`, in which case they are directed to the GKE cluster.
 
 An [HTTPS target proxy][] secures incoming traffic using SSL. An SSL certificate
@@ -73,3 +73,4 @@ on the next build.
 [validated by the Istio ingress]: https://cloud.google.com/solutions/authenticating-cloud-run-on-gke-end-users-using-istio-and-identity-platform
 [build diagram]: ./build-diagram.svg
 [OpenAPI spec]: ../openapi.yaml
+[By default]: ../infrastructure-tpl.yaml#L93
