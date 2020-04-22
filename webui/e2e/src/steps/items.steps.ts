@@ -31,11 +31,11 @@ When('I go to Items page', async () => {
   await browser.wait(ExpectedConditions.invisibilityOf(loadingSpinner));
 });
 
-Then('I should see some items as start', async () =>  {
+Then('I should see some items as initial count', async () =>  {
   startCount = await page.getTableRows().count();
 });
 
-Then('I should see {int} more items than start', async (diff) =>  {
+Then('I should see {int} more items than initial count', async (diff) =>  {
   const newCount = await page.getTableRows().count();
   expect(newCount).equals(startCount + diff);
 });
