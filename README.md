@@ -8,13 +8,15 @@ for building a web application on Google Cloud using Cloud Run for Anthos.
 
 ### Development Environment
 
-*NOTE: the steps in this guide assume that you are working in a POSIX-based development environment.*
+*NOTE: the steps in this guide assume that you are working in a POSIX-based
+development environment.*
 
-The only requirement to run this example out of the box is a working installation of `gcloud`. Optionally, having `make` installed will allow you to make use of the
-convenience targets provided in the [`makefile`][].
+The only requirement to run this example out of the box is a working
+installation of `gcloud`. Optionally, having `make` installed will allow you
+to make use of the convenience targets provided in the [`makefile`][].
 
-*NOTE: Your `gcloud` user account must have [Owner permission][] in order to complete setup of
-the application.*
+*NOTE: Your `gcloud` user account must have [Owner permission][] in order
+to complete setup of the application.*
 
 #### Cloud Shell
 
@@ -24,57 +26,67 @@ This example can be run directly from Cloud Shell!
 
 #### Local Setup
 
-Follow the steps to [set up gcloud][] in your local environment, then `git clone` this repo.
+Follow the steps to [set up gcloud][] in your local environment,
+then `git clone` this repo.
 
 ### Custom Domain
 
-For this reference application to work properly, you will need a custom domain that has been
-set up properly as described below.
+For this reference application to work properly, you will need a custom domain
+that has been set up properly as described below.
 
-You can follow the steps at https://cloud-tutorial.dev/ to get a custom subdomain and managed zone that are
-ready to use.
+You can follow the steps at [cloud-tutorial.dev][] to get a
+custom subdomain and managed zone that are ready to use.
 
 #### Managed Zone
 
-Your custom domain must be associated with a [Cloud DNS Managed Zone][] in the same project that
-you are using for this application.
+Your custom domain must be associated with a [Cloud DNS Managed Zone][] in the
+same project that you are using for this application.
 
-To re-use an existing custom domain that you already own, be sure to [update name server records][]
-to point to your managed zone.
+To re-use an existing custom domain that you already own,
+be sure to [update name server records][] to point to your managed zone.
 
 #### Confirm Ownership of Domain
 
-In order for the reference application to work, you must complete [domain ownership verification][].
+In order for the reference application to work, you must complete
+[domain ownership verification][].
 
 You can create a TXT record using the following steps:
 
 1. In [Cloud DNS][], navigate to the managed zone associated with your custom domain.
-2. Click **Add record set**.
-3. Set the **Resource Record Type** to **TXT**.
-4. In the **TXT data** field, paste the TXT record provided from following the [domain ownership verification][] steps.
-5. Click **Create**.
+1. Click **Add record set**.
+1. Set the **Resource Record Type** to **TXT**.
+1. In the **TXT data** field, paste the TXT record provided from following the
+   [domain ownership verification][] steps.
+1. Click **Create**.
 
 ### Setup Identity Platform for Auth
 
 1. Follow [Setting up OAuth 2.0 guide][] to setup [OAuth consent screen][].
-2. Enable Identity Platform and add **Google** as an Identity provider:
+1. Enable Identity Platform and add **Google** as an Identity provider:
    * Go to the [Identity Platform page in the GCP console][].
    * Select your project from the **Select a project** drop-down.
    * Click **Enable Identity Platform**.
    * On the **Providers** page, click **Add a provider**.
    * Select **Google** from the list.
-   * Fill in the **Web Client ID** and **Web Client Secret** fields with those from the OAuth client ID created in the previous step.
-3. Add your custom domain as Authorized Domain on [Identity Platform -> Settings][] page, Security tab.
-4. Follow the example in [webui/firebaseConfig.js.sample](webui/firebaseConfig.js.sample) to create `webui/firebaseConfig.js`
-    1. **apiKey** and **authDomain** can be found following the [Identity Platform quickstart guide][]
+   * Fill in the **Web Client ID** and **Web Client Secret** fields with those
+     from the OAuth client ID created in the previous step.
+1. Add your custom domain as Authorized Domain on
+   [Identity Platform -> Settings][] page, Security tab.
+1. Follow the example in [webui/firebaseConfig.js.sample](webui/firebaseConfig.js.sample)
+   to create `webui/firebaseConfig.js`
+   * **apiKey** and **authDomain** can be found following the
+    [Identity Platform quickstart guide][]
 
 ### Set up Firestore security rules
 
-Add the following security rules from [`firestore/firestore.rules`](firestore/firestore.rules) to your Firebase project in the rules tab at
-https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules
+Add the following security rules from [`firestore/firestore.rules`](firestore/firestore.rules)
+to your Firebase project in the rules tab at
+<https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules>
 
 ## Deploying the Application for the First Time
-This project uses [Cloud Build][] and [Config Connector][] to automate code and infrastructure deployments.
+
+This project uses [Cloud Build][] and [Config Connector][] to automate code and
+infrastructure deployments.
 The instructions below describe how to deploy the application.
 
 ### 1. Configure GCP Project
@@ -87,6 +99,7 @@ The easiest way to do so is by running [bootstrap.sh](bootstrap.sh):
 ```
 
 ### 2. Create an environment file
+
 Copy [env.mk.sample](env.mk.sample) to `env.mk`:
 
 ```bash
@@ -115,12 +128,17 @@ Run `make build-all`
 
 ## Try Out the Application
 
-Once your application is deployed, you can try it out by navigating to `https://$DOMAIN`, where `$DOMAIN` is the custom domain
+Once your application is deployed, you can try it out by navigating to `https://$DOMAIN`,
+where `$DOMAIN` is the custom domain
 you configured in `env.mk`.
 
 ## Update the Application
-Running `make build-all` will rebuild and deploy the app, including any changes made to the infrastructure. Note that removing resources from `infrastructure-tpl.yaml` will not cause them to be deleted. You must either run `make delete` before
-removing the resource (then redeploy with `make build-all` after removing it), or manually delete the resource with `kubectl delete`.
+
+Running `make build-all` will rebuild and deploy the app, including any changes
+made to the infrastructure. Note that removing resources from `infrastructure-tpl.yaml`
+will not cause them to be deleted. You must either run `make delete` before removing
+the resource (then redeploy with `make build-all` after removing it), or manually
+delete the resource with `kubectl delete`.
 
 ```shell
 # builds and deploys backend, frontend, and KCC infrastructure
@@ -134,7 +152,9 @@ make build-webui
 ```
 
 ## Cleanup
-Running `make delete` will delete the Config Connector resources from your cluster, which will cause Config Connector to delete the associated GCP resources.
+
+Running `make delete` will delete the Config Connector resources from your cluster,
+which will cause Config Connector to delete the associated GCP resources.
 However, you must manually delete your Cloud Run service and GKE Cluster.
 
 [Cloud Build]: https://cloud.google.com/cloud-build/docs
@@ -152,3 +172,4 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [set up gcloud]: https://cloud.google.com/sdk/docs
 [`makefile`]: makefile
 [Owner permission]: https://console.cloud.google.com/iam-admin/roles/details/roles%3Cowner
+[cloud-tutorial.dev]: https://cloud-tutorial.dev/
