@@ -22,7 +22,7 @@ import { ItemsPage } from '../pages/items.po';
 
 const page = new ItemsPage();
 const loadingSpinner = page.getLoadingSpinner();
-let startCount;
+let lastCount;
 const loadingDelay = 200;
 
 When('I go to Items page', async () => {
@@ -31,13 +31,20 @@ When('I go to Items page', async () => {
   await browser.wait(ExpectedConditions.invisibilityOf(loadingSpinner));
 });
 
-Then('I should see some items as initial count', async () =>  {
-  startCount = await page.getTableRows().count();
+Then('I should see some items', async () =>  {
+  lastCount = await page.getTableRows().count();
 });
 
-Then('I should see {int} more items than initial count', async (diff) =>  {
+Then('I should see {int} more items', async (diff) =>  {
   const newCount = await page.getTableRows().count();
-  expect(newCount).equals(startCount + diff);
+  expect(newCount).equals(lastCount + diff);
+  lastCount = newCount;
+});
+
+Then('I should see {int} less items', async (diff) =>  {
+  const newCount = await page.getTableRows().count();
+  expect(newCount).equals(lastCount - diff);
+  lastCount = newCount;
 });
 
 When('I fill in {string} with {string}', async (fieldName, value) => {
