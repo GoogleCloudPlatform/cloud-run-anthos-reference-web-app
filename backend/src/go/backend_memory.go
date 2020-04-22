@@ -86,7 +86,7 @@ func (mb *InMemoryBackend) ListItems(ctx context.Context) ([]*Item, error) {
 }
 
 func (mb *InMemoryBackend) ListItemInventory(ctx context.Context, id string) ([]*Inventory, error) {
-	var inventories []*Inventory
+	inventories := make([]*Inventory, 0)
 	if itemInvs, ok := mb.inventoryByItemByLocationIndex[id]; ok {
 		for _, inventory := range itemInvs {
 			inventories = append(inventories, inventory)
@@ -96,7 +96,7 @@ func (mb *InMemoryBackend) ListItemInventory(ctx context.Context, id string) ([]
 }
 
 func (mb *InMemoryBackend) ListItemInventoryTransactions(ctx context.Context, id string) ([]*InventoryTransaction, error) {
-	var txns []*InventoryTransaction
+	txns := make([]*InventoryTransaction, 0)
 	for _, txn := range mb.inventoryTransactions {
 		if txn.ItemId == id {
 			txns = append(txns, txn)
@@ -122,7 +122,7 @@ func (mb *InMemoryBackend) ListLocations(ctx context.Context) ([]*Location, erro
 }
 
 func (mb *InMemoryBackend) ListLocationInventory(ctx context.Context, id string) ([]*Inventory, error) {
-	var inventories []*Inventory
+	inventories := make([]*Inventory, 0)
 	if locInvs, ok := mb.inventoryByLocationByItemIndex[id]; ok {
 		for _, inventory := range locInvs {
 			inventories = append(inventories, inventory)
@@ -132,7 +132,7 @@ func (mb *InMemoryBackend) ListLocationInventory(ctx context.Context, id string)
 }
 
 func (mb *InMemoryBackend) ListLocationInventoryTransactions(ctx context.Context, id string) ([]*InventoryTransaction, error) {
-	var txns []*InventoryTransaction
+	txns := make([]*InventoryTransaction, 0, len(mb.inventoryTransactions))
 	for _, txn := range mb.inventoryTransactions {
 		if txn.LocationId == id {
 			txns = append(txns, txn)
@@ -149,8 +149,8 @@ func (mb *InMemoryBackend) NewItem(ctx context.Context, inputItem *Item) (*Item,
 	return item, nil
 }
 
-// lookupInventory returns the inventory associated with the transaction
-func (mb *InMemoryBackend) lookupInventory(itemID, locID string) *Inventory {
+// lookupInventory returns the inventory associated with the item and location
+func (mb *InMemoryBackend) lookupInventory(ctx context.Context, itemID, locID string) (*Inventory, error) {
 	// item and/or location may not have any inventory yet. Create index entries as needed.
 	if _, found := mb.inventoryByItemByLocationIndex[itemID]; !found {
 		mb.inventoryByItemByLocationIndex[itemID] = make(map[string]*Inventory)
@@ -173,7 +173,7 @@ func (mb *InMemoryBackend) lookupInventory(itemID, locID string) *Inventory {
 		mb.inventoryByItemByLocationIndex[itemID][locID] = inv
 		mb.inventoryByLocationByItemIndex[locID][itemID] = inv
 	}
-	return inv
+	return inv, nil
 }
 
 func (mb *InMemoryBackend) NewInventoryTransaction(ctx context.Context, inputTxn *InventoryTransaction) (*InventoryTransaction, error) {
@@ -187,7 +187,7 @@ func (mb *InMemoryBackend) NewInventoryTransaction(ctx context.Context, inputTxn
 	transaction := &InventoryTransaction{}
 	*transaction = *inputTxn
 	transaction.Id = uuid.New().String()
-	inv := mb.lookupInventory(transaction.ItemId, transaction.LocationId)
+	inv, _ := mb.lookupInventory(ctx, transaction.ItemId, transaction.LocationId)
 	if err := inv.applyTransaction(transaction); err != nil {
 		return nil, err
 	}
