@@ -28,4 +28,4 @@ Feature: Item Management
     And I click on link "test item 1"
     And I click "Delete" button
     And I go to Items page
-    Then I should see 1 less items
+    Then I should see 1 fewer items
