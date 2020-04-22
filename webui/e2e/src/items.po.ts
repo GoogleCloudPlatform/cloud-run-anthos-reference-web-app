@@ -68,4 +68,8 @@ export class ItemsPage {
   getItemLinkByName(name: string) {
     return element(by.linkText(name));
   }
+
+  getLoadingSpinner() {
+    return element(by.css('mat-progress-spinner'));
+  }
 }

@@ -14,49 +14,77 @@
  * limitations under the License.
  */
 
-import { browser, logging, element, by, ExpectedConditions } from 'protractor';
+import { browser, logging, element, by, ExpectedConditions, ElementFinder } from 'protractor';
 import { LoginPage } from './login.po';
 import { ItemsPage } from './items.po';
 
 describe('Item pages', () => {
   let loginPage: LoginPage;
   let page: ItemsPage;
+  let loadingSpinner: ElementFinder;
+  const testItemName = 'test item 1';
+  const loadingDelay = 200;
+  let startCount;
 
   beforeEach(() => {
     loginPage = new LoginPage();
     loginPage.login();
     page = new ItemsPage();
+    loadingSpinner = page.getLoadingSpinner();
   });
 
   it('should create item', async () => {
-    const testItemName = 'test item 1';
     page.navigateTo();
     // on item list
     const cardTitle = page.getPageTitle();
-    await browser.driver.wait(ExpectedConditions.presenceOf(cardTitle));
+    await browser.wait(ExpectedConditions.presenceOf(cardTitle));
     expect(await cardTitle.getText()).toEqual('Items');
-    const startCount = await page.getTableRows().count();
+    loadingSpinner = page.getLoadingSpinner();
+    browser.sleep(loadingDelay);
+    await browser.wait(ExpectedConditions.invisibilityOf(loadingSpinner));
+    startCount = await page.getTableRows().count();
     page.getCreateButton().click();
     // on item create page
     page.getNameTextbox().sendKeys(testItemName);
     page.getDescriptionTextbox().sendKeys('description of test item');
     page.getSubmitButton().click();
     // on item view page
+    browser.sleep(loadingDelay);
+    await browser.wait(ExpectedConditions.invisibilityOf(loadingSpinner));
     expect(page.getItemTitle().getText()).toEqual(testItemName);
     expect(page.getItemDescription().getText()).toEqual('description of test item');
+  });
+
+  it('should edit item', async () => {
+    page.navigateTo();
+    browser.sleep(loadingDelay);
+    await browser.wait(ExpectedConditions.invisibilityOf(loadingSpinner));
+    const itemLink = page.getItemLinkByName(testItemName);
+    await browser.driver.wait(ExpectedConditions.presenceOf(itemLink));
+    itemLink.click();
     page.getEditButton().click();
-    // on item edit page
+    browser.sleep(loadingDelay);
+    await browser.wait(ExpectedConditions.invisibilityOf(loadingSpinner));
     page.getDescriptionTextbox().clear();
     page.getDescriptionTextbox().sendKeys('edited description of test item');
     page.getSubmitButton().click();
+    browser.sleep(loadingDelay);
+    await browser.wait(ExpectedConditions.invisibilityOf(loadingSpinner));
     expect(page.getItemDescription().getText()).toEqual('edited description of test item');
-    // on item view page
-    page.getBackButton().click();
-    // back to item list
+  });
+
+  it('should delete item', async () => {
+    page.navigateTo();
+    browser.sleep(loadingDelay);
+    await browser.wait(ExpectedConditions.invisibilityOf(loadingSpinner));
     expect(page.getTableRows().count()).toEqual(startCount + 1);
     page.getItemLinkByName(testItemName).click();
     // on item view page again
+    browser.sleep(loadingDelay);
+    await browser.wait(ExpectedConditions.invisibilityOf(loadingSpinner));
     page.getDeleteButton().click();
+    browser.sleep(loadingDelay);
+    await browser.wait(ExpectedConditions.invisibilityOf(loadingSpinner));
     expect(page.getTableRows().count()).toEqual(startCount);
   });
 
