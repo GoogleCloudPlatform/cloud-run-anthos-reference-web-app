@@ -22,3 +22,16 @@ jobs:
 
     - name: Run markdown lint
       run: mdl $GITHUB_WORKSPACE
+
+  ng-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.16.2'
+    - working-directory: ./webui
+      run: npm ci
+    - working-directory: ./webui
+      run: npm run lint
