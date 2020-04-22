@@ -41,7 +41,7 @@ Then('I should see {int} more items', async (diff) =>  {
   lastCount = newCount;
 });
 
-Then('I should see {int} less items', async (diff) =>  {
+Then('I should see {int} fewer items', async (diff) =>  {
   const newCount = await page.getTableRows().count();
   expect(newCount).equals(lastCount - diff);
   lastCount = newCount;
