@@ -53,6 +53,7 @@ import { LocationViewComponent } from './location-view/location-view.component';
 import { InventoryTransactionDialogComponent } from './inventory-transaction-dialog/inventory-transaction-dialog.component';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 export function apiConfigFactory(): Configuration {
   const params: ConfigurationParameters = {
@@ -97,6 +98,7 @@ export function appNameFactory() {
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
     MatSelectModule,
     MatSnackBarModule,
     BrowserAnimationsModule,

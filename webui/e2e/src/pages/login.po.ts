@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { browser, by, element, ExpectedConditions } from 'protractor';
-import {email, password} from './credentials';
+import { browser, by, element } from 'protractor';
+import {email, password} from '../credentials';
 
 export class LoginPage {
   navigateTo() {
@@ -42,11 +42,11 @@ export class LoginPage {
     return element(by.css('simple-snack-bar button'));
   }
 
-  login() {
-    this.navigateTo();
-    this.getEmailTextbox().sendKeys(email);
-    this.getPasswordTextbox().sendKeys(password);
-    this.getLoginButton().click();
-    browser.sleep(2000);
+  async login() {
+    await this.navigateTo();
+    await this.getEmailTextbox().sendKeys(email);
+    await this.getPasswordTextbox().sendKeys(password);
+    await this.getLoginButton().click();
+    await browser.sleep(2000);
   }
 }
