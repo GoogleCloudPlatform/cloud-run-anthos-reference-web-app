@@ -46,3 +46,21 @@ jobs:
         node-version: '12.16.2'
     - working-directory: ./webui
       run: npm audit
+  
+  backend-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '1.13'
+    - run: |
+        GOFMT_OUT=$(gofmt -l ./backend/src)
+        if [ -z "${GOFMT_OUT}"]
+        then
+          echo "All files formatted correctly!"
+        else
+          gofmt -d ./backend/src
+        fi
