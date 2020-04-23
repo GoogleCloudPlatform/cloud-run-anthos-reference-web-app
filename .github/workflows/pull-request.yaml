@@ -23,6 +23,18 @@ jobs:
     - name: Run markdown lint
       run: mdl $GITHUB_WORKSPACE
 
+  license-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '1.13'
+    - run: go get -u github.com/google/addlicense
+    - run: addlicense -check "$GITHUB_WORKSPACE"
+
   lint-webui:
     runs-on: ubuntu-latest
 
