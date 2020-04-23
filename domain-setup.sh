@@ -49,9 +49,11 @@ if (("${choice}" == 1)); then
   DOMAIN="${zone}.cloud-tutorial.dev"
   if /tmp/claim.sh "${zone}"; then
     gcloud config set project "${DEFAULT_PROJECT_ID}"
+    echo
     echo "The domain ${zone}.cloud-tutorial.dev has been successfully claimed."
   else
     gcloud config set project "${DEFAULT_PROJECT_ID}"
+    echo
     echo "Unable to claim '${DOMAIN}'. Please try again with a different zone."
     exit 1
   fi
@@ -111,11 +113,22 @@ if [[ "${answer}" == "y" ]]; then
     exit 1
   fi
 
+  echo
   echo "The TXT record has been configured for domain ${DOMAIN}."
   echo "Within a few minutes you should be able to finish domain verification at:"
   echo "${url}"
 
-  echo "In the meantime, continue with Setup Identity Platform for Auth in the README"
+  echo "In the meantime, continue with the remaining prerequisites in the README"
 else
   echo "Your custom domain is ready for use."
 fi
+
+# Create env.mk if not present
+if [[ ! -f "env.mk" ]]; then
+  cp env.mk.sample env.mk
+fi
+
+# Substitute default PROJECT_ID and DOMAIN values
+sed -e "s/^PROJECT_ID=project-id$/PROJECT_ID=${PROJECT_ID}/" \
+    -e "s/^DOMAIN=my-zone.cloud-tutorial.dev$/DOMAIN=${DOMAIN}/" \
+    -i env.mk
