@@ -314,7 +314,7 @@ func (fb *FirestoreBackend) update(ctx context.Context, path, id string, value i
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		if _, err := tx.Get(dref); err != nil {
 			if status.Code(err) == codes.NotFound {
-				return &ResourceNotFound{collection:path, id:id}
+				return &ResourceNotFound{collection: path, id: id}
 			}
 			return err
 		}
@@ -360,7 +360,7 @@ func (fb *FirestoreBackend) lookupInventory(ctx context.Context, itemID, locatio
 			return tx.Create(invs.NewDoc(), inv)
 		}
 
-		return	docs[0].DataTo(inv)
+		return docs[0].DataTo(inv)
 	})
 	return inv, err
 }
