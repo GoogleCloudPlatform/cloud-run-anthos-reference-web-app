@@ -83,28 +83,39 @@ fi
 
 # Verify the domain
 url="https://search.google.com/search-console?resource_id=sc-domain:${DOMAIN}"
-echo "Please open the following URL in a web browser and click VERIFY YOUR OWNERSHIP:"
+echo "In your web browser, open:"
 echo "${url}"
 echo
-echo "Copy and paste the TXT record data below (starts with 'google-site-verification='):"
-read -r TXT_RECORD
-readonly TXT_RECORD
+read -r -p "Does the page say you don't have access to the property [y/n]? " answer
+while [[ "${answer}" != "y" ]] && [[ "${answer}" != "n" ]]; do
+  read -r -p "Please enter 'y' or 'n': " answer
+done
 echo
-gcloud --project "${PROJECT_ID}" dns record-sets transaction start --zone "${zone}"
-gcloud --project "${PROJECT_ID}" dns record-sets transaction add "${TXT_RECORD}" \
-  --ttl=300 --type=TXT \
-  --name="${DOMAIN}" \
-  --zone="${zone}"
-if ! gcloud --project "${PROJECT_ID}" dns record-sets transaction execute --zone "${zone}"
-then
-  echo "Failed to create the TXT record set. You may need to manually create the TXT"
-  echo "record set with its TXT record data via the Cloud Console:"
-  echo "https://console.cloud.google.com/net-services/dns/zones/${zone}?project=${PROJECT_ID}"
-  exit 1
+
+if [[ "${answer}" == "y" ]]; then
+  echo "Click VERIFY YOUR OWNERSHIP."
+  echo "Copy and paste the TXT record data below (starts with 'google-site-verification='):"
+  read -r TXT_RECORD
+  readonly TXT_RECORD
+  echo
+  gcloud --project "${PROJECT_ID}" dns record-sets transaction start --zone "${zone}"
+  gcloud --project "${PROJECT_ID}" dns record-sets transaction add "${TXT_RECORD}" \
+    --ttl=300 --type=TXT \
+    --name="${DOMAIN}" \
+    --zone="${zone}"
+  if ! gcloud --project "${PROJECT_ID}" dns record-sets transaction execute --zone "${zone}"
+  then
+    echo "Failed to create the TXT record set. You may need to manually create the TXT"
+    echo "record set with its TXT record data via the Cloud Console:"
+    echo "https://console.cloud.google.com/net-services/dns/zones/${zone}?project=${PROJECT_ID}"
+    exit 1
+  fi
+
+  echo "The TXT record has been configured for domain ${DOMAIN}."
+  echo "Within a few minutes you should be able to finish domain verification at:"
+  echo "${url}"
+
+  echo "In the meantime, continue with Setup Identity Platform for Auth in the README"
+else
+  echo "Your custom domain is ready for use."
 fi
-
-echo "The TXT record has been configured for domain ${DOMAIN}."
-echo "Within a few minutes you should be able to finish domain verification at:"
-echo "${url}"
-
-echo "In the meantime, continue with Setup Identity Platform for Auth in the README"
