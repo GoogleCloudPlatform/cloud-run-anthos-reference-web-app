@@ -63,4 +63,5 @@ jobs:
           echo "All files formatted correctly!"
         else
           gofmt -d ./backend/src
+          exit 1
         fi
