@@ -13,32 +13,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+usage() {
+  local name
+  name=$(basename "$0")
+  echo "Usage: ${name} PROJECT_ID"
+  exit 1
+}
 
+if [[ "$#" -ne 1 ]]; then
+  usage
+fi
 
-# PROJECT_ID
-PROJECT_ID=$1
-PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
+readonly PROJECT_ID="$1"
+readonly PROJECT_NUMBER=$(gcloud projects describe "${PROJECT_ID}" --format="value(projectNumber)")
 
-# Enable cloud run api
-gcloud services enable cloudbuild.googleapis.com
+# Enable Cloud Build, Kubernetes Engine, and Cloud Resource Manager APIs
+gcloud --project "${PROJECT_ID}" services enable {cloudbuild,container,cloudresourcemanager}.googleapis.com
 
-# Enable kubernetes engine api
-gcloud services enable container.googleapis.com
-
-# Enable cloud resource manager api
-gcloud services enable cloudresourcemanager.googleapis.com
-
-# Grant cloud build service account permissions
-
+# Grant Cloud Build service account permissions
+# Service Account Admin, roles/iam.serviceAccountAdmin
 # Service Account User, roles/iam.serviceAccountUser
 # Kubernetes Engine Admin, roles/container.admin
 # Project IAM Admin, roles/resourcemanager.projectIamAdmin
-# Service Account Admin, roles/iam.serviceAccountAdmin
+# Compute Load Balancer Admin, roles/compute.loadBalancerAdmin
+# Compute Network Admin, roles/compute.networkAdmin
 
-for role in roles/container.developer roles/iam.serviceAccountUser roles/container.admin roles/resourcemanager.projectIamAdmin roles/iam.serviceAccountAdmin roles/compute.loadBalancerAdmin roles/compute.networkAdmin
-do
-  gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-  --member serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com \
-  --role ${role}
+for role in iam.serviceAccount{Admin,User} container.admin resourcemanager.projectIamAdmin compute.{loadBalancer,network}Admin; do
+  gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
+  --member serviceAccount:"${PROJECT_NUMBER}"@cloudbuild.gserviceaccount.com \
+  --role roles/"${role}"
 done
 
+# Create env.mk if not present
+if [[ ! -f "env.mk" ]]; then
+  cp env.mk.sample env.mk
+fi
+
+# Substitute default PROJECT_ID value
+sed "s/^PROJECT_ID=project-id$/PROJECT_ID=${PROJECT_ID}/" -i env.mk

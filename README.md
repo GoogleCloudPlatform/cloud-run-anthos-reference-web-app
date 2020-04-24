@@ -98,23 +98,17 @@ The easiest way to do so is by running [bootstrap.sh](bootstrap.sh):
 ./bootstrap.sh $PROJECT_ID
 ```
 
-### 2. Create an environment file
+This step additionally creates a file named `env.mk` based on [env.mk.sample](env.mk.sample).
 
-Copy [env.mk.sample](env.mk.sample) to `env.mk`:
-
-```bash
-cp env.mk.sample env.mk
-```
-
-### 3. Fill out TODO sections in `env.mk`
+### 2. Fill out TODO sections in `env.mk`
 
 Address the TODO comment at the top of `env.mk` and ensure values are correct.
 
-### 4. Create a GKE Cluster
+### 3. Create a GKE Cluster
 
 Run `make cluster`
 
-### 5. Add a verified owner for the domain
+### 4. Add a verified owner for the domain
 
 Add the following service account as an [additional verified owner][]:
 
@@ -122,7 +116,7 @@ Add the following service account as an [additional verified owner][]:
 
 where `${PROJECT_ID}` is replaced by your Google Cloud project ID.
 
-### 6. Build and deploy
+### 5. Build and deploy
 
 Run `make build-all`
 
