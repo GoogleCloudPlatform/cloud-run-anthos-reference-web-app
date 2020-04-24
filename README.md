@@ -34,23 +34,30 @@ then `git clone` this repo.
 ### Custom Domain
 
 For this reference application to work properly, you will need a custom domain
-that has been set up properly as described below.
+that has been set up properly and verified.
+
+The easiest way to do this is by running the interactive script
+[domain-setup.sh](domain-setup.sh):
+
+```bash
+./domain-setup.sh
+```
+
+#### Creating a Custom Domain
 
 You can follow the steps at [cloud-tutorial.dev][] to get a
 custom subdomain and managed zone that are ready to use.
 
-#### Managed Zone
+#### Using an existing Custom Domain
 
-Your custom domain must be associated with a [Cloud DNS Managed Zone][] in the
-same project that you are using for this application.
+Your custom domain will need to be associated with a [Cloud DNS Managed Zone][]
+in the same project that you are using for this application. Be sure to
+[update name server records][] to point to your managed zone.
 
-To re-use an existing custom domain that you already own,
-be sure to [update name server records][] to point to your managed zone.
+#### Verifying Domain Ownership
 
-#### Confirm Ownership of Domain
-
-In order for the reference application to work, you must complete
-[domain ownership verification][].
+You must complete [domain ownership verification][] for the reference
+application to work.
 
 You can create a TXT record using the following steps:
 
