@@ -97,7 +97,8 @@ You can create a TXT record using the following steps:
      from the OAuth 2.0 Client ID created in the previous step.
    * Click **Save**.
 1. Setup `webui/firebaseConfig.js`:
-   * Copy [webui/firebaseConfig.js.sample][] to `webui/firebaseConfig.js`:
+   * Copy [webui/firebaseConfig.js.sample](webui/firebaseConfig.js.sample) to
+     `webui/firebaseConfig.js`:
 
      ```bash
      cp webui/firebaseConfig.js.sample webui/firebaseConfig.js
