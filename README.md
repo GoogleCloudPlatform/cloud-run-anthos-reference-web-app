@@ -68,29 +68,52 @@ You can create a TXT record using the following steps:
    [domain ownership verification][] steps.
 1. Click **Create**.
 
-### Setup Identity Platform for Auth
+### Identity Platform for Auth and Firestore Setup
 
-1. Follow [Setting up OAuth 2.0 guide][] to setup [OAuth consent screen][].
-1. Enable Identity Platform and add **Google** as an Identity provider:
-   * Go to the [Identity Platform page in the GCP console][].
-   * Select your project from the **Select a project** drop-down.
-   * Click **Enable Identity Platform**.
-   * On the **Providers** page, click **Add a provider**.
+1. [Enable Identity Platform][] for your project.
+   * This will create an OAuth 2.0 Client ID that can be used by the web application.
+   * This additionally creates a Firebase project where Cloud Firestore can be used.
+1. On the [Identity Platform -> Settings][] page, in the **Security** tab, add
+   your custom domain under **Authorized Domains**.
+1. Configure the [OAuth consent screen][].
+   * You'll need to set the **Support email** and the
+     **Application homepage link** (your Custom Domain).
+   * Additional information
+     [here](https://support.google.com/cloud/answer/6158849?hl=en#userconsent).
+1. Configure your OAuth 2.0 Client ID to be used by your Custom Domain.
+   * In the GCP console, navigate to [APIs & Services -> Credentials][].
+   * Click on the OAuth 2.0 Client ID that was auto created.
+     * **$PROJECT_ID.firebaseapp.com** _should_ appear under
+       **Authorized JavaScript origins**.
+   * Take note of the **Client ID** and **Client secret**. You'll use them in
+     the next step.
+   * Under **Authorized JavaScript origins**, add your custom domain prefixed
+     with **https://**.
+   * Click **Save**.
+1. Add **Google** as an Identity Provider in Identity Platform:
+   * In the GCP console, navigate to [Identity Platform -> Providers][].
+   * Click **Add a provider**.
    * Select **Google** from the list.
    * Fill in the **Web Client ID** and **Web Client Secret** fields with those
-     from the OAuth client ID created in the previous step.
-1. Add your custom domain as Authorized Domain on
-   [Identity Platform -> Settings][] page, Security tab.
-1. Follow the example in [webui/firebaseConfig.js.sample](webui/firebaseConfig.js.sample)
-   to create `webui/firebaseConfig.js`
-   * **apiKey** and **authDomain** can be found following the
-    [Identity Platform quickstart guide][]
-
-### Set up Firestore security rules
-
-Add the following security rules from [`firestore/firestore.rules`](firestore/firestore.rules)
-to your Firebase project in the rules tab at
-<https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules>
+     from the OAuth 2.0 Client ID created in the previous step.
+   * Click **Save**.
+1. Setup `webui/firebaseConfig.js`:
+   * Copy [webui/firebaseConfig.js.sample][] to `webui/firebaseConfig.js`:
+     ```bash
+     cp webui/firebaseConfig.js.sample webui/firebaseConfig.js
+     ```
+   * Fill in the **apiKey** and **authDomain** values in
+     `webui/firebaseConfig.js` with the values found by navigating to
+     [Identity Platform -> Providers][] and clicking on
+     **Application setup details** on the right.
+     ![application setup details location](application_setup_details.png)
+1. Set up the Firestore security rules:
+   * Navigate to the Develop > Database > Rules in the Firebase console at:
+     <https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules>.
+   * Ensure that **Cloud Firestore** is selected in the dropdown above.
+     ![firestore rules page](firestore_rules_page.png)
+   * Set the security rules to the ones found in
+     [`firestore/firestore.rules`](firestore/firestore.rules)
 
 ## Deploying the Application for the First Time
 
@@ -160,6 +183,7 @@ Running `make delete` will delete the Config Connector resources from your clust
 which will cause Config Connector to delete the associated GCP resources.
 However, you must manually delete your Cloud Run service and GKE Cluster.
 
+[APIs & Services -> Credentials]: https://console.cloud.google.com/apis/credentials
 [Cloud Build]: https://cloud.google.com/cloud-build/docs
 [Config Connector]: https://cloud.google.com/config-connector/docs
 [Cloud DNS Managed Zone]: https://cloud.google.com/dns/zones
@@ -167,6 +191,8 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [update name server records]: https://cloud.google.com/dns/docs/migrating#update_your_registrars_name_server_records
 [domain ownership verification]: https://cloud.google.com/storage/docs/domain-name-verification#verification
 [additional verified owner]: https://cloud.google.com/storage/docs/domain-name-verification?_ga=2.256052552.-234301672.1582050261#additional_verified_owners
+[Enable Identity Platform]: https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity
+[Identity Platform -> Providers]: https://console.cloud.google.com/customer-identity/providers
 [Identity Platform quickstart guide]: https://cloud.google.com/identity-platform/docs/quickstart-email-password#sign_the_user_in
 [Identity Platform page in the GCP console]: https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity
 [OAuth consent screen]: https://console.cloud.google.com/apis/credentials/consent
