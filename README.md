@@ -87,8 +87,7 @@ You can create a TXT record using the following steps:
        **Authorized JavaScript origins**.
    * Take note of the **Client ID** and **Client secret**. You'll use them in
      the next step.
-   * Under **Authorized JavaScript origins**, add your custom domain prefixed
-     with **https://**.
+   * Under **Authorized JavaScript origins**, add your custom domain.
    * Click **Save**.
 1. Add **Google** as an Identity Provider in Identity Platform:
    * In the GCP console, navigate to [Identity Platform -> Providers][].
@@ -99,9 +98,11 @@ You can create a TXT record using the following steps:
    * Click **Save**.
 1. Setup `webui/firebaseConfig.js`:
    * Copy [webui/firebaseConfig.js.sample][] to `webui/firebaseConfig.js`:
+
      ```bash
      cp webui/firebaseConfig.js.sample webui/firebaseConfig.js
      ```
+
    * Fill in the **apiKey** and **authDomain** values in
      `webui/firebaseConfig.js` with the values found by navigating to
      [Identity Platform -> Providers][] and clicking on
