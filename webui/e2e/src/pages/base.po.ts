@@ -45,10 +45,6 @@ export class BasePage {
     return element(by.css(`[formcontrolname=${name}]`));
   }
 
-  // getSelect(name: string): ElementFinder  {
-  //   return element(by.css(`mat-select[formcontrolname=${name}]`));
-  // }
-
   getButton(name: string): ElementFinder  {
     return element(by.buttonText(name));
   }
