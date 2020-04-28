@@ -39,6 +39,7 @@ export class InventoryTransactionDialogComponent implements OnInit {
   });
   items: Item[] = [];
   locations: Location[] = [];
+  submitting = false;
 
   constructor(
     private dialogRef: MatDialogRef<InventoryTransactionDialogComponent>,
@@ -63,8 +64,12 @@ export class InventoryTransactionDialogComponent implements OnInit {
 
   onSubmit(): void {
     const data = this.inventoryTransactionForm.value;
+    this.submitting = true;
     this.inventoryService.newInventoryTransaction(data).subscribe(() => {
       this.dialogRef.close({event: 'submit'});
+      this.submitting = false;
+    }, () => {
+      this.submitting = false;
     });
   }
 }

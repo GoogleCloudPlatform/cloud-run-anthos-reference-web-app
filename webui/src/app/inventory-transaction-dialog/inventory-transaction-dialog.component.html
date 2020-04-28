@@ -51,6 +51,7 @@
       <textarea matInput formControlName="note"></textarea>
     </mat-form-field>
   </mat-dialog-content>
+  <mat-progress-bar mode="indeterminate" *ngIf="submitting"></mat-progress-bar>
   <mat-dialog-actions class="form-actions">
     <button type="submit" mat-button color="primary">Submit</button>
     <button type="reset" mat-button color="warn" (click)="onCancel()">Cancel</button>

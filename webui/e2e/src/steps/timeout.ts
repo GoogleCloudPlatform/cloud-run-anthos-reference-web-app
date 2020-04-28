@@ -16,4 +16,4 @@
 
 import { setDefaultTimeout } from 'cucumber';
 
-setDefaultTimeout(10000);
+setDefaultTimeout(15000);

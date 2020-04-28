@@ -17,16 +17,16 @@
 import { browser, by, element, ExpectedConditions } from 'protractor';
 import { BasePage } from './base.po';
 
-export class ItemsPage extends BasePage {
+export class LocationsPage extends BasePage {
   navigateTo() {
-    return this.navigateToPath('items');
+    return this.navigateToPath('locations');
   }
 
-  getItemTitle() {
-    return element(by.css('.item-info mat-card-title'));
+  getLocationTitle() {
+    return element(by.css('.location-info mat-card-title'));
   }
 
-  getItemDescription() {
-    return element(by.css('.item-info mat-card-content'));
+  getLocationWarehouse() {
+    return element(by.css('.location-info mat-card-content'));
   }
 }
