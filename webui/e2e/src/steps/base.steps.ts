@@ -38,7 +38,7 @@ When ('I click on link {string}', async (name) => {
   await page.clickLinkByName(name);
 });
 
-When ('I click on icon button', async () => {
+When ('I click on the plus icon button', async () => {
   const plusButton = element(by.css('button mat-icon'));
   await page.clickElement(plusButton);
 });

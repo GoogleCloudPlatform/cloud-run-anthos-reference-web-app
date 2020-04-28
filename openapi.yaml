@@ -30,9 +30,13 @@ components:
         status:
           type: integer
           format: int32
+          minimum: 100
+          maximum: 599
           description: HTTP status code
         message:
           type: string
+      required:
+        - status
       example:
         status: 404
         message: Item with ID 34 not found
@@ -47,6 +51,8 @@ components:
           readOnly: true
         description:
           type: string
+      required:
+        - name
       example:
         name: test item
         id: item-uuid
@@ -63,6 +69,9 @@ components:
         role:
           type: string
           enum: [worker, admin]
+      required:
+        - name
+        - role
       example:
         name: Some Manager
         id: user-uuid
@@ -78,6 +87,9 @@ components:
           readOnly: true
         warehouse:
           type: string
+      required:
+        - name
+        - warehouse
       example:
         name: shelf 3
         id: location-uuid
@@ -97,6 +109,10 @@ components:
         last_updated:
           type: string
           format: date-time
+      required:
+        - item_id
+        - location_id
+        - count
       example:
         item_id: item-uuid
         location_id: location-uuid
@@ -130,6 +146,11 @@ components:
           type: string
           format: uuid
           description: the ID of the User who created the transaction
+      required:
+        - item_id
+        - location_id
+        - action
+        - count
       example:
         id: uuid
         item_id: item-uuid

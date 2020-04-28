@@ -658,6 +658,16 @@ func (bt *backendTester) testNewInventoryTransaction(t *testing.T) {
 			wantCount: 20,
 		},
 		{
+			desc: "recount existing inventory to 0",
+			txn: &InventoryTransaction{
+				ItemId:     stockedItem.Id,
+				LocationId: stockedLoc.Id,
+				Action:     "RECOUNT",
+				Count:      0,
+			},
+			wantCount: 0,
+		},
+		{
 			desc: "recount new inventory",
 			txn: &InventoryTransaction{
 				ItemId:     newItem.Id,
