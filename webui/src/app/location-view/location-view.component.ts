@@ -16,7 +16,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { Location, InventoryService } from 'api-client';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-location-view',
@@ -29,7 +29,8 @@ export class LocationViewComponent implements OnInit {
 
   constructor(
     private inventoryService: InventoryService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router,
   ) { }
 
   ngOnInit() {
@@ -54,4 +55,11 @@ export class LocationViewComponent implements OnInit {
     }
   }
 
+  handleDelete(): void {
+    if (this.location) {
+      this.inventoryService.deleteLocation(this.location.id).subscribe(() => {
+        this.router.navigate(['/locations']);
+      });
+    }
+  }
 }

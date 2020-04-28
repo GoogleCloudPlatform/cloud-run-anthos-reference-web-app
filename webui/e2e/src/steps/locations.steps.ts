@@ -17,25 +17,25 @@
 import { Then, Given } from 'cucumber';
 import { expect } from 'chai';
 
-import { ItemsPage } from '../pages/items.po';
+import { LocationsPage } from '../pages/locations.po';
 
-const page = new ItemsPage();
+const page = new LocationsPage();
 
-Then('I should see Item named {string}', async (name) => {
-  expect(await page.getItemTitle().getText()).equals(name);
+Then('I should see Location named {string}', async (name) => {
+  expect(await page.getLocationTitle().getText()).equals(name);
 });
 
-Then('I should see Item description as {string}', async (description) => {
-  expect(await page.getItemDescription().getText()).equals(description);
+Then('I should see Location in warehouse {string}', async (warehouse) => {
+  expect(await page.getLocationWarehouse().getText()).equals(warehouse);
 });
 
-Given('There is an item named {string}', async (name) => {
+Given('There is a location named {string}', async (name) => {
   await page.navigateTo();
   const link = page.getLinkByName(name);
   if (!await link.isPresent()) {
     page.clickButton('Create');
     await page.getFormField('name').sendKeys(name);
-    await page.getFormField('description').sendKeys(`test item ${name}`);
+    await page.getFormField('warehouse').sendKeys(`WH ${name}`);
     await page.clickButton('Submit');
   }
 });
