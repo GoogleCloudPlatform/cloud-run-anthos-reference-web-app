@@ -50,7 +50,7 @@ When ('I select {string} in selector {string}', async (optionText, selectName) =
 When ('I check radio button {string}', async (value) => {
   const radioButton = element(by.css(`mat-radio-button[value=${value}]`));
   await page.clickElement(radioButton);
-})
+});
 
 let lastCount = 0;
 
