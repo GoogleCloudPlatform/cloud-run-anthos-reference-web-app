@@ -37,10 +37,10 @@ For this reference application to work properly, you will need a custom domain
 that has been set up properly and verified.
 
 The easiest way to do this is by running the interactive script
-[domain-setup.sh](domain-setup.sh):
+[domain-setup.sh][]:
 
 ```bash
-./domain-setup.sh
+./scripts/domain-setup.sh
 ```
 
 #### Creating a Custom Domain
@@ -73,8 +73,10 @@ You can create a TXT record using the following steps:
 1. [Enable Identity Platform][] for your project.
    * This will create an OAuth 2.0 Client ID that can be used by the web application.
    * This additionally creates a Firebase project where Cloud Firestore can be used.
-1. On the [Identity Platform -> Settings][] page, in the **Security** tab, add
-   your custom domain under **Authorized Domains**.
+1. Whitelist your custom domain in Identity Platform.
+   * In the GCP console, navigate to [Identity Platform -> Settings][].
+   * Click on the **Security** tab.
+   * Add your custom domain under **Authorized Domains**.
 1. Configure the [OAuth consent screen][].
    * You'll need to set the **Support email** and the
      **Application homepage link** (your Custom Domain).
@@ -87,7 +89,8 @@ You can create a TXT record using the following steps:
        **Authorized JavaScript origins**.
    * Take note of the **Client ID** and **Client secret**. You'll use them in
      the next step.
-   * Under **Authorized JavaScript origins**, add your custom domain.
+   * Under **Authorized JavaScript origins**, add your custom domain prefixed
+     with `https://`.
    * Click **Save**.
 1. Add **Google** as an Identity Provider in Identity Platform:
    * In the GCP console, navigate to [Identity Platform -> Providers][].
@@ -96,26 +99,19 @@ You can create a TXT record using the following steps:
    * Fill in the **Web Client ID** and **Web Client Secret** fields with those
      from the OAuth 2.0 Client ID created in the previous step.
    * Click **Save**.
-1. Setup `webui/firebaseConfig.js`:
-   * Copy [webui/firebaseConfig.js.sample](webui/firebaseConfig.js.sample) to
-     `webui/firebaseConfig.js`:
+1. Run [firebase-config-setup.sh][] to create `webui/firebaseConfig.js`:
 
-     ```bash
-     cp webui/firebaseConfig.js.sample webui/firebaseConfig.js
-     ```
+   ```bash
+   ./scripts/firebase-config-setup.sh $PROJECT_ID
+   ```
 
-   * Fill in the **apiKey** and **authDomain** values in
-     `webui/firebaseConfig.js` with the values found by navigating to
-     [Identity Platform -> Providers][] and clicking on
-     **Application setup details** on the right.
-     ![application setup details location](application_setup_details.png)
 1. Set up the Firestore security rules:
    * Navigate to the Develop > Database > Rules in the Firebase console at:
      <https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules>.
    * Ensure that **Cloud Firestore** is selected in the dropdown above.
-     ![firestore rules page](firestore_rules_page.png)
+     ![firestore rules page][]
    * Set the security rules to the ones found in
-     [`firestore/firestore.rules`](firestore/firestore.rules)
+     [`firestore/firestore.rules`][]
 
 ## Deploying the Application for the First Time
 
@@ -126,10 +122,10 @@ The instructions below describe how to deploy the application.
 ### 1. Configure GCP Project
 
 You will need to bootstrap the services and permissions required by this example.
-The easiest way to do so is by running [bootstrap.sh](bootstrap.sh):
+The easiest way to do so is by running [bootstrap.sh][]:
 
 ```bash
-./bootstrap.sh $PROJECT_ID
+./scripts/bootstrap.sh $PROJECT_ID
 ```
 
 This step additionally creates a file named `env.mk` based on [env.mk.sample](env.mk.sample).
@@ -205,3 +201,9 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [Owner permission]: https://console.cloud.google.com/iam-admin/roles/details/roles%3Cowner
 [architecture.md]: ./docs/architecture.md
 [cloud-tutorial.dev]: https://cloud-tutorial.dev/
+[bootstap.sh]: scripts/bootstrap.sh
+[firebase-config-setup.sh]: scripts/firebase-config-setup.sh
+[domain-setup.sh]: scripts/domain-setup.sh
+[application setup details location]: docs/img/application_setup_details.png
+[firestore rules page]: docs/img/firestore_rules_page.png
+[`firestore/firestore.rules`]: firestore/firestore.rules
