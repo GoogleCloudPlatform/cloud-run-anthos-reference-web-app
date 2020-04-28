@@ -77,14 +77,10 @@ You can create a TXT record using the following steps:
    * In the GCP console, navigate to [Identity Platform -> Settings][].
    * Click on the **Security** tab.
    * Add your custom domain under **Authorized Domains**.
-1. Configure the [OAuth consent screen][].
-   * You'll need to set the **Support email** and the
-     **Application homepage link** (your Custom Domain).
-   * Additional information
-     [here](https://support.google.com/cloud/answer/6158849?hl=en#userconsent).
-1. Configure your OAuth 2.0 Client ID to be used by your Custom Domain.
+1. Authorize your OAuth 2.0 Client ID to be usable by your custom domain.
    * In the GCP console, navigate to [APIs & Services -> Credentials][].
    * Click on the OAuth 2.0 Client ID that was auto created.
+     * "(auto created by Google Service)" appears in the name.
      * **$PROJECT_ID.firebaseapp.com** _should_ appear under
        **Authorized JavaScript origins**.
    * Take note of the **Client ID** and **Client secret**. You'll use them in
@@ -92,6 +88,11 @@ You can create a TXT record using the following steps:
    * Under **Authorized JavaScript origins**, add your custom domain prefixed
      with `https://`.
    * Click **Save**.
+1. Configure the [OAuth consent screen][].
+   * You'll need to set the **Support email** and the
+     **Application homepage link** (your custom domain prefixed with `https://`).
+   * Additional information
+     [here](https://support.google.com/cloud/answer/6158849?hl=en#userconsent).
 1. Add **Google** as an Identity Provider in Identity Platform:
    * In the GCP console, navigate to [Identity Platform -> Providers][].
    * Click **Add a provider**.
@@ -110,8 +111,7 @@ You can create a TXT record using the following steps:
      <https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules>.
    * Ensure that **Cloud Firestore** is selected in the dropdown above.
      ![firestore rules page screenshot][]
-   * Set the security rules to the ones found in
-     [`firestore/firestore.rules`][]
+   * Set the security rules to the ones found in [`firestore/firestore.rules`][].
 
 ## Deploying the Application for the First Time
 
@@ -201,7 +201,7 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [Owner permission]: https://console.cloud.google.com/iam-admin/roles/details/roles%3Cowner
 [architecture.md]: ./docs/architecture.md
 [cloud-tutorial.dev]: https://cloud-tutorial.dev/
-[bootstap.sh]: scripts/bootstrap.sh
+[bootstrap.sh]: scripts/bootstrap.sh
 [firebase-config-setup.sh]: scripts/firebase-config-setup.sh
 [domain-setup.sh]: scripts/domain-setup.sh
 [firestore rules page screenshot]: docs/img/firestore_rules_page.png
