@@ -109,7 +109,7 @@ You can create a TXT record using the following steps:
    * Navigate to the Develop > Database > Rules in the Firebase console at:
      <https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules>.
    * Ensure that **Cloud Firestore** is selected in the dropdown above.
-     ![firestore rules page][]
+     ![firestore rules page screenshot][]
    * Set the security rules to the ones found in
      [`firestore/firestore.rules`][]
 
@@ -204,6 +204,5 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [bootstap.sh]: scripts/bootstrap.sh
 [firebase-config-setup.sh]: scripts/firebase-config-setup.sh
 [domain-setup.sh]: scripts/domain-setup.sh
-[application setup details location]: docs/img/application_setup_details.png
-[firestore rules page]: docs/img/firestore_rules_page.png
+[firestore rules page screenshot]: docs/img/firestore_rules_page.png
 [`firestore/firestore.rules`]: firestore/firestore.rules
