@@ -37,10 +37,10 @@ For this reference application to work properly, you will need a custom domain
 that has been set up properly and verified.
 
 The easiest way to do this is by running the interactive script
-[domain-setup.sh](domain-setup.sh):
+[domain-setup.sh][]:
 
 ```bash
-./domain-setup.sh
+./scripts/domain-setup.sh
 ```
 
 #### Creating a Custom Domain
@@ -68,29 +68,50 @@ You can create a TXT record using the following steps:
    [domain ownership verification][] steps.
 1. Click **Create**.
 
-### Setup Identity Platform for Auth
+### Identity Platform for Auth and Firestore Setup
 
-1. Follow [Setting up OAuth 2.0 guide][] to setup [OAuth consent screen][].
-1. Enable Identity Platform and add **Google** as an Identity provider:
-   * Go to the [Identity Platform page in the GCP console][].
-   * Select your project from the **Select a project** drop-down.
-   * Click **Enable Identity Platform**.
-   * On the **Providers** page, click **Add a provider**.
+1. [Enable Identity Platform][] for your project.
+   * This will create an OAuth 2.0 Client ID that can be used by the web application.
+   * This additionally creates a Firebase project where Cloud Firestore can be used.
+1. Whitelist your custom domain in Identity Platform.
+   * In the GCP console, navigate to [Identity Platform -> Settings][].
+   * Click on the **Security** tab.
+   * Add your custom domain under **Authorized Domains**.
+1. Authorize your OAuth 2.0 Client ID to be usable by your custom domain.
+   * In the GCP console, navigate to [APIs & Services -> Credentials][].
+   * Click on the OAuth 2.0 Client ID that was auto created.
+     * "(auto created by Google Service)" appears in the name.
+     * **$PROJECT_ID.firebaseapp.com** _should_ appear under
+       **Authorized JavaScript origins**.
+   * Take note of the **Client ID** and **Client secret**. You'll use them in
+     the next step.
+   * Under **Authorized JavaScript origins**, add your custom domain prefixed
+     with `https://`.
+   * Click **Save**.
+1. Configure the [OAuth consent screen][].
+   * You'll need to set the **Support email** and the
+     **Application homepage link** (your custom domain prefixed with `https://`).
+   * Additional information
+     [here](https://support.google.com/cloud/answer/6158849?hl=en#userconsent).
+1. Add **Google** as an Identity Provider in Identity Platform:
+   * In the GCP console, navigate to [Identity Platform -> Providers][].
+   * Click **Add a provider**.
    * Select **Google** from the list.
    * Fill in the **Web Client ID** and **Web Client Secret** fields with those
-     from the OAuth client ID created in the previous step.
-1. Add your custom domain as Authorized Domain on
-   [Identity Platform -> Settings][] page, Security tab.
-1. Follow the example in [webui/firebaseConfig.js.sample](webui/firebaseConfig.js.sample)
-   to create `webui/firebaseConfig.js`
-   * **apiKey** and **authDomain** can be found following the
-    [Identity Platform quickstart guide][]
+     from the OAuth 2.0 Client ID created in the previous step.
+   * Click **Save**.
+1. Run [firebase-config-setup.sh][] to create `webui/firebaseConfig.js`:
 
-### Set up Firestore security rules
+   ```bash
+   ./scripts/firebase-config-setup.sh $PROJECT_ID
+   ```
 
-Add the following security rules from [`firestore/firestore.rules`](firestore/firestore.rules)
-to your Firebase project in the rules tab at
-<https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules>
+1. Set up the Firestore security rules:
+   * Navigate to the Develop > Database > Rules in the Firebase console at:
+     <https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules>.
+   * Ensure that **Cloud Firestore** is selected in the dropdown above.
+     ![firestore rules page screenshot][]
+   * Set the security rules to the ones found in [`firestore/firestore.rules`][].
 
 ## Deploying the Application for the First Time
 
@@ -101,10 +122,10 @@ The instructions below describe how to deploy the application.
 ### 1. Configure GCP Project
 
 You will need to bootstrap the services and permissions required by this example.
-The easiest way to do so is by running [bootstrap.sh](bootstrap.sh):
+The easiest way to do so is by running [bootstrap.sh][]:
 
 ```bash
-./bootstrap.sh $PROJECT_ID
+./scripts/bootstrap.sh $PROJECT_ID
 ```
 
 This step additionally creates a file named `env.mk` based on [env.mk.sample](env.mk.sample).
@@ -160,6 +181,7 @@ Running `make delete` will delete the Config Connector resources from your clust
 which will cause Config Connector to delete the associated GCP resources.
 However, you must manually delete your Cloud Run service and GKE Cluster.
 
+[APIs & Services -> Credentials]: https://console.cloud.google.com/apis/credentials
 [Cloud Build]: https://cloud.google.com/cloud-build/docs
 [Config Connector]: https://cloud.google.com/config-connector/docs
 [Cloud DNS Managed Zone]: https://cloud.google.com/dns/zones
@@ -167,6 +189,8 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [update name server records]: https://cloud.google.com/dns/docs/migrating#update_your_registrars_name_server_records
 [domain ownership verification]: https://cloud.google.com/storage/docs/domain-name-verification#verification
 [additional verified owner]: https://cloud.google.com/storage/docs/domain-name-verification?_ga=2.256052552.-234301672.1582050261#additional_verified_owners
+[Enable Identity Platform]: https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity
+[Identity Platform -> Providers]: https://console.cloud.google.com/customer-identity/providers
 [Identity Platform quickstart guide]: https://cloud.google.com/identity-platform/docs/quickstart-email-password#sign_the_user_in
 [Identity Platform page in the GCP console]: https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity
 [OAuth consent screen]: https://console.cloud.google.com/apis/credentials/consent
@@ -177,3 +201,8 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [Owner permission]: https://console.cloud.google.com/iam-admin/roles/details/roles%3Cowner
 [architecture.md]: ./docs/architecture.md
 [cloud-tutorial.dev]: https://cloud-tutorial.dev/
+[bootstrap.sh]: scripts/bootstrap.sh
+[firebase-config-setup.sh]: scripts/firebase-config-setup.sh
+[domain-setup.sh]: scripts/domain-setup.sh
+[firestore rules page screenshot]: docs/img/firestore_rules_page.png
+[`firestore/firestore.rules`]: firestore/firestore.rules
