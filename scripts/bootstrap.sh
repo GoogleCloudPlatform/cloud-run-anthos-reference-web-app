@@ -22,6 +22,18 @@ usage() {
   exit 1
 }
 
+progress_indicator() {
+  local pid
+  pid=$1
+  while kill -0 $pid 2> /dev/null; do
+    for X in '-' '/' '|' '\'; do
+      echo -en "\b$X"
+      sleep 0.1
+    done
+  done
+  echo -en "\b"
+}
+
 if [[ "$#" -ne 1 ]]; then
   usage
 fi
@@ -29,8 +41,9 @@ fi
 readonly PROJECT_ID="$1"
 readonly PROJECT_NUMBER=$(gcloud projects describe "${PROJECT_ID}" --format="value(projectNumber)")
 
+echo "Enabling Cloud Build, Kubernetes Engine, and Cloud Resource Manager APIs ..."
 # Enable Cloud Build, Kubernetes Engine, and Cloud Resource Manager APIs
-gcloud --project "${PROJECT_ID}" services enable {cloudbuild,container,cloudresourcemanager}.googleapis.com
+gcloud --project "${PROJECT_ID}" services enable {cloudbuild,container,cloudresourcemanager}.googleapis.com & progress_indicator $!
 
 # Grant Cloud Build service account permissions
 # Service Account Admin, roles/iam.serviceAccountAdmin
@@ -40,16 +53,20 @@ gcloud --project "${PROJECT_ID}" services enable {cloudbuild,container,cloudreso
 # Compute Load Balancer Admin, roles/compute.loadBalancerAdmin
 # Compute Network Admin, roles/compute.networkAdmin
 
+echo "Granting Cloud Build service account permissions ..."
 for role in iam.serviceAccount{Admin,User} container.admin resourcemanager.projectIamAdmin compute.{loadBalancer,network}Admin; do
   gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
   --member serviceAccount:"${PROJECT_NUMBER}"@cloudbuild.gserviceaccount.com \
-  --role roles/"${role}"
+  --role roles/"${role}" \
+  > /dev/null & progress_indicator $!
 done
 
 # Create env.mk if not present
 if [[ ! -f "env.mk" ]]; then
+  echo "Creating env.mk ..."
   cp env.mk.sample env.mk
 fi
 
 # Substitute default PROJECT_ID value
+echo "Substituting values in env.mk ..."
 sed "s/^PROJECT_ID=project-id$/PROJECT_ID=${PROJECT_ID}/" -i env.mk
