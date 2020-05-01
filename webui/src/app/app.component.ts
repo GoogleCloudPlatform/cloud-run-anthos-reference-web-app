@@ -34,7 +34,7 @@ export class AppComponent {
   }
 
   signOut() {
-    this.afAuth.auth.signOut()
+    this.authProcess.signOut()
       .catch(e => console.error('An error happened while signing out!', e));
   }
 }

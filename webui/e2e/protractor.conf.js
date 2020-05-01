@@ -27,7 +27,7 @@ exports.config = {
     './src/features/**/*.feature'
   ],
   capabilities: {
-    browserName: 'chrome'
+    browserName: 'chrome',
   },
   directConnect: true,
   baseUrl: 'http://localhost:4200/',
@@ -44,5 +44,6 @@ exports.config = {
     require('ts-node').register({
       project: require('path').join(__dirname, './tsconfig.json')
     });
-  }
+  },
+  SELENIUM_PROMISE_MANAGER: false,
 };

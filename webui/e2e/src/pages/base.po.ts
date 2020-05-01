@@ -24,25 +24,32 @@ export class BasePage {
   constructor() {
     this.loadingSpinner = this.getLoadingSpinner();
     this.progressBar = this.getProgressBar();
+    // Disable this because browser.waitForAngular() never resolve, and all tests end up timing out.
+    // Tested with ChromeDriver@81.0.4044.69, Protractor@5.4.4, Angular@9.1.0.
+    // If these versions are updated, we might try again to enable this.
+    browser.waitForAngularEnabled(false);
   }
 
   async navigateToPath(path: string) {
     await browser.get(`/${path}`);
     await browser.sleep(this.loadingDelay);
     await browser.wait(ExpectedConditions.invisibilityOf(this.loadingSpinner));
-    return;
   }
 
   getPageTitle(): ElementFinder  {
     return element(by.css('mat-card-title'));
   }
 
-  getTableRows(): ElementArrayFinder  {
+  getTableRows(): ElementArrayFinder {
     return element.all(by.tagName('tr'));
   }
 
   getFormField(name: string): ElementFinder  {
     return element(by.css(`[formcontrolname=${name}]`));
+  }
+
+  async waitForElement(css: string) {
+    await browser.wait(ExpectedConditions.presenceOf(element(by.css(css))));
   }
 
   getButton(name: string): ElementFinder  {
@@ -51,6 +58,7 @@ export class BasePage {
 
   async clickButton(name: string) {
     this.getButton(name).click();
+    await browser.sleep(this.loadingDelay);
     await browser.wait(ExpectedConditions.invisibilityOf(this.progressBar));
     await browser.sleep(this.loadingDelay);
     await browser.wait(ExpectedConditions.invisibilityOf(this.loadingSpinner));
@@ -61,7 +69,7 @@ export class BasePage {
   }
 
   async clickElement(link: ElementFinder) {
-    await browser.driver.wait(ExpectedConditions.presenceOf(link));
+    await browser.wait(ExpectedConditions.presenceOf(link));
     await link.click();
     await browser.sleep(this.loadingDelay);
     await browser.wait(ExpectedConditions.invisibilityOf(this.loadingSpinner));

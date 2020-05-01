@@ -23,7 +23,6 @@
   </mat-card-content>
 
   <ng-template #contentBlock>
-    <mat-progress-bar mode="indeterminate" *ngIf="submitting"></mat-progress-bar>
     <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
       <input hidden formControlName="id">
       <mat-form-field appearance="fill">
@@ -36,6 +35,7 @@
         <input matInput type="text" formControlName="description">
       </mat-form-field>
       <br>
+      <mat-progress-bar mode="indeterminate" *ngIf="submitting"></mat-progress-bar>
       <br>
       <button type="submit" mat-button [disabled]="submitting">Submit</button>
       <button mat-button color="warn" onclick="onCancel()">Cancel</button>

@@ -28,6 +28,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 export class LocationEditorComponent implements OnInit {
   isNew = true;
   loading = false;
+  submitting = false;
 
   locationForm = new FormGroup({
     name: new FormControl(''),
@@ -58,13 +59,20 @@ export class LocationEditorComponent implements OnInit {
 
   onSubmit() {
     const location = this.locationForm.value;
+    this.submitting = true;
     if (this.isNew) {
       this.inventoryService.newLocation(location).subscribe((newLocation) => {
         this.router.navigate(['/locations', newLocation.id]);
+        this.submitting = false;
+      }, () => {
+        this.submitting = false;
       });
     } else {
       this.inventoryService.updateLocation(location.id, location).subscribe((newLocation) => {
         this.router.navigate(['/locations', newLocation.id]);
+        this.submitting = false;
+      }, () => {
+        this.submitting = false;
       });
     }
   }
