@@ -2,6 +2,7 @@
   "name": "webui",
   "version": "0.0.0",
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
@@ -52,6 +53,7 @@
     "karma-coverage-istanbul-reporter": "~2.0.1",
     "karma-jasmine": "~2.0.1",
     "karma-jasmine-html-reporter": "^1.5.1",
+    "npm-force-resolutions": "0.0.3",
     "protractor": "=5.4.4",
     "protractor-cucumber-framework": "^6.2.1",
     "ts-node": "~7.0.0",
@@ -59,6 +61,6 @@
     "typescript": "~3.8.3"
   },
   "resolutions": {
-    "tree-kill": "^1.2.2"
+    "yargs-parser": "^18.1.3"
   }
 }
