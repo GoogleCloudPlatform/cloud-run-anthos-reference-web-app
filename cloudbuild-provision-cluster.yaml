@@ -138,7 +138,6 @@ steps:
 # https://cloud.google.com/load-balancing/docs/https#source_ip_addresses
 - name: 'gcr.io/cloud-builders/gcloud'
   id: Restrict Cluster Ingress
-  waitFor: ['Create NEG']
   entrypoint: /bin/bash
   args:
   - '-c'
