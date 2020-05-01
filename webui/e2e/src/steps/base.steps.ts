@@ -55,16 +55,19 @@ When ('I check radio button {string}', async (value) => {
 let lastCount = 0;
 
 Then('I should see some entries', async () =>  {
+  await page.waitForElement('tr');
   lastCount = await page.getTableRows().count();
 });
 
 Then('I should see {int} more entries', async (diff) =>  {
+  await page.waitForElement('tr');
   const newCount = await page.getTableRows().count();
   expect(newCount).to.equals(lastCount + diff);
   lastCount = newCount;
 });
 
 Then('I should see {int} fewer entries', async (diff) =>  {
+  await page.waitForElement('tr');
   const newCount = await page.getTableRows().count();
   expect(newCount).to.equal(lastCount - diff);
   lastCount = newCount;

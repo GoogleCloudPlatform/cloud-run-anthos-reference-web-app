@@ -35,6 +35,7 @@
         <input matInput type="text" formControlName="warehouse">
       </mat-form-field>
       <br>
+      <mat-progress-bar mode="indeterminate" *ngIf="submitting"></mat-progress-bar>
       <br>
       <button type="submit" mat-button>Submit</button>
       <button mat-button color="warn" onclick="onCancel()">Cancel</button>

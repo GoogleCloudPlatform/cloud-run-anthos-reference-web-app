@@ -1,5 +1,12 @@
 include env.mk
 
+# You can use bigger machine type n1-highcpu-8 or n1-highcpu-32.
+# See https://cloud.google.com/cloud-build/pricing
+# for more detail.
+ifdef CB_MACHINE_TYPE
+	MACHINE_TYPE=--machine-type=$(CB_MACHINE_TYPE)
+endif
+
 # Shared cluster substitution args
 CLUSTER_ARGS := \
 	_CLUSTER_LOCATION=$(CLUSTER_LOCATION) \
@@ -137,22 +144,22 @@ delete:
 	gcloud builds submit . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(INFRA_SUBS)
 
 build-webui: cluster
-	gcloud builds submit --config ./webui/cloudbuild.yaml --substitutions $(WEBUI_SUBS) .
+	gcloud builds submit $(MACHINE_TYPE) --config ./webui/cloudbuild.yaml --substitutions $(WEBUI_SUBS) .
 
 test-backend:
-	gcloud builds submit --config ./backend/cloudbuild-test.yaml --substitutions $(BACKEND_TEST_SUBS)  .
+	gcloud builds submit $(MACHINE_TYPE) --config ./backend/cloudbuild-test.yaml --substitutions $(BACKEND_TEST_SUBS)  .
 
 test-webui:
-	gcloud builds submit --config ./webui/cloudbuild-test.yaml .
+	gcloud builds submit $(MACHINE_TYPE) --config ./webui/cloudbuild-test.yaml .
 
 test-webui-e2e:
-	gcloud builds submit --config ./webui/e2e/cloudbuild.yaml --substitutions $(FRONTEND_E2E_SUBS) .
+	gcloud builds submit $(MACHINE_TYPE) --config ./webui/e2e/cloudbuild.yaml --substitutions $(FRONTEND_E2E_SUBS) .
 
 build-backend: cluster
-	gcloud builds submit --config ./backend/cloudbuild.yaml --substitutions $(BACKEND_SUBS) .
+	gcloud builds submit $(MACHINE_TYPE) --config ./backend/cloudbuild.yaml --substitutions $(BACKEND_SUBS) .
 
 build-infrastructure: cluster
-	gcloud builds submit . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(INFRA_SUBS)
+	gcloud builds submit $(MACHINE_TYPE) . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(INFRA_SUBS)
 
 build-all: build-infrastructure build-webui build-backend
 
