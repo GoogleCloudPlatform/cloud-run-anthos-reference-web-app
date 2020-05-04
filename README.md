@@ -106,6 +106,13 @@ You can create a TXT record using the following steps:
    ./scripts/firebase-config-setup.sh $PROJECT_ID
    ```
 
+1. Create Firestore database:
+   * Navigate to the Develop > Database in the Firebase console at:
+     <https://console.firebase.google.com/project/$PROJECT_ID/database>.
+   * Click **Create Database**
+   * Choose **production mode**, and click **Next**
+   * Choose customize the location as desired, and click **Done**
+
 1. Set up the Firestore security rules:
    * Navigate to the Develop > Database > Rules in the Firebase console at:
      <https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules>.
