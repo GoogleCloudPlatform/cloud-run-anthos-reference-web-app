@@ -142,9 +142,14 @@ steps:
   args:
   - '-c'
   - |
-      for firewall in $(gcloud compute firewall-rules list \
-          --filter="targetTags.list()~^gke-${_CLUSTER_NAME}-[0-9a-z]*-node$ AND sourceRanges.list()=0.0.0.0/0" \
-          --format="csv[no-heading](name)"); do \
-        gcloud compute firewall-rules update "$firewall" \
-            --source-ranges=35.191.0.0/16,130.211.0.0/22; \
-      done
+      firewall=$(gcloud compute firewall-rules list \
+          --filter="name:k8s-fw AND targetTags.list()~^gke-${_CLUSTER_NAME}-[0-9a-z]*-node$" \
+          --format="csv[no-heading](name)"); \
+      while [[ -z $firewall ]]; do \
+        echo "unable to find cluster ingress firewall. Sleeping 10s..."; \
+        sleep 10s; \
+        firewall=$(gcloud compute firewall-rules list \
+          --filter="name:k8s-fw AND targetTags.list()~^gke-${_CLUSTER_NAME}-[0-9a-z]*-node$" \
+          --format="csv[no-heading](name)"); \
+      done; \
+      gcloud compute firewall-rules update "$firewall" --source-ranges=35.191.0.0/16,130.211.0.0/22;
