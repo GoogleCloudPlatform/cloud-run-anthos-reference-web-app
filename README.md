@@ -77,6 +77,7 @@ You can create a TXT record using the following steps:
    * In the GCP console, navigate to [Identity Platform -> Settings][].
    * Click on the **Security** tab.
    * Add your custom domain under **Authorized Domains**.
+   * Click **Save**.
 1. Authorize your OAuth 2.0 Client ID to be usable by your custom domain.
    * In the GCP console, navigate to [APIs & Services -> Credentials][].
    * Click on the OAuth 2.0 Client ID that was auto created.
@@ -88,11 +89,6 @@ You can create a TXT record using the following steps:
    * Under **Authorized JavaScript origins**, add your custom domain prefixed
      with `https://`.
    * Click **Save**.
-1. Configure the [OAuth consent screen][].
-   * You'll need to set the **Support email** and the
-     **Application homepage link** (your custom domain prefixed with `https://`).
-   * Additional information
-     [here](https://support.google.com/cloud/answer/6158849?hl=en#userconsent).
 1. Add **Google** as an Identity Provider in Identity Platform:
    * In the GCP console, navigate to [Identity Platform -> Providers][].
    * Click **Add a provider**.
@@ -100,6 +96,11 @@ You can create a TXT record using the following steps:
    * Fill in the **Web Client ID** and **Web Client Secret** fields with those
      from the OAuth 2.0 Client ID created in the previous step.
    * Click **Save**.
+1. Configure the [OAuth consent screen][].
+   * You'll need to set the **Support email** and the
+     **Application homepage link** (your custom domain prefixed with `https://`).
+   * Additional information
+     [here](https://support.google.com/cloud/answer/6158849?hl=en#userconsent).
 1. Run [firebase-config-setup.sh][] to create `webui/firebaseConfig.js`:
 
    ```bash
