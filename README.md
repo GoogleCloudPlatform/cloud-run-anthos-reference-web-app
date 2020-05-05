@@ -101,10 +101,13 @@ You can create a TXT record using the following steps:
      **Application homepage link** (your custom domain prefixed with `https://`).
    * Additional information
      [here](https://support.google.com/cloud/answer/6158849?hl=en#userconsent).
-1. Run [firebase-config-setup.sh][] to create `webui/firebaseConfig.js`:
+1. Setup `webui/firebaseConfig.js`.
+   * Identify your Web API Key by navigating to Project Settings in the Firebase console:
+     <https://console.firebase.google.com/project/$PROJECT_ID/settings/general>
+   * Run [firebase-config-setup.sh][] to create `webui/firebaseConfig.js`:
 
    ```bash
-   ./scripts/firebase-config-setup.sh $PROJECT_ID
+   ./scripts/firebase-config-setup.sh $PROJECT_ID $API_KEY
    ```
 
 1. Set up the Firestore security rules:
