@@ -81,3 +81,7 @@ Then('I should see the latest transaction is for item {string} in location {stri
   expect(await row.element(by.css('td.mat-column-location')).getText()).to.equals(loc);
   expect(await row.element(by.css('td.mat-column-diff')).getText()).to.equals(diff);
 });
+
+Then('I should see page title {string}', async (title) => {
+  expect(await page.getPageTitle().getText()).to.equal(title);
+});
