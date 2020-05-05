@@ -15,7 +15,8 @@
 
 set -e
 
-# TODO: Fetch the API key once this command becomes generally available:
+# TODO(https://github.com/GoogleCloudPlatform/cloud-run-anthos-reference-web-app/issues/28):
+# Fetch the API key once this command becomes generally available:
 # https://cloud.google.com/sdk/gcloud/reference/alpha/services/api-keys/list
 
 usage() {
