@@ -131,14 +131,6 @@ ifneq ($(CLUSTER_MISSING),0)
 	gcloud builds submit . --verbosity=info --config cloudbuild-provision-cluster.yaml --substitutions $(PROVISION_SUBS)
 	gcloud container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION)
 endif
-	# Restrict cluster ingress firewall rules to just GCLB's published ranges:
-	# https://cloud.google.com/load-balancing/docs/https#source_ip_addresses
-	for firewall in $$(gcloud --project=$(PROJECT_ID) compute firewall-rules list \
-		  --filter="targetTags.list()~^gke-$(CLUSTER_NAME)-[0-9a-z]*-node$$ AND sourceRanges.list()=0.0.0.0/0" \
-		  --format="csv[no-heading](name)"); do \
-		gcloud --project=$(PROJECT_ID) compute firewall-rules update "$$firewall" \
-		  --source-ranges=35.191.0.0/16,130.211.0.0/22; \
-	done
 
 delete:
 	gcloud builds submit . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(INFRA_SUBS)
