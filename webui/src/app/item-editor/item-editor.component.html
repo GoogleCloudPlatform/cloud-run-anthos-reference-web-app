@@ -38,7 +38,7 @@
       <mat-progress-bar mode="indeterminate" *ngIf="submitting"></mat-progress-bar>
       <br>
       <button type="submit" mat-button [disabled]="submitting">Submit</button>
-      <button mat-button color="warn" onclick="onCancel()">Cancel</button>
+      <button type="reset" mat-button color="warn" (click)="onCancel()">Cancel</button>
     </form>
   </ng-template>
 </mat-card>
