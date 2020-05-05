@@ -102,7 +102,8 @@ You can create a TXT record using the following steps:
    * Additional information
      [here](https://support.google.com/cloud/answer/6158849?hl=en#userconsent).
 1. Setup `webui/firebaseConfig.js`.
-   * Identify your Web API Key by navigating to Project Settings in the Firebase console:
+   * Identify your Web API Key by navigating to Project Settings in the Firebase
+     console:
      <https://console.firebase.google.com/project/$PROJECT_ID/settings/general>
    * Run [firebase-config-setup.sh][] to create `webui/firebaseConfig.js`:
 
