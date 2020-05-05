@@ -117,7 +117,7 @@ if [[ "${answer}" == "y" ]]; then
   echo "The TXT record has been configured for domain ${DOMAIN}."
   echo "Within a few minutes you should be able to finish domain verification at:"
   echo "${url}"
-
+  echo
   echo "In the meantime, continue with the remaining prerequisites in the README"
 else
   echo "Your custom domain is ready for use."
