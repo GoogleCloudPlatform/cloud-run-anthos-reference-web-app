@@ -133,3 +133,23 @@ steps:
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
+# Restrict cluster ingress firewall rules to just GCLB's published ranges:
+# https://cloud.google.com/load-balancing/docs/https#source_ip_addresses
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Restrict Cluster Ingress
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+      firewall=$(gcloud compute firewall-rules list \
+          --filter="name:k8s-fw AND targetTags.list()~^gke-${_CLUSTER_NAME}-[0-9a-z]*-node$" \
+          --format="csv[no-heading](name)"); \
+      while [[ -z $firewall ]]; do \
+        echo "unable to find cluster ingress firewall. Sleeping 10s..."; \
+        sleep 10s; \
+        firewall=$(gcloud compute firewall-rules list \
+          --filter="name:k8s-fw AND targetTags.list()~^gke-${_CLUSTER_NAME}-[0-9a-z]*-node$" \
+          --format="csv[no-heading](name)"); \
+      done; \
+      gcloud compute firewall-rules update "$firewall" --source-ranges=35.191.0.0/16,130.211.0.0/22;

@@ -52,9 +52,10 @@ gcloud --project "${PROJECT_ID}" services enable {cloudbuild,container,cloudreso
 # Project IAM Admin, roles/resourcemanager.projectIamAdmin
 # Compute Load Balancer Admin, roles/compute.loadBalancerAdmin
 # Compute Network Admin, roles/compute.networkAdmin
+# Compute Security Admin roles/compute.securityAdmin
 
 echo "Granting Cloud Build service account permissions ..."
-for role in iam.serviceAccount{Admin,User} container.admin resourcemanager.projectIamAdmin compute.{loadBalancer,network}Admin; do
+for role in iam.serviceAccount{Admin,User} container.admin resourcemanager.projectIamAdmin compute.{loadBalancer,network,security}Admin; do
   gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
   --member serviceAccount:"${PROJECT_NUMBER}"@cloudbuild.gserviceaccount.com \
   --role roles/"${role}" \
