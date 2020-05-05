@@ -67,6 +67,8 @@ OPENAPI_GEN_CLIENT_ARGS=-g typescript-angular -i openapi.yaml -o webui/api-clien
 IGNORE := $(shell gcloud container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null)
 CLUSTER_MISSING=$(.SHELLSTATUS)
 
+ADDLICENSE=github.com/google/addlicense
+
 .PHONY: bootstrap clean delete run-local-webui run-local-backend check-license lint-webui lint test-webui-local test-backend-local build-webui test-webui build-backend build-infrastructure build-all test cluster
 
 ## RULES FOR LOCAL DEVELOPMENT
@@ -79,11 +81,6 @@ clean:
 
 /tmp/$(OPENAPI_GEN_JAR):
 	wget $(OPENAPI_GEN_URL) -P /tmp/
-
-${GOPATH}/bin/addlicense:
-	@echo addlicense is not installed, installing it now ...
-	go get -u github.com/google/addlicense
-	@echo ... installation complete
 
 webui/api-client: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml
 	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_CLIENT_ARGS)
@@ -102,8 +99,9 @@ run-local-webui: webui/api-client
 run-local-backend: backend/src/api/openapi.yaml
 	cd backend/src && go run main.go
 
-check-license: ${GOPATH}/bin/addlicense
-	${GOPATH}/bin/addlicense -check .
+check-license:
+	GO111MODULE=off go list $(ADDLICENSE) || GO111MODULE=off go get -u $(ADDLICENSE)
+	GO111MODULE=off go run $(ADDLICENSE) -check .
 
 lint-webui: webui/node_modules
 	cd webui && npm run lint
