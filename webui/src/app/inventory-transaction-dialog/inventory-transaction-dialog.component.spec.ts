@@ -28,6 +28,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 describe('InventoryTransactionDialogComponent', () => {
   let component: InventoryTransactionDialogComponent;
@@ -45,6 +46,7 @@ describe('InventoryTransactionDialogComponent', () => {
         MatInputModule,
         MatSelectModule,
         MatDialogModule,
+        MatProgressBarModule,
         ReactiveFormsModule,
         NoopAnimationsModule,
       ],

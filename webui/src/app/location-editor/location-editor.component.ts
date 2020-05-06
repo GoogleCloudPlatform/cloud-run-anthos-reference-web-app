@@ -15,7 +15,6 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { Location } from '@angular/common';
 import { InventoryService } from 'api-client';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormGroup, FormControl } from '@angular/forms';
@@ -29,6 +28,7 @@ export class LocationEditorComponent implements OnInit {
   isNew = true;
   loading = false;
   submitting = false;
+  locationId: string;
 
   locationForm = new FormGroup({
     name: new FormControl(''),
@@ -40,21 +40,27 @@ export class LocationEditorComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private inventoryService: InventoryService,
-    private location: Location,
   ) { }
 
   ngOnInit() {
-    const locationId = this.route.snapshot.paramMap.get('id');
-    if (locationId) {
-      this.isNew = false;
-      this.loading = true;
-      this.inventoryService.getLocation(locationId).subscribe(location => {
-        this.locationForm.setValue(location);
-        this.loading = false;
-      }, () => {
-        this.loading = false;
-      });
-    }
+    this.route.paramMap.subscribe(pmap => {
+      this.locationId = pmap.get('id');
+      if (this.locationId) {
+        this.isNew = false;
+        this.loading = true;
+        this.inventoryService.getLocation(this.locationId).subscribe(location => {
+          this.locationForm.setValue(
+            Object.assign({
+              name: '',
+              warehouse: '',
+            }, location)
+          );
+          this.loading = false;
+        }, () => {
+          this.loading = false;
+        });
+      }
+    });
   }
 
   onSubmit() {
@@ -78,7 +84,11 @@ export class LocationEditorComponent implements OnInit {
   }
 
   onCancel() {
-    this.location.back();
+    if (this.isNew) {
+      this.router.navigate(['/locations']);
+    } else {
+      this.router.navigate(['/locations', this.locationId]);
+    }
   }
 
 }
