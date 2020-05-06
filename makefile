@@ -67,12 +67,9 @@ OPENAPI_GEN_CLIENT_ARGS=-g typescript-angular -i openapi.yaml -o webui/api-clien
 IGNORE := $(shell gcloud container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null)
 CLUSTER_MISSING=$(.SHELLSTATUS)
 
-.PHONY: bootstrap clean delete run-local-webui run-local-backend check-license lint-webui lint test-webui-local test-backend-local build-webui test-webui build-backend build-infrastructure build-all test cluster
+.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local build-webui test-webui build-backend build-infrastructure build-all test cluster
 
 ## RULES FOR LOCAL DEVELOPMENT
-bootstrap:
-	./bootstrap.sh $(PROJECT_ID)
-
 clean:
 	rm -rf webui/node_modules webui/api-client
 	git clean -d -f -X backend/
@@ -100,7 +97,7 @@ run-local-backend: backend/src/api/openapi.yaml
 lint-webui: webui/node_modules
 	cd webui && npm run lint
 
-lint: check-license lint-webui
+lint: lint-webui
 
 test-backend-local: backend/src/api/openapi.yaml
 	docker stop firestore-emulator 2>/dev/null || true
@@ -120,30 +117,30 @@ test-webui-e2e-local: webui/api-client webui/node_modules
 cluster:
 ifneq ($(CLUSTER_MISSING),0)
 	@echo Cluster $(CLUSTER_NAME) does not exist, creating cluster
-	gcloud builds submit . --verbosity=info --config cloudbuild-provision-cluster.yaml --substitutions $(PROVISION_SUBS)
-	gcloud container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION)
+	gcloud --project=$(PROJECT_ID) builds submit . --verbosity=info --config cloudbuild-provision-cluster.yaml --substitutions $(PROVISION_SUBS)
+	gcloud --project=$(PROJECT_ID) container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION)
 endif
 
 delete:
-	gcloud builds submit . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(INFRA_SUBS)
+	gcloud --project=$(PROJECT_ID) builds submit . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(INFRA_SUBS)
 
 build-webui: cluster
-	gcloud builds submit $(MACHINE_TYPE) --config ./webui/cloudbuild.yaml --substitutions $(WEBUI_SUBS) .
+	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./webui/cloudbuild.yaml --substitutions $(WEBUI_SUBS) .
 
 test-backend:
-	gcloud builds submit $(MACHINE_TYPE) --config ./backend/cloudbuild-test.yaml --substitutions $(BACKEND_TEST_SUBS)  .
+	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./backend/cloudbuild-test.yaml --substitutions $(BACKEND_TEST_SUBS)  .
 
 test-webui:
-	gcloud builds submit $(MACHINE_TYPE) --config ./webui/cloudbuild-test.yaml .
+	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./webui/cloudbuild-test.yaml .
 
 test-webui-e2e:
-	gcloud builds submit $(MACHINE_TYPE) --config ./webui/e2e/cloudbuild.yaml --substitutions $(FRONTEND_E2E_SUBS) .
+	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./webui/e2e/cloudbuild.yaml --substitutions $(FRONTEND_E2E_SUBS) .
 
 build-backend: cluster
-	gcloud builds submit $(MACHINE_TYPE) --config ./backend/cloudbuild.yaml --substitutions $(BACKEND_SUBS) .
+	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./backend/cloudbuild.yaml --substitutions $(BACKEND_SUBS) .
 
 build-infrastructure: cluster
-	gcloud builds submit $(MACHINE_TYPE) . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(INFRA_SUBS)
+	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(INFRA_SUBS)
 
 build-all: build-infrastructure build-webui build-backend
 
