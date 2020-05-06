@@ -64,7 +64,7 @@ OPENAPI_GEN_URL="https://repo1.maven.org/maven2/org/openapitools/openapi-generat
 OPENAPI_GEN_SERVER_ARGS=-g go-server -i openapi.yaml -o backend/src --api-name-suffix= --git-user-id=$(GIT_USER_ID) --git-repo-id=$(GIT_REPO_ID) --package-name=service -t $(CUSTOM_TEMPLATES)
 OPENAPI_GEN_CLIENT_ARGS=-g typescript-angular -i openapi.yaml -o webui/api-client
 
-CLUSTER_MISSING=$(shell gcloud container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
+CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
 
 .PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local build-webui test-webui build-backend build-infrastructure build-all test cluster
 
