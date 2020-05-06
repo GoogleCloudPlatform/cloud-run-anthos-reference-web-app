@@ -83,6 +83,7 @@ jobs:
       with:
         node-version: '12.16.2'
     - run: touch env.mk
+    - run: cp ./webui/firebaseConfig.js.sample ./webui/firebaseConfig.js
     - run: make test-webui-local
       
   backend-lint:
