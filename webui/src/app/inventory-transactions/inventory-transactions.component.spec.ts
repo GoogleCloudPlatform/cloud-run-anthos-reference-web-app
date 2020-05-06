@@ -24,6 +24,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 describe('InventoryTransactionsComponent', () => {
   let component: InventoryTransactionsComponent;
@@ -39,6 +40,7 @@ describe('InventoryTransactionsComponent', () => {
         MatDialogModule,
         MatTableModule,
         MatIconModule,
+        MatProgressSpinnerModule,
         RouterTestingModule,
       ],
     })

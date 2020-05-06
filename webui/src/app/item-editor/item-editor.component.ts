@@ -15,9 +15,8 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import {Location} from '@angular/common';
 import { FormControl, FormGroup } from '@angular/forms';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { InventoryService } from 'api-client';
 
 @Component({
@@ -29,6 +28,7 @@ export class ItemEditorComponent implements OnInit {
   isNew = true;
   loading = false;
   submitting = false;
+  itemId: string;
 
   itemForm = new FormGroup({
     name: new FormControl(''),
@@ -40,21 +40,27 @@ export class ItemEditorComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private inventoryService: InventoryService,
-    private location: Location,
   ) { }
 
   ngOnInit() {
-    const itemId = this.route.snapshot.paramMap.get('id');
-    if (itemId) {
-      this.isNew = false;
-      this.loading = true;
-      this.inventoryService.getItem(itemId).subscribe(item => {
-        this.itemForm.setValue(item);
-        this.loading = false;
-      }, () => {
-        this.loading = false;
-      });
-    }
+    this.route.paramMap.subscribe(pmap => {
+      this.itemId = pmap.get('id');
+      if (this.itemId) {
+        this.isNew = false;
+        this.loading = true;
+        this.inventoryService.getItem(this.itemId).subscribe(item => {
+          this.itemForm.setValue(
+            Object.assign({
+              name: '',
+              description: '',
+            }, item)
+          );
+          this.loading = false;
+        }, () => {
+          this.loading = false;
+        });
+      }
+    });
   }
 
   onSubmit() {
@@ -78,6 +84,10 @@ export class ItemEditorComponent implements OnInit {
   }
 
   onCancel() {
-    this.location.back();
+    if (this.isNew) {
+      this.router.navigate(['/items']);
+    } else {
+      this.router.navigate(['/items', this.itemId]);
+    }
   }
 }

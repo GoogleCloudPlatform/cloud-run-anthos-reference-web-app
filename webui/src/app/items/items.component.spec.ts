@@ -28,13 +28,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { of, Observable } from 'rxjs';
 import { Location } from '@angular/common';
-import { Component } from '@angular/core';
-
-@Component({
-  template: ''
-})
-class DummyComponent {
-}
+import { DummyComponent } from '../testing/dummy.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 describe('ItemsComponent', () => {
   let component: ItemsComponent;
@@ -55,6 +50,7 @@ describe('ItemsComponent', () => {
         MatCardModule,
         MatIconModule,
         MatTableModule,
+        MatProgressSpinnerModule,
         ReactiveFormsModule,
         RouterTestingModule.withRoutes([
           { path: 'items/new', component: DummyComponent },

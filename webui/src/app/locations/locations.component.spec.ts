@@ -21,6 +21,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 describe('LocationsComponent', () => {
   let component: LocationsComponent;
@@ -33,6 +34,7 @@ describe('LocationsComponent', () => {
         HttpClientTestingModule,
         MatCardModule,
         MatTableModule,
+        MatProgressSpinnerModule,
         RouterTestingModule,
       ],
     })

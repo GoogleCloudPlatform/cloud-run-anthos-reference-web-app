@@ -18,23 +18,35 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LoginComponent } from './login.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { ReactiveFormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { AngularFireModule } from '@angular/fire';
+import { NgxAuthFirebaseUIModule } from 'ngx-auth-firebaseui';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
+  const firebaseConfig = {
+    projectId: 'asdf',
+    apiKey: 'asdf',
+    authDomain: 'asdf'
+  };
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ LoginComponent ],
       imports: [
+        HttpClientTestingModule,
+        MatCardModule,
+        NoopAnimationsModule,
         RouterTestingModule,
+        AngularFireModule.initializeApp(firebaseConfig),
+        NgxAuthFirebaseUIModule.forRoot(firebaseConfig, () => 'test',
+        {
+          authGuardFallbackURL: '/login',
+          authGuardLoggedInURL: '/',
+        }),
       ]
     })
     .compileComponents();
