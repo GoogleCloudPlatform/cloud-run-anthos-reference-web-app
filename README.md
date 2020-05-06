@@ -162,7 +162,7 @@ where `${PROJECT_ID}` is replaced by your Google Cloud project ID.
 
 Run `make build-all`.
 
-Note: You might need to rerun this command the first time.
+Note: This sometimes fails on the very first run; if so, try running it again.
 
 ## Try Out the Application
 
