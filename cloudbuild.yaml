@@ -71,20 +71,6 @@ steps:
         --global
     fi
 
-# Wait for Config Connector to be ready after creating the infrastructure resources
-- name: 'gcr.io/cloud-builders/kubectl'
-  id: Config Connector Ready
-  waitFor: ['Infrastructure Resources']
-  entrypoint: /bin/bash
-  args:
-  - '-c'
-  - |
-    [ "${_APPLY_OR_DELETE}" = "delete" ] || /builder/kubectl.bash wait --namespace=cnrm-system --for=condition=Ready pod --all --timeout=5m
-    /builder/kubectl.bash get --namespace=cnrm-system all
-  env:
-    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
-    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
-
 # Look up the standalone NEGs associated with the Istio ingress
 # See: https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg
 - name: 'gcr.io/cloud-builders/kubectl'
@@ -116,7 +102,7 @@ steps:
 # Apply/delete backend service definition
 - name: 'gcr.io/cloud-builders/kubectl'
   id: Create Backend Service
-  waitFor: ['Generate Backend Service Definition', 'Config Connector Ready']
+  waitFor: ['Generate Backend Service Definition', 'Infrastructure Resources']
   entrypoint: /bin/bash
   args:
   - '-c'
