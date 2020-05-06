@@ -90,7 +90,7 @@ describe('ItemEditorComponent', () => {
     updateItemSpy = spyOn(inventoryService, 'updateItem');
   });
 
-  it('should create', () => {
+  it('should initialize', () => {
     expect(component).toBeTruthy();
     expect(component.isNew).toBeTruthy();
   });

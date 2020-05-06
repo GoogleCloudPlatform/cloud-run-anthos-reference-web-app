@@ -91,7 +91,7 @@ describe('LocationEditorComponent', () => {
     updateLocationSpy = spyOn(inventoryService, 'updateLocation');
   });
 
-  it('should create', () => {
+  it('should initialize', () => {
     expect(component).toBeTruthy();
     expect(component.isNew).toBeTruthy();
   });
