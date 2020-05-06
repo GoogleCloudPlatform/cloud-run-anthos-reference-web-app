@@ -160,7 +160,9 @@ where `${PROJECT_ID}` is replaced by your Google Cloud project ID.
 
 ### 5. Build and deploy
 
-Run `make build-all`
+Run `make build-all`.
+
+Note: You might need to rerun this command the first time.
 
 ## Try Out the Application
 

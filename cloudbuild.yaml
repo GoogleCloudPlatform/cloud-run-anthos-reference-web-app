@@ -71,6 +71,20 @@ steps:
         --global
     fi
 
+# Wait for Config Connector to be ready after creating the infrastructure resources
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Config Connector Ready
+  waitFor: ['Infrastructure Resources']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    [ "${_APPLY_OR_DELETE}" = "delete" ] || /builder/kubectl.bash wait --namespace=cnrm-system --for=condition=Ready pod --all --timeout=5m
+    /builder/kubectl.bash get --namespace=cnrm-system all
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
 # Look up the standalone NEGs associated with the Istio ingress
 # See: https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg
 - name: 'gcr.io/cloud-builders/kubectl'
@@ -95,19 +109,19 @@ steps:
   - '-c'
   - |
     apk add --update --no-cache jq
-    jq -f backend-service-template.jq neg-status.json > backend-service-hydrated.json
+    jq -f backend-service-template.jq neg-status.json | \
+    sed "s/$\[PROJECT_ID\]/${PROJECT_ID}/g" | \
+    sed "s/$\[BACKEND_SERVICE_HOST_NAME\]/${_BACKEND_SERVICE_HOST_NAME}/g" > backend-service-hydrated.json
 
-# Substitute the remaining variables into the backend service definition and apply/delete it
+# Apply/delete backend service definition
 - name: 'gcr.io/cloud-builders/kubectl'
   id: Create Backend Service
-  waitFor: ['Generate Backend Service Definition']
+  waitFor: ['Generate Backend Service Definition', 'Config Connector Ready']
   entrypoint: /bin/bash
   args:
   - '-c'
   - |
-    sed "s/$\[PROJECT_ID\]/${PROJECT_ID}/g" backend-service-hydrated.json | \
-    sed "s/$\[BACKEND_SERVICE_HOST_NAME\]/${_BACKEND_SERVICE_HOST_NAME}/g" | \
-    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f - || [ "${_APPLY_OR_DELETE}" = "delete" ]
+    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f backend-service-hydrated.json || [ "${_APPLY_OR_DELETE}" = "delete" ]
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
@@ -121,10 +135,7 @@ steps:
   args:
   - '-c'
   - |
-    if [ "${_APPLY_OR_DELETE}" = "apply" ]
-    then
-      /builder/kubectl.bash wait computeforwardingrule/web-app-forwarding-rule --namespace=${_NAMESPACE} --for=condition=Ready --timeout=15m
-    fi
+    [ "${_APPLY_OR_DELETE}" = "delete" ] || /builder/kubectl.bash wait computeforwardingrule/web-app-forwarding-rule --namespace=${_NAMESPACE} --for=condition=Ready --timeout=15m
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
