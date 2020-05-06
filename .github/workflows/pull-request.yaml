@@ -82,6 +82,8 @@ jobs:
       with:
         node-version: '12.16.2'
     - working-directory: ./webui
+      run: npm ci
+    - working-directory: ./webui
       run: npm test -- --watch=false
       
   backend-lint:
