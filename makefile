@@ -106,7 +106,7 @@ test-backend-local: backend/src/api/openapi.yaml
 	docker stop firestore-emulator
 
 test-webui-local: webui/api-client webui/node_modules
-	cd webui && npm run test
+	cd webui && npm run test -- --watch=false --browsers=ChromeHeadless
 
 test-webui-e2e-local: webui/api-client webui/node_modules
 	cd webui && npm run e2e -- --dev-server-target= --base-url=http://localhost:4200 
