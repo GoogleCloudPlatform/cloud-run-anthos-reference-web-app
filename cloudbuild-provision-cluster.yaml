@@ -106,6 +106,15 @@ steps:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
 
+# Verify Config Connector Installation
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Wait Config Connector
+  waitFor: ['Install Config Connector']
+  args: ['wait', '-n', 'cnrm-system', '--for=condition=Ready', 'pod', '--all', '--timeout=5m']
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
 # Create the web application namespace
 - name: 'gcr.io/cloud-builders/kubectl'
   id: Create Namespace
