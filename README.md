@@ -162,8 +162,6 @@ where `${PROJECT_ID}` is replaced by your Google Cloud project ID.
 
 Run `make build-all`.
 
-Note: This sometimes fails on the very first run; if so, try running it again.
-
 ## Try Out the Application
 
 Once your application is deployed, you can try it out by navigating to `https://$DOMAIN`,
