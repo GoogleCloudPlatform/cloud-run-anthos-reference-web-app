@@ -40,6 +40,37 @@ steps:
     - 'PROJECT_ID=${PROJECT_ID}'
     - 'SSL_CERT_NAME=${_SSL_CERT_NAME}'
 
+# create an SSL certificate if one does not already exist
+# (when running a delete, this stage does nothing)
+# SSL cert creation and infrastructure setup are
+# interdependent; the infrastructure setup cannot complete
+# until the SSL cert exists, and the SSL cert cannot
+# transition from PROVISIONING to ACTIVE until
+# a GCLB is assigned via DNS.
+- name: 'google/cloud-sdk:latest'
+  id: SSL certificate
+  waitFor: ['-']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    if [[ "${_APPLY_OR_DELETE}" = "apply" ]]
+    then
+      gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} || \
+      gcloud beta compute ssl-certificates create ${_SSL_CERT_NAME} \
+        --description="Generated SSL certificate for cloud run web app" \
+        --domains=${_DOMAIN} \
+        --global
+      echo "Waiting for ${_SSL_CERT_NAME} to become ACTIVE"
+      STATUS=$(gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} --format="get(managed.status)")
+      while [[ "$${STATUS}" != "ACTIVE" ]]; do
+        echo "Status of ${_SSL_CERT_NAME} is $${STATUS}"
+        sleep 30
+        STATUS=$(gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} --format="get(managed.status)")
+      done
+      echo "Status of ${_SSL_CERT_NAME} is $${STATUS}"
+    fi
+
 # apply/delete infrastructure
 - name: 'gcr.io/cloud-builders/kubectl'
   id: Infrastructure Resources
@@ -52,24 +83,6 @@ steps:
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
-
-# create an SSL certificate if one does not already exist
-# (when running a delete, this stage does nothing)
-- name: 'google/cloud-sdk:latest'
-  id: SSL certificate
-  waitFor: ['Infrastructure Resources']
-  entrypoint: /bin/bash
-  args:
-  - '-c'
-  - |
-    if [ "${_APPLY_OR_DELETE}" = "apply" ]
-    then
-      gcloud compute ssl-certificates describe ${_SSL_CERT_NAME} || \
-      gcloud beta compute ssl-certificates create ${_SSL_CERT_NAME} \
-        --description="Generated SSL certificate for cloud run web app" \
-        --domains=${_DOMAIN} \
-        --global
-    fi
 
 # Look up the standalone NEGs associated with the Istio ingress
 # See: https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg
