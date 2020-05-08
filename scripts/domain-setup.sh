@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+readonly APP_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+readonly ENV_MK="${APP_ROOT}/env.mk"
+
 echo "This script will interactively walk you through setting up your custom domain"
 echo "for use by the Cloud Run on Anthos Reference Web App."
 echo
@@ -124,11 +127,11 @@ else
 fi
 
 # Create env.mk if not present
-if [[ ! -f "env.mk" ]]; then
-  cp env.mk.sample env.mk
+if [[ ! -f "${ENV_MK}" ]]; then
+  cp "${ENV_MK}.sample" "${ENV_MK}"
 fi
 
 # Substitute default PROJECT_ID and DOMAIN values
 sed -e "s/^PROJECT_ID=project-id$/PROJECT_ID=${PROJECT_ID}/" \
     -e "s/^DOMAIN=my-zone.cloud-tutorial.dev$/DOMAIN=${DOMAIN}/" \
-    -i env.mk
+    -i "${ENV_MK}"
