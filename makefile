@@ -116,12 +116,12 @@ test-webui-e2e-local: webui/api-client webui/node_modules
 cluster:
 ifneq ($(CLUSTER_MISSING),0)
 	@echo Cluster $(CLUSTER_NAME) does not exist, creating cluster
-	gcloud --project=$(PROJECT_ID) builds submit . --verbosity=info --config cloudbuild-provision-cluster.yaml --substitutions $(PROVISION_SUBS)
+	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --verbosity=info --config cloudbuild-provision-cluster.yaml --substitutions $(PROVISION_SUBS) .
 	gcloud --project=$(PROJECT_ID) container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION)
 endif
 
 delete:
-	gcloud --project=$(PROJECT_ID) builds submit . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(INFRA_SUBS)
+	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(INFRA_SUBS) .
 
 build-webui: cluster
 	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./webui/cloudbuild.yaml --substitutions $(WEBUI_SUBS) .
