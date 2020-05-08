@@ -40,6 +40,7 @@ fi
 
 readonly PROJECT_ID="$1"
 readonly PROJECT_NUMBER=$(gcloud projects describe "${PROJECT_ID}" --format="value(projectNumber)")
+readonly APP_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 echo "Enabling Cloud Build, Kubernetes Engine, and Cloud Resource Manager APIs ..."
 # Enable Cloud Build, Kubernetes Engine, and Cloud Resource Manager APIs
@@ -63,11 +64,11 @@ for role in iam.serviceAccount{Admin,User} container.admin resourcemanager.proje
 done
 
 # Create env.mk if not present
-if [[ ! -f "env.mk" ]]; then
-  echo "Creating env.mk ..."
-  cp env.mk.sample env.mk
+if [[ ! -f "${APP_ROOT}"/env.mk ]]; then
+  echo "Creating env.mk..."
+  cp "${APP_ROOT}"/env.mk.sample "${APP_ROOT}"/env.mk
 fi
 
 # Substitute default PROJECT_ID value
 echo "Substituting values in env.mk ..."
-sed "s/^PROJECT_ID=project-id$/PROJECT_ID=${PROJECT_ID}/" -i env.mk
+sed "s/^PROJECT_ID=project-id$/PROJECT_ID=${PROJECT_ID}/" -i "${APP_ROOT}"/env.mk
