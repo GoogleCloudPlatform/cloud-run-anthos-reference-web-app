@@ -54,7 +54,7 @@ steps:
   args:
   - '-c'
   - |
-    if [ "${_APPLY_OR_DELETE}" = "apply" ]
+    if [[ "${_APPLY_OR_DELETE}" = "apply" ]]
     then
       gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} || \
       gcloud beta compute ssl-certificates create ${_SSL_CERT_NAME} \
@@ -63,10 +63,10 @@ steps:
         --global
       echo "Waiting for ${_SSL_CERT_NAME} to become ACTIVE"
       STATUS=$(gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} --format="get(managed.status)")
-      while [ "$${STATUS}" != "ACTIVE" ]; do
+      while [[ "$${STATUS}" != "ACTIVE" ]]; do
         echo "Status of ${_SSL_CERT_NAME} is $${STATUS}"
         sleep 30
-        STATUS=$(gcloud compute ssl-certificates describe ${_SSL_CERT_NAME} --format="get(managed.status)")
+        STATUS=$(gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} --format="get(managed.status)")
       done
       echo "Status of ${_SSL_CERT_NAME} is $${STATUS}"
     fi
