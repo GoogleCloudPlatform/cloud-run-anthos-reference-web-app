@@ -30,6 +30,7 @@ usage() {
 
 readonly PROJECT_ID="$1"
 readonly APP_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+readonly FIREBASECONFIG_JS="${APP_ROOT}/webui/firebaseConfig.js"
 
 if [[ "$#" -ne 2 ]]; then
   usage
@@ -37,7 +38,7 @@ fi
 
 readonly API_KEY="$2"
 
-cat > "${APP_ROOT}"/webui/firebaseConfig.js << FIREBASECONFIG
+cat > "${FIREBASECONFIG_JS}" << FIREBASECONFIG
 export const firebaseConfig = {
   "projectId": "${PROJECT_ID}",
   "apiKey": "${API_KEY}",
@@ -46,6 +47,6 @@ export const firebaseConfig = {
 FIREBASECONFIG
 
 echo
-echo "Wrote to $(realpath "${APP_ROOT}"/webui/firebaseConfig.js):"
+echo "Wrote to $(realpath ${FIREBASECONFIG_JS}):"
 echo
-cat "${APP_ROOT}"/webui/firebaseConfig.js
+cat "${FIREBASECONFIG_JS}"
