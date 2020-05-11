@@ -45,6 +45,7 @@ The easiest way to do this is by running the interactive script
 
 This script:
 
+* Allows you to create a custom subdomain or use an existing one.
 * Creates custom subdomains and managed zones ready for use using the steps at
   [cloud-tutorial.dev][].
 * Ensures any custom domains are associated with a [Cloud DNS Managed Zone][]
