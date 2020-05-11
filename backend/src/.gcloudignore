@@ -1,8 +1,0 @@
-.openapi-generator/
-api/
-go/api_inventory.go
-go/api.go
-go/logger.go
-go/model_*.go
-go/routers.go
-main.go

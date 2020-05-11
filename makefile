@@ -61,7 +61,7 @@ WEBUI_SUBS := $(subst $(space),$(comma),$(WEBUI_SUBS))
 CUSTOM_TEMPLATES=backend/templates
 OPENAPI_GEN_JAR=openapi-generator-cli-4.3.0.jar
 OPENAPI_GEN_URL="https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/4.3.0/$(OPENAPI_GEN_JAR)"
-OPENAPI_GEN_SERVER_ARGS=-g go-server -i openapi.yaml -o backend/src --api-name-suffix= --git-user-id=$(GIT_USER_ID) --git-repo-id=$(GIT_REPO_ID) --package-name=service -t $(CUSTOM_TEMPLATES)
+OPENAPI_GEN_SERVER_ARGS=-g go-server -i openapi.yaml -o backend/api-service --api-name-suffix= --git-user-id=$(GIT_USER_ID) --git-repo-id=$(GIT_REPO_ID)/api-service --package-name=service -t $(CUSTOM_TEMPLATES) --additional-properties=sourceFolder=src
 OPENAPI_GEN_CLIENT_ARGS=-g typescript-angular -i openapi.yaml -o webui/api-client
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
@@ -82,7 +82,7 @@ webui/api-client: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml
 webui/node_modules:
 	cd webui && npm ci
 
-backend/src/api/openapi.yaml: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml $(CUSTOM_TEMPLATES)/*.mustache
+backend/api-service/src/api/openapi.yaml: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml $(CUSTOM_TEMPLATES)/*.mustache
 	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_SERVER_ARGS)
 
 # Uses port 4200
@@ -90,19 +90,19 @@ run-local-webui: webui/api-client
 	cd webui && ng serve --proxy-config proxy.conf.json
 
 # Uses port 8080
-run-local-backend: backend/src/api/openapi.yaml
-	cd backend/src && go run main.go
+run-local-backend: backend/api-service/src/api/openapi.yaml
+	cd backend/api-service && go run main.go
 
 lint-webui: webui/node_modules
 	cd webui && npm run lint
 
 lint: lint-webui
 
-test-backend-local: backend/src/api/openapi.yaml
+test-backend-local: backend/api-service/src/api/openapi.yaml
 	docker stop firestore-emulator 2>/dev/null || true
 	docker run --detach --rm -p 9090:9090 --name=firestore-emulator jdlk7/firestore-emulator
 	docker run --network=host jwilder/dockerize:0.6.1 dockerize -timeout=60s -wait=tcp://localhost:9090
-	cd backend/src/go && FIRESTORE_EMULATOR_HOST=localhost:9090 go test -tags=emulator -v
+	cd backend/api-service/src && FIRESTORE_EMULATOR_HOST=localhost:9090 go test -tags=emulator -v
 	docker stop firestore-emulator
 
 test-webui-local: webui/api-client webui/node_modules
@@ -127,7 +127,7 @@ build-webui: cluster
 	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./webui/cloudbuild.yaml --substitutions $(WEBUI_SUBS) .
 
 test-backend:
-	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./backend/cloudbuild-test.yaml --substitutions $(BACKEND_TEST_SUBS)  .
+	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./backend/api-service/cloudbuild-test.yaml --substitutions $(BACKEND_TEST_SUBS)  .
 
 test-webui:
 	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./webui/cloudbuild-test.yaml .
@@ -136,7 +136,7 @@ test-webui-e2e:
 	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./webui/e2e/cloudbuild.yaml --substitutions $(FRONTEND_E2E_SUBS) .
 
 build-backend: cluster
-	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./backend/cloudbuild.yaml --substitutions $(BACKEND_SUBS) .
+	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./backend/api-service/cloudbuild.yaml --substitutions $(BACKEND_SUBS) .
 
 build-infrastructure: cluster
 	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(INFRA_SUBS)

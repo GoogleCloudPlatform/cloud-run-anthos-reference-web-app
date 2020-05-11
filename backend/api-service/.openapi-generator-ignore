@@ -6,4 +6,4 @@
 
 Dockerfile
 go.mod
-go/api_inventory_service.go
+src/api_inventory_service.go

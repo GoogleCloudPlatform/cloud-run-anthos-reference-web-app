@@ -1,7 +1,0 @@
-src/.openapi-generator/
-src/api/
-src/go/api*.go
-src/go/logger.go
-src/go/model_*.go
-src/go/routers.go
-src/main.go
