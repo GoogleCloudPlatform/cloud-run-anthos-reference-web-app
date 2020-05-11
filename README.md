@@ -97,6 +97,7 @@ You can create a TXT record using the following steps:
      from the OAuth 2.0 Client ID created in the previous step.
    * Click **Save**.
 1. Configure the [OAuth consent screen][].
+   * **User Type** can be set to either **Internal** or **External**.
    * You'll need to set the **Support email** and the
      **Application homepage link** (your custom domain prefixed with `https://`).
    * Additional information
