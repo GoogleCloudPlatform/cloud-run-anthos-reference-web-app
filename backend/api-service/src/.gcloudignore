@@ -1,5 +1,0 @@
-api_inventory.go
-api.go
-logger.go
-model_*.go
-routers.go
