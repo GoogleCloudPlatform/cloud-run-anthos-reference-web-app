@@ -1,6 +1,6 @@
 env.mk
-backend/api-service/src/.openapi-generator/
-backend/api-service/src/api/
+backend/api-service/.openapi-generator/
+backend/api-service/api/
 backend/api-service/src/api*.go
 backend/api-service/src/logger.go
 backend/api-service/src/model_*.go
