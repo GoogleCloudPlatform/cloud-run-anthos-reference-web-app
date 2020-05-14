@@ -170,10 +170,6 @@ func TestFSNewItem(t *testing.T) {
 }
 
 func TestFSNewInventoryTransaction(t *testing.T) {
-	// Running this test against the Firestore emulator raises an Unknown RPC
-	// error when querying the "inventories" collection not reproducible against
-	// an actual Firestore database:
-	t.Skip("this test is known to fail due to unknown reasons")
 	firestoreBackendTester.testNewInventoryTransaction(t)
 }
 
