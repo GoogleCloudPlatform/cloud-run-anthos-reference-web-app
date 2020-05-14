@@ -58,7 +58,7 @@ jobs:
       with:
         node-version: '12.16.2'
     - working-directory: ./webui
-      run: npm audit
+      run: npm audit --production
   
   webui-lint:
     runs-on: ubuntu-latest
