@@ -35,7 +35,7 @@ jobs:
       run: gem install mdl
 
     - name: Run markdown lint
-      run: mdl $GITHUB_WORKSPACE
+      run: mdl -v $GITHUB_WORKSPACE
 
   license-check:
     runs-on: ubuntu-latest

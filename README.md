@@ -43,30 +43,16 @@ The easiest way to do this is by running the interactive script
 ./scripts/domain-setup.sh
 ```
 
-#### Creating a Custom Domain
+This script:
 
-You can follow the steps at [cloud-tutorial.dev][] to get a
-custom subdomain and managed zone that are ready to use.
-
-#### Using an existing Custom Domain
-
-Your custom domain will need to be associated with a [Cloud DNS Managed Zone][]
-in the same project that you are using for this application. Be sure to
-[update name server records][] to point to your managed zone.
-
-#### Verifying Domain Ownership
-
-You must complete [domain ownership verification][] for the reference
-application to work.
-
-You can create a TXT record using the following steps:
-
-1. In [Cloud DNS][], navigate to the managed zone associated with your custom domain.
-1. Click **Add record set**.
-1. Set the **Resource Record Type** to **TXT**.
-1. In the **TXT data** field, paste the TXT record provided from following the
-   [domain ownership verification][] steps.
-1. Click **Create**.
+* Allows you to create a custom subdomain or use an existing one.
+* Creates custom subdomains and managed zones ready for use using the steps at
+  [cloud-tutorial.dev][].
+* Ensures any custom domains are associated with a [Cloud DNS Managed Zone][]
+  in the same project that you are using for this application.
+* For provided custom domains, links to documentation to
+  [update name server records][] to point to your managed zone.
+* Walks you through [domain ownership verification][].
 
 ### Identity Platform for Auth and Firestore Setup
 
@@ -97,6 +83,7 @@ You can create a TXT record using the following steps:
      from the OAuth 2.0 Client ID created in the previous step.
    * Click **Save**.
 1. Configure the [OAuth consent screen][].
+   * **User Type** can be set to either **Internal** or **External**.
    * You'll need to set the **Support email** and the
      **Application homepage link** (your custom domain prefixed with `https://`).
    * Additional information
@@ -197,7 +184,6 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [Cloud Build]: https://cloud.google.com/cloud-build/docs
 [Config Connector]: https://cloud.google.com/config-connector/docs
 [Cloud DNS Managed Zone]: https://cloud.google.com/dns/zones
-[Cloud DNS]: https://console.cloud.google.com/net-services/dns/zones
 [update name server records]: https://cloud.google.com/dns/docs/migrating#update_your_registrars_name_server_records
 [domain ownership verification]: https://cloud.google.com/storage/docs/domain-name-verification#verification
 [additional verified owner]: https://cloud.google.com/storage/docs/domain-name-verification?_ga=2.256052552.-234301672.1582050261#additional_verified_owners
