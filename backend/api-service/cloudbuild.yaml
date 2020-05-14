@@ -21,21 +21,22 @@ steps:
   args: ['generate',
         '-g','go-server',
         '-i','openapi.yaml',
-        '-o','backend/src',
+        '-o','backend/api-service',
+        '--additional-properties=sourceFolder=src',
         '--api-name-suffix=',
         '--git-user-id=${_GIT_USER_ID}',
-        '--git-repo-id=${_GIT_REPO_ID}',
+        '--git-repo-id=${_GIT_REPO_ID}/api-service',
         '--package-name=service',
         '-t', 'backend/templates']
 # build the backend Go service and deploy it to Cloud Run for Anthos
 - name: 'mirror.gcr.io/library/golang'
   id: Go Build
-  dir: 'backend/src/'
+  dir: 'backend/'
   env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux']
-  args: ['go','build','-mod=readonly', '-v', '-o', 'server']
+  args: ['go','build','-mod=readonly', '-v', '-o', 'api-service/server', './api-service']
 - name: 'gcr.io/cloud-builders/docker'
   id: Build Docker Image
-  dir: 'backend/src/'
+  dir: 'backend/api-service/'
   args: ['build', '-t', 'gcr.io/$PROJECT_ID/${_BACKEND_IMAGE_NAME}:${BUILD_ID}', '.']
 - name: 'gcr.io/cloud-builders/docker'
   id: Push

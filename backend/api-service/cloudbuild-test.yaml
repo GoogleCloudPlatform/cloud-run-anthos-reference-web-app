@@ -27,17 +27,17 @@ steps:
 - name: openapitools/openapi-generator-cli:v4.2.3
   id: Generate Server
   waitFor: ["-"]
-  args: ['generate', '-g','go-server','-i','openapi.yaml','-o','backend/src', '--api-name-suffix=', '--git-user-id=${_GIT_USER_ID}', '--git-repo-id=${_GIT_REPO_ID}', '--package-name=service', '-t', 'backend/templates']
+  args: ['generate', '-g','go-server','-i','openapi.yaml','-o','backend/api-service', '--additional-properties=sourceFolder=src', '--api-name-suffix=', '--git-user-id=${_GIT_USER_ID}', '--git-repo-id=${_GIT_REPO_ID}/api-service', '--package-name=service', '-t', 'backend/templates']
 # build and test the Go backend
 - name: mirror.gcr.io/library/golang
   id: Build
   waitFor: ['Generate Server']
-  dir: 'backend/src'
+  dir: 'backend/'
   env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux']
-  args: ['go','build','-mod=readonly', '-v', '-o', 'server']
+  args: ['go','build','-mod=readonly', '-v', '-o', 'api-service/server', './api-service']
 - name: mirror.gcr.io/library/golang
   id: Test
   waitFor: ['Wait for Firestore emulator serving', 'Generate Server']
-  dir: 'backend/src/go'
+  dir: 'backend/api-service/src'
   env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux', 'FIRESTORE_EMULATOR_HOST=firestore-emulator:9090']
   args: ['go','test','-mod=readonly', '-v', '-tags=emulator']
