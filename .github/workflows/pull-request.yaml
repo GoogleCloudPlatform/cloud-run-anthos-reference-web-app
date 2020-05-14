@@ -97,12 +97,12 @@ jobs:
         go-version: '1.13'
     - id: gofmt
       run: |
-        GOFMT_OUT=$(gofmt -l ./backend/src)
+        GOFMT_OUT=$(gofmt -l ./backend)
         if [ -z "${GOFMT_OUT}" ]
         then
           echo "All files formatted correctly!"
         else
-          gofmt -d ./backend/src
+          gofmt -d ./backend
           exit 1
         fi
 
