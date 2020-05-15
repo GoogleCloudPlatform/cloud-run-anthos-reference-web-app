@@ -28,7 +28,7 @@
     "firebase": "^7.13.2",
     "moment": "^2.24.0",
     "ngx-auth-firebaseui": "^4.2.1",
-    "rxjs": "^6.5.5",
+    "rxjs": "6.5.5",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
   },
