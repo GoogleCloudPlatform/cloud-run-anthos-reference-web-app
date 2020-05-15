@@ -28,6 +28,7 @@ type InMemoryBackend struct {
 	inventoryByItemByLocationIndex map[string]map[string]*Inventory
 	inventoryByLocationByItemIndex map[string]map[string]*Inventory
 	inventoryTransactions          map[string]*InventoryTransaction
+	alerts                         map[string]*Alert
 }
 
 func NewInMemoryBackend() *InMemoryBackend {
@@ -37,6 +38,7 @@ func NewInMemoryBackend() *InMemoryBackend {
 		inventoryByItemByLocationIndex: make(map[string]map[string]*Inventory),
 		inventoryByLocationByItemIndex: make(map[string]map[string]*Inventory),
 		inventoryTransactions:          make(map[string]*InventoryTransaction),
+		alerts:                         make(map[string]*Alert),
 	}
 }
 
@@ -54,6 +56,14 @@ func (mb *InMemoryBackend) DeleteLocation(ctx context.Context, id string) error 
 		return nil
 	}
 	return LocationNotFound(id)
+}
+
+func (mb *InMemoryBackend) DeleteAlert(ctx context.Context, id string) error {
+	if _, ok := mb.alerts[id]; ok {
+		delete(mb.alerts, id)
+		return nil
+	}
+	return AlertNotFound(id)
 }
 
 func (mb *InMemoryBackend) GetInventoryTransaction(ctx context.Context, id string) (*InventoryTransaction, error) {
@@ -141,12 +151,28 @@ func (mb *InMemoryBackend) ListLocationInventoryTransactions(ctx context.Context
 	return txns, nil
 }
 
+func (mb *InMemoryBackend) ListAlerts(ctx context.Context) ([]*Alert, error) {
+	alerts := make([]*Alert, 0, len(mb.alerts))
+	for _, alert := range mb.alerts {
+		alerts = append(alerts, alert)
+	}
+	return alerts, nil
+}
+
 func (mb *InMemoryBackend) NewItem(ctx context.Context, inputItem *Item) (*Item, error) {
 	item := &Item{}
 	*item = *inputItem
 	item.Id = uuid.New().String()
 	mb.items[item.Id] = item
 	return item, nil
+}
+
+func (mb *InMemoryBackend) NewAlert(ctx context.Context, inputAlert *Alert) (*Alert, error) {
+	alert := &Alert{}
+	*alert = *inputAlert
+	alert.Id = uuid.New().String()
+	mb.alerts[alert.Id] = alert
+	return alert, nil
 }
 
 // lookupInventory returns the inventory associated with the item and location

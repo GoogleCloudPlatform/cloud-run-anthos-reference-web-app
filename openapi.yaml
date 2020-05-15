@@ -160,6 +160,30 @@ components:
         note: just in case
         timestamp: 2020-01-02 12:34:56Z
         created_by: user-uuid
+    Alert:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        item_id:
+          type: string
+          format: uuid
+        transaction_id:
+          type: string
+          format: uuid
+        text:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      example:
+        id: uuid
+        item_id: item-uuid
+        transaction_id: transaction-uuid
+        text: Inventory too low for item.
+        timestamp: 2020-01-02 12:34:56Z
   parameters:
     PathId:
       name: id
@@ -189,6 +213,11 @@ components:
         'application/json':
           schema:
             $ref: '#/components/schemas/InventoryTransaction'
+    AlertRequest:
+      content:
+        'application/json':
+          schema:
+            $ref: "#/components/schemas/Alert"
   responses:
     StatusResponse:
       description: Status response
@@ -220,6 +249,12 @@ components:
         'application/json':
           schema:
             $ref: '#/components/schemas/InventoryTransaction'
+    AlertResponse:
+      description: Alert response
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/Alert'
 paths:
   /items:
     get:
@@ -484,4 +519,48 @@ paths:
           $ref: '#/components/responses/StatusResponse'
         '200':
           $ref: '#/components/responses/InventoryTransactionResponse'
-
+  /alerts:
+    get:
+      summary: List all Alerts
+      operationId: listAlerts
+      tags: [alert]
+      responses:
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          description: List of Alerts
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Alert'
+    post:
+      summary: Create a new Alert
+      operationId: newAlert
+      tags: [alert]
+      requestBody:
+        $ref: '#/components/requestBodies/AlertRequest'
+      responses:
+        '403':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          $ref: '#/components/responses/AlertResponse'
+  /alerts/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    delete:
+      summary: Delete Alert by ID
+      operationId: deleteAlert
+      tags: [alert]
+      responses:
+        '404':
+          $ref: '#/components/responses/StatusResponse'
+        '403':
+          $ref: '#/components/responses/StatusResponse'
+        '401':
+          $ref: '#/components/responses/StatusResponse'
+        '200':
+          $ref: '#/components/responses/StatusResponse'

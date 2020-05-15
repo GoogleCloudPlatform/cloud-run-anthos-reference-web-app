@@ -33,6 +33,9 @@ var inMemoryBackendTester = backendTester{
 		if state.locations != nil {
 			mb.locations = state.locations
 		}
+		if state.alerts != nil {
+			mb.alerts = state.alerts
+		}
 
 		for _, inv := range state.inventories {
 			if mb.inventoryByItemByLocationIndex[inv.ItemId] == nil {
@@ -62,6 +65,14 @@ func TestIMBDeleteLocation(t *testing.T) {
 
 func TestIMBDeleteLocationNotFound(t *testing.T) {
 	inMemoryBackendTester.testDeleteLocationNotFound(t)
+}
+
+func TestIMBDeleteAlert(t *testing.T) {
+	inMemoryBackendTester.testDeleteAlert(t)
+}
+
+func TestIMBDeleteAmertNotFound(t *testing.T) {
+	inMemoryBackendTester.testDeleteAlertNotFound(t)
 }
 
 func TestIMBGetInventoryTransaction(t *testing.T) {
@@ -116,8 +127,8 @@ func TestIMBListLocationInventoryTransactions(t *testing.T) {
 	inMemoryBackendTester.testListLocationInventoryTransactions(t)
 }
 
-func TestIMBNewItem(t *testing.T) {
-	inMemoryBackendTester.testNewItem(t)
+func TestIMBListAlerts(t *testing.T) {
+	inMemoryBackendTester.testListAlerts(t)
 }
 
 func TestIMBNewInventoryTransaction(t *testing.T) {
@@ -130,6 +141,10 @@ func TestIMBNewInventoryTransactionNotFoundErrors(t *testing.T) {
 
 func TestIMBNewLocation(t *testing.T) {
 	inMemoryBackendTester.testNewLocation(t)
+}
+
+func TestIMBNewAlert(t *testing.T) {
+	inMemoryBackendTester.testNewAlert(t)
 }
 
 func TestIMBUpdateItem(t *testing.T) {

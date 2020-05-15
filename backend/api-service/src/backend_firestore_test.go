@@ -92,6 +92,13 @@ var firestoreBackendTester = backendTester{
 				t.Fatalf("error creating doc: %v", err)
 			}
 		}
+		for id, data := range state.alerts {
+			dref := client.Collection("alerts").Doc(id)
+			_, err := dref.Create(ctx, data)
+			if err != nil {
+				t.Fatalf("error creating doc: %v", err)
+			}
+		}
 
 		return backend
 	},
@@ -111,6 +118,14 @@ func TestFSDeleteLocation(t *testing.T) {
 
 func TestFSDeleteLocationNotFound(t *testing.T) {
 	firestoreBackendTester.testDeleteLocationNotFound(t)
+}
+
+func TestFSDeleteAlert(t *testing.T) {
+	firestoreBackendTester.testDeleteAlert(t)
+}
+
+func TestFSDeleteAlertNotFound(t *testing.T) {
+	firestoreBackendTester.testDeleteAlertNotFound(t)
 }
 
 func TestFSGetInventoryTransaction(t *testing.T) {
@@ -165,6 +180,10 @@ func TestFSListLocationInventoryTransactions(t *testing.T) {
 	firestoreBackendTester.testListLocationInventoryTransactions(t)
 }
 
+func TestFSListAlerts(t *testing.T) {
+	firestoreBackendTester.testListAlerts(t)
+}
+
 func TestFSNewItem(t *testing.T) {
 	firestoreBackendTester.testNewItem(t)
 }
@@ -183,6 +202,10 @@ func TestFSNewInventoryTransactionNotFoundErrors(t *testing.T) {
 
 func TestFSNewLocation(t *testing.T) {
 	firestoreBackendTester.testNewLocation(t)
+}
+
+func TestFSNewAlert(t *testing.T) {
+	firestoreBackendTester.testNewAlert(t)
 }
 
 func TestFSUpdateItem(t *testing.T) {

@@ -36,6 +36,10 @@ func InventoryTransactionNotFound(id string) *ResourceNotFound {
 	return &ResourceNotFound{collection: "inventoryTransactions", id: id}
 }
 
+func AlertNotFound(id string) *ResourceNotFound {
+	return &ResourceNotFound{collection: "alerts", id: id}
+}
+
 type ResourceConflict struct {
 	collection string
 	id         string

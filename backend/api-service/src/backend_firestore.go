@@ -63,6 +63,10 @@ func (fb *FirestoreBackend) DeleteLocation(ctx context.Context, id string) error
 	return fb.deleteDoc(ctx, "locations", id)
 }
 
+func (fb *FirestoreBackend) DeleteAlert(ctx context.Context, id string) error {
+	return fb.deleteDoc(ctx, "alerts", id)
+}
+
 func (fb *FirestoreBackend) getDoc(ctx context.Context, path, id string) (*firestore.DocumentSnapshot, error) {
 	client, err := fb.NewClient(ctx)
 	if err != nil {
@@ -158,6 +162,23 @@ func (fb *FirestoreBackend) ListLocations(ctx context.Context) ([]*Location, err
 		locations = append(locations, location)
 	}
 	return locations, nil
+}
+
+func (fb *FirestoreBackend) ListAlerts(ctx context.Context) ([]*Alert, error) {
+	docs, err := fb.listDocs(ctx, "alerts")
+	if err != nil {
+		return nil, err
+	}
+
+	alerts := make([]*Alert, 0, len(docs))
+	for _, doc := range docs {
+		alert := &Alert{}
+		if err = doc.DataTo(alert); err != nil {
+			return nil, err
+		}
+		alerts = append(alerts, alert)
+	}
+	return alerts, nil
 }
 
 func (fb *FirestoreBackend) listInventories(ctx context.Context, filters ...queryFilter) ([]*Inventory, error) {
@@ -303,6 +324,17 @@ func (fb *FirestoreBackend) NewLocation(ctx context.Context, location *Location)
 	location.Id = dref.ID
 	_, err = dref.Create(ctx, location)
 	return location, err
+}
+
+func (fb *FirestoreBackend) NewAlert(ctx context.Context, alert *Alert) (*Alert, error) {
+	client, err := fb.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	dref := client.Collection("alerts").NewDoc()
+	alert.Id = dref.ID
+	_, err = dref.Create(ctx, alert)
+	return alert, err
 }
 
 func (fb *FirestoreBackend) update(ctx context.Context, path, id string, value interface{}) error {
