@@ -42,7 +42,6 @@ type AlertApiService struct {
 func NewAlertApiService() AlertApiServicer {
 	projectID := os.Getenv("PROJECT_ID")
 	backend := NewFirestoreBackend(projectID)
-
 	return &AlertApiService{backend}
 }
 
@@ -53,6 +52,7 @@ func (s *AlertApiService) DeleteAlert(id string, w http.ResponseWriter) error {
 	if err != nil {
 		return err
 	}
+
 	return EncodeJSONStatus(http.StatusOK, "alert deleted", w)
 }
 
