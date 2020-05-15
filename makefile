@@ -100,7 +100,8 @@ lint: lint-webui
 
 test-backend-local: backend/api-service/src/api/openapi.yaml
 	docker stop firestore-emulator 2>/dev/null || true
-	docker run --detach --rm -p 9090:9090 --name=firestore-emulator jdlk7/firestore-emulator
+	docker run --detach --rm -p 9090:9090 --name=firestore-emulator google/cloud-sdk:292.0.0 sh -c \
+	 "apt-get install google-cloud-sdk-firestore-emulator && gcloud beta emulators firestore start --host-port=0.0.0.0:9090"
 	docker run --network=host jwilder/dockerize:0.6.1 dockerize -timeout=60s -wait=tcp://localhost:9090
 	cd backend/api-service/src && FIRESTORE_EMULATOR_HOST=localhost:9090 go test -tags=emulator -v
 	docker stop firestore-emulator
