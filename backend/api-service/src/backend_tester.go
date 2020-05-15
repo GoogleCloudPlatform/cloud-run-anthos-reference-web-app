@@ -131,11 +131,11 @@ func (bt *backendTester) testDeleteAlert(t *testing.T) {
 	ctx := context.Background()
 	id := "alert-id"
 	alert := Alert{
-		Id:          "id-to-be-replaced-by-uuid",
+		Id:            "id-to-be-replaced-by-uuid",
 		ItemId:        "item_id",
 		TransactionId: "transaction_id",
-		Text: "text",
-		Timestamp:  time.Now(),
+		Text:          "text",
+		Timestamp:     time.Now(),
 	}
 	backend := bt.initBackend(t, initialBackendState{alerts: map[string]*Alert{id: &alert}})
 
@@ -148,11 +148,10 @@ func (bt *backendTester) testDeleteAlert(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ListAlerts() returned unexpected err: %v", err)
 	}
-	if (len(got) != 0 ) {
+	if len(got) != 0 {
 		t.Errorf("ListAlerts() = %v should be empty", got)
 	}
 }
-
 
 func (bt *backendTester) testDeleteAlertNotFound(t *testing.T) {
 	ctx := context.Background()
@@ -929,15 +928,15 @@ func (bt *backendTester) testNewAlert(t *testing.T) {
 	ctx := context.Background()
 	backend := bt.resetBackend(t)
 	alert := Alert{
-		Id:          "id-to-be-replaced-by-uuid",
+		Id:            "id-to-be-replaced-by-uuid",
 		ItemId:        "item_id",
 		TransactionId: "transaction_id",
-		Text: "text",
-		Timestamp:  time.Now(),
+		Text:          "text",
+		Timestamp:     time.Now(),
 	}
 
 	got, err := backend.NewAlert(ctx, &alert)
-	
+
 	if err != nil {
 		t.Fatalf("NewAlert(%v) returned unexpected err: %v", alert, err)
 	}
@@ -952,10 +951,10 @@ func (bt *backendTester) testNewAlert(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ListAlerts() returned unexpected err: %v", err)
 	}
-	if (len(v) != 1) {
+	if len(v) != 1 {
 		t.Errorf("ListAlerts() = %v should have a single alert", got)
 	}
-	if (!cmp.Equal(v[0], got, cmpopts.EquateApproxTime(time.Millisecond))) {
+	if !cmp.Equal(v[0], got, cmpopts.EquateApproxTime(time.Millisecond)) {
 		t.Errorf("after backend.NewAlert(%v), backend.ListAlerts())[0] = %v want %v", alert, v[0], got)
 	}
 }
