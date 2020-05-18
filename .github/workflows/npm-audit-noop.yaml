@@ -15,7 +15,7 @@
 name: "no-op"
 
 on:
-  push:
+  pull_request:
     paths-ignore:
     - "webui/package.json"
     - "webui/package-lock.json"

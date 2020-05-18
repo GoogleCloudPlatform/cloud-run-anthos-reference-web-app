@@ -15,7 +15,7 @@
 name: "dependency-updated"
 
 on:
-  push:
+  pull_request:
     paths:
     - "webui/package.json"
     - "webui/package-lock.json"
