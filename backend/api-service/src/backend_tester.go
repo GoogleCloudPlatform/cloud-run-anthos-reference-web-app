@@ -131,7 +131,7 @@ func (bt *backendTester) testDeleteAlert(t *testing.T) {
 	ctx := context.Background()
 	id := "alert-id"
 	alert := Alert{
-		Id:            "id-to-be-replaced-by-uuid",
+		Id:            "id",
 		ItemId:        "item_id",
 		TransactionId: "transaction_id",
 		Text:          "text",

@@ -40,14 +40,15 @@ func (i *Inventory) applyTransaction(txn *InventoryTransaction) error {
 }
 
 type DatabaseBackend interface {
+	DeleteAlert(ctx context.Context, id string) error
 	DeleteItem(ctx context.Context, id string) error
 	DeleteLocation(ctx context.Context, id string) error
-	DeleteAlert(ctx context.Context, id string) error
 
 	GetInventoryTransaction(ctx context.Context, id string) (*InventoryTransaction, error)
 	GetItem(ctx context.Context, id string) (*Item, error)
 	GetLocation(ctx context.Context, id string) (*Location, error)
 
+	ListAlerts(ctx context.Context) ([]*Alert, error)
 	ListItems(ctx context.Context) ([]*Item, error)
 	ListItemInventory(ctx context.Context, itemId string) ([]*Inventory, error)
 	ListItemInventoryTransactions(ctx context.Context, itemId string) ([]*InventoryTransaction, error)
@@ -55,12 +56,11 @@ type DatabaseBackend interface {
 	ListLocations(ctx context.Context) ([]*Location, error)
 	ListLocationInventory(ctx context.Context, locationId string) ([]*Inventory, error)
 	ListLocationInventoryTransactions(ctx context.Context, locationId string) ([]*InventoryTransaction, error)
-	ListAlerts(ctx context.Context) ([]*Alert, error)
 
+	NewAlert(ctx context.Context, alert *Alert) (*Alert, error)
 	NewItem(ctx context.Context, item *Item) (*Item, error)
 	NewInventoryTransaction(ctx context.Context, transaction *InventoryTransaction) (*InventoryTransaction, error)
 	NewLocation(ctx context.Context, location *Location) (*Location, error)
-	NewAlert(ctx context.Context, alert *Alert) (*Alert, error)
 
 	UpdateItem(ctx context.Context, item *Item) (*Item, error)
 	UpdateLocation(ctx context.Context, location *Location) (*Location, error)

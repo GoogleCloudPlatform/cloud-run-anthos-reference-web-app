@@ -71,7 +71,7 @@ func TestIMBDeleteAlert(t *testing.T) {
 	inMemoryBackendTester.testDeleteAlert(t)
 }
 
-func TestIMBDeleteAmertNotFound(t *testing.T) {
+func TestIMBDeleteAlertNotFound(t *testing.T) {
 	inMemoryBackendTester.testDeleteAlertNotFound(t)
 }
 
@@ -129,6 +129,10 @@ func TestIMBListLocationInventoryTransactions(t *testing.T) {
 
 func TestIMBListAlerts(t *testing.T) {
 	inMemoryBackendTester.testListAlerts(t)
+}
+
+func TestIMBNewItem(t *testing.T) {
+	inMemoryBackendTester.testNewItem(t)
 }
 
 func TestIMBNewInventoryTransaction(t *testing.T) {
