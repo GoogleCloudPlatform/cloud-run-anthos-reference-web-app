@@ -25,11 +25,11 @@ import (
 )
 
 const (
-	alertsCollection = "alerts"
-	inventoriesCollection = "inventories"
+	alertsCollection                = "alerts"
+	inventoriesCollection           = "inventories"
 	inventoryTransactionsCollection = "inventoryTransactions"
-	itemsCollection = "items"
-	locationsCollection = "locations"
+	itemsCollection                 = "items"
+	locationsCollection             = "locations"
 )
 
 // FirestoreBackend is a backend that talks to Firestore and implements the
