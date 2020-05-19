@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	alertCollection = "alerts"
+	alertsCollection = "alerts"
 	inventoriesCollection = "inventories"
 	inventoryTransactionsCollection = "inventoryTransactions"
 	itemsCollection = "items"
@@ -72,7 +72,7 @@ func (fb *FirestoreBackend) DeleteLocation(ctx context.Context, id string) error
 }
 
 func (fb *FirestoreBackend) DeleteAlert(ctx context.Context, id string) error {
-	return fb.deleteDoc(ctx, alertCollection, id)
+	return fb.deleteDoc(ctx, alertsCollection, id)
 }
 
 func (fb *FirestoreBackend) getDoc(ctx context.Context, path, id string) (*firestore.DocumentSnapshot, error) {
@@ -173,7 +173,7 @@ func (fb *FirestoreBackend) ListLocations(ctx context.Context) ([]*Location, err
 }
 
 func (fb *FirestoreBackend) ListAlerts(ctx context.Context) ([]*Alert, error) {
-	docs, err := fb.listDocs(ctx, alertCollection)
+	docs, err := fb.listDocs(ctx, alertsCollection)
 	if err != nil {
 		return nil, err
 	}
@@ -339,7 +339,7 @@ func (fb *FirestoreBackend) NewAlert(ctx context.Context, alert *Alert) (*Alert,
 	if err != nil {
 		return nil, err
 	}
-	dref := client.Collection(alertCollection).NewDoc()
+	dref := client.Collection(alertsCollection).NewDoc()
 	alert.Id = dref.ID
 	_, err = dref.Create(ctx, alert)
 	return alert, err
