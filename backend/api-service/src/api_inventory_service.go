@@ -174,6 +174,15 @@ func (s *InventoryApiService) ListLocations(w http.ResponseWriter) error {
 
 // NewInventoryTransaction - Create a new Inventory Transaction
 func (s *InventoryApiService) NewInventoryTransaction(inventoryTransaction InventoryTransaction, w http.ResponseWriter) error {
+	if inventoryTransaction.Action == "" {
+		return EncodeJSONStatus(http.StatusBadRequest, "Empty required field: action", w)
+	}
+	if inventoryTransaction.ItemId == "" {
+		return EncodeJSONStatus(http.StatusBadRequest, "Empty required field: item_id", w)
+	}
+	if inventoryTransaction.LocationId == "" {
+		return EncodeJSONStatus(http.StatusBadRequest, "Empty required field: location_id", w)
+	}
 	validAction := false
 	for _, a := range supportedTransactionActions {
 		if a == inventoryTransaction.Action {
@@ -198,6 +207,10 @@ func (s *InventoryApiService) NewInventoryTransaction(inventoryTransaction Inven
 
 // NewItem - Create a new Item
 func (s *InventoryApiService) NewItem(item Item, w http.ResponseWriter) error {
+	if item.Name == "" {
+		return EncodeJSONStatus(http.StatusBadRequest, "Empty required field: name", w)
+	}
+
 	ctx := context.Background()
 	r, err := s.db.NewItem(ctx, &item)
 	if err != nil {
@@ -210,6 +223,13 @@ func (s *InventoryApiService) NewItem(item Item, w http.ResponseWriter) error {
 
 // NewLocation - Create a new Location
 func (s *InventoryApiService) NewLocation(location Location, w http.ResponseWriter) error {
+	if location.Name == "" {
+		return EncodeJSONStatus(http.StatusBadRequest, "Empty required field: name", w)
+	}
+	if location.Warehouse == "" {
+		return EncodeJSONStatus(http.StatusBadRequest, "Empty required field: warehouse", w)
+	}
+
 	ctx := context.Background()
 	r, err := s.db.NewLocation(ctx, &location)
 	if err != nil {
@@ -226,6 +246,9 @@ func (s *InventoryApiService) UpdateItem(id string, item Item, w http.ResponseWr
 		message := fmt.Sprintf("Mismatched path id: %s and item.Id: %s ", id, item.Id)
 		return EncodeJSONStatus(http.StatusBadRequest, message, w)
 	}
+	if item.Name == "" {
+		return EncodeJSONStatus(http.StatusBadRequest, "Empty required field: name", w)
+	}
 
 	ctx := context.Background()
 	r, err := s.db.UpdateItem(ctx, &item)
@@ -241,6 +264,12 @@ func (s *InventoryApiService) UpdateLocation(id string, location Location, w htt
 	if id != location.Id {
 		message := fmt.Sprintf("Mismatched path id: %s and location.Id: %s ", id, location.Id)
 		return EncodeJSONStatus(http.StatusBadRequest, message, w)
+	}
+	if location.Name == "" {
+		return EncodeJSONStatus(http.StatusBadRequest, "Empty required field: name", w)
+	}
+	if location.Warehouse == "" {
+		return EncodeJSONStatus(http.StatusBadRequest, "Empty required field: warehouse", w)
 	}
 
 	ctx := context.Background()
