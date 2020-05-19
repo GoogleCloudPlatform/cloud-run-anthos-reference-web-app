@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "PR Validation"
+name: "common"
 
 on:
   pull_request:
@@ -48,8 +48,8 @@ jobs:
         go-version: '1.13'
     - run: go get -u github.com/google/addlicense
     - run: addlicense -check .
-
-  npm-audit:
+  
+  npm-audit-advisory:
     runs-on: ubuntu-latest
 
     steps:
@@ -58,7 +58,7 @@ jobs:
       with:
         node-version: '12.16.2'
     - working-directory: ./webui
-      run: npm audit --production
+      run: npm audit
   
   webui-lint:
     runs-on: ubuntu-latest

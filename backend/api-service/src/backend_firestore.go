@@ -382,7 +382,7 @@ func (fb *FirestoreBackend) lookupInventory(ctx context.Context, itemID, locatio
 
 	// Lookup the inventory id
 	invs := client.Collection(inventoriesCollection)
-	var inv *Inventory
+	inv := &Inventory{ItemId: itemID, LocationId: locationID}
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		// Find the inventory
 		q := invs.Where("ItemId", "==", itemID).Where("LocationId", "==", locationID)
@@ -396,7 +396,7 @@ func (fb *FirestoreBackend) lookupInventory(ctx context.Context, itemID, locatio
 		}
 
 		if len(docs) == 0 {
-			inv = &Inventory{ItemId: itemID, LocationId: locationID, LastUpdated: time.Now()}
+			inv.LastUpdated = time.Now()
 			return tx.Create(invs.NewDoc(), inv)
 		}
 

@@ -810,7 +810,7 @@ func (bt *backendTester) testNewInventoryTransaction(t *testing.T) {
 			if !cmp.Equal(got, tc.txn, cmpopts.IgnoreFields(InventoryTransaction{}, "Id", "Timestamp")) {
 				t.Errorf("NewInventoryTransaction(%v) = %v want %v (ignoring Id field)", tc.txn, got, tc.txn)
 			}
-			if v, _ := backend.GetInventoryTransaction(ctx, got.Id); v != got {
+			if v, _ := backend.GetInventoryTransaction(ctx, got.Id); !cmp.Equal(got, v, cmpopts.EquateApproxTime(time.Microsecond)) {
 				t.Errorf("after backend.NewInventoryTransaction(%v), backend.GetInventoryTransaction(%v) = %v want %v", tc.txn, got.Id, v, got)
 			}
 

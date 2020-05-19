@@ -18,7 +18,7 @@ steps:
 # start the firestore emulator
 - name: gcr.io/cloud-builders/docker
   id: Start Firestore emulator
-  args: ['run', '--detach', '--rm', '--network=cloudbuild', '--name=firestore-emulator', 'jdlk7/firestore-emulator']
+  args: ['run', '--detach', '--rm', '--network=cloudbuild', '--name=firestore-emulator', 'google/cloud-sdk', 'sh', '-c', 'apt-get install google-cloud-sdk-firestore-emulator && gcloud beta emulators firestore start --host-port=0.0.0.0:9090']
 # wait for docker container to be serving
 - name: jwilder/dockerize:0.6.1
   id: Wait for Firestore emulator serving

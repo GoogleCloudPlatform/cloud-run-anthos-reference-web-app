@@ -151,14 +151,19 @@ steps:
   args:
   - '-c'
   - |
-      firewall=$(gcloud compute firewall-rules list \
-          --filter="name:k8s-fw AND targetTags.list()~^gke-${_CLUSTER_NAME}-[0-9a-z]*-node$" \
-          --format="csv[no-heading](name)"); \
-      while [[ -z $firewall ]]; do \
+      # Wait for the firewall rule associated with the current cluster creation to be created
+      # so that it's restricted along with any other cluster ingress firewalls that might apply.
+      CLUSTER_CREATE_TIME=$(gcloud container clusters describe ${_CLUSTER_NAME} --zone=${_CLUSTER_LOCATION} --format="value(createTime)")
+      while [[ -z $(gcloud compute firewall-rules list \
+          --filter="name:k8s-fw AND targetTags.list()~^gke-${_CLUSTER_NAME}-[0-9a-z]*-node$ AND creationTimestamp>=$${CLUSTER_CREATE_TIME}" \
+          --format="value(name)") ]]; \
+      do \
         echo "unable to find cluster ingress firewall. Sleeping 10s..."; \
-        sleep 10s; \
-        firewall=$(gcloud compute firewall-rules list \
-          --filter="name:k8s-fw AND targetTags.list()~^gke-${_CLUSTER_NAME}-[0-9a-z]*-node$" \
-          --format="csv[no-heading](name)"); \
+        sleep 10s;  \
       done; \
-      gcloud compute firewall-rules update "$firewall" --source-ranges=35.191.0.0/16,130.211.0.0/22;
+      for firewall in $(gcloud compute firewall-rules list \
+          --filter="name:k8s-fw AND targetTags.list()~^gke-${_CLUSTER_NAME}-[0-9a-z]*-node$" \
+          --format="value(name)");
+      do \
+        gcloud compute firewall-rules update "$firewall" --source-ranges=35.191.0.0/16,130.211.0.0/22; \
+      done;
