@@ -24,6 +24,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const alertsStr = "alerts"
+const inventoriesStr = "inventories"
+const inventoryTransactionsStr = "inventoryTransactions"
+const itemsStr = "items"
+const locationsStr = "locations"
+
 // FirestoreBackend is a backend that talks to Firestore and implements the
 // Backend interface
 type FirestoreBackend struct {
@@ -56,15 +62,15 @@ func (fb *FirestoreBackend) deleteDoc(ctx context.Context, path, id string) erro
 }
 
 func (fb *FirestoreBackend) DeleteItem(ctx context.Context, id string) error {
-	return fb.deleteDoc(ctx, "items", id)
+	return fb.deleteDoc(ctx, itemsStr, id)
 }
 
 func (fb *FirestoreBackend) DeleteLocation(ctx context.Context, id string) error {
-	return fb.deleteDoc(ctx, "locations", id)
+	return fb.deleteDoc(ctx, locationsStr, id)
 }
 
 func (fb *FirestoreBackend) DeleteAlert(ctx context.Context, id string) error {
-	return fb.deleteDoc(ctx, "alerts", id)
+	return fb.deleteDoc(ctx, alertsStr, id)
 }
 
 func (fb *FirestoreBackend) getDoc(ctx context.Context, path, id string) (*firestore.DocumentSnapshot, error) {
@@ -81,7 +87,7 @@ func (fb *FirestoreBackend) getDoc(ctx context.Context, path, id string) (*fires
 }
 
 func (fb *FirestoreBackend) GetInventoryTransaction(ctx context.Context, id string) (*InventoryTransaction, error) {
-	doc, err := fb.getDoc(ctx, "inventoryTransactions", id)
+	doc, err := fb.getDoc(ctx, inventoryTransactionsStr, id)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +97,7 @@ func (fb *FirestoreBackend) GetInventoryTransaction(ctx context.Context, id stri
 }
 
 func (fb *FirestoreBackend) GetItem(ctx context.Context, id string) (*Item, error) {
-	doc, err := fb.getDoc(ctx, "items", id)
+	doc, err := fb.getDoc(ctx, itemsStr, id)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +107,7 @@ func (fb *FirestoreBackend) GetItem(ctx context.Context, id string) (*Item, erro
 }
 
 func (fb *FirestoreBackend) GetLocation(ctx context.Context, id string) (*Location, error) {
-	doc, err := fb.getDoc(ctx, "locations", id)
+	doc, err := fb.getDoc(ctx, locationsStr, id)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +137,7 @@ func (fb *FirestoreBackend) listDocs(ctx context.Context, path string, filters .
 }
 
 func (fb *FirestoreBackend) ListItems(ctx context.Context) ([]*Item, error) {
-	docs, err := fb.listDocs(ctx, "items")
+	docs, err := fb.listDocs(ctx, itemsStr)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +154,7 @@ func (fb *FirestoreBackend) ListItems(ctx context.Context) ([]*Item, error) {
 }
 
 func (fb *FirestoreBackend) ListLocations(ctx context.Context) ([]*Location, error) {
-	docs, err := fb.listDocs(ctx, "locations")
+	docs, err := fb.listDocs(ctx, locationsStr)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +171,7 @@ func (fb *FirestoreBackend) ListLocations(ctx context.Context) ([]*Location, err
 }
 
 func (fb *FirestoreBackend) ListAlerts(ctx context.Context) ([]*Alert, error) {
-	docs, err := fb.listDocs(ctx, "alerts")
+	docs, err := fb.listDocs(ctx, alertsStr)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +188,7 @@ func (fb *FirestoreBackend) ListAlerts(ctx context.Context) ([]*Alert, error) {
 }
 
 func (fb *FirestoreBackend) listInventories(ctx context.Context, filters ...queryFilter) ([]*Inventory, error) {
-	docs, err := fb.listDocs(ctx, "inventories", filters...)
+	docs, err := fb.listDocs(ctx, inventoriesStr, filters...)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +205,7 @@ func (fb *FirestoreBackend) listInventories(ctx context.Context, filters ...quer
 }
 
 func (fb *FirestoreBackend) listInventoryTransactions(ctx context.Context, filters ...queryFilter) ([]*InventoryTransaction, error) {
-	docs, err := fb.listDocs(ctx, "inventoryTransactions", filters...)
+	docs, err := fb.listDocs(ctx, inventoryTransactionsStr, filters...)
 	if err != nil {
 		return nil, err
 	}
@@ -237,10 +243,10 @@ func (fb *FirestoreBackend) ListLocationInventoryTransactions(ctx context.Contex
 
 func (fb *FirestoreBackend) NewInventoryTransaction(ctx context.Context, invTxn *InventoryTransaction) (*InventoryTransaction, error) {
 	itemId, locId := invTxn.ItemId, invTxn.LocationId
-	if _, err := fb.getDoc(ctx, "items", itemId); err != nil {
+	if _, err := fb.getDoc(ctx, itemsStr, itemId); err != nil {
 		return nil, err
 	}
-	if _, err := fb.getDoc(ctx, "locations", locId); err != nil {
+	if _, err := fb.getDoc(ctx, locationsStr, locId); err != nil {
 		return nil, err
 	}
 	client, err := fb.NewClient(ctx)
@@ -249,7 +255,7 @@ func (fb *FirestoreBackend) NewInventoryTransaction(ctx context.Context, invTxn 
 	}
 
 	// Lookup the inventory id
-	invs := client.Collection("inventories")
+	invs := client.Collection(inventoriesStr)
 	var invRef *firestore.DocumentRef
 
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
@@ -296,7 +302,7 @@ func (fb *FirestoreBackend) NewInventoryTransaction(ctx context.Context, invTxn 
 		}
 
 		// Create the inventory transaction itself
-		dref := client.Collection("inventoryTransactions").NewDoc()
+		dref := client.Collection(inventoryTransactionsStr).NewDoc()
 		invTxn.Id = dref.ID
 		return tx.Create(dref, invTxn)
 	})
@@ -309,7 +315,7 @@ func (fb *FirestoreBackend) NewItem(ctx context.Context, item *Item) (*Item, err
 	if err != nil {
 		return nil, err
 	}
-	dref := client.Collection("items").NewDoc()
+	dref := client.Collection(itemsStr).NewDoc()
 	item.Id = dref.ID
 	_, err = dref.Create(ctx, item)
 	return item, err
@@ -320,7 +326,7 @@ func (fb *FirestoreBackend) NewLocation(ctx context.Context, location *Location)
 	if err != nil {
 		return nil, err
 	}
-	dref := client.Collection("locations").NewDoc()
+	dref := client.Collection(locationsStr).NewDoc()
 	location.Id = dref.ID
 	_, err = dref.Create(ctx, location)
 	return location, err
@@ -331,7 +337,7 @@ func (fb *FirestoreBackend) NewAlert(ctx context.Context, alert *Alert) (*Alert,
 	if err != nil {
 		return nil, err
 	}
-	dref := client.Collection("alerts").NewDoc()
+	dref := client.Collection(alertsStr).NewDoc()
 	alert.Id = dref.ID
 	_, err = dref.Create(ctx, alert)
 	return alert, err
@@ -357,12 +363,12 @@ func (fb *FirestoreBackend) update(ctx context.Context, path, id string, value i
 }
 
 func (fb *FirestoreBackend) UpdateItem(ctx context.Context, item *Item) (*Item, error) {
-	err := fb.update(ctx, "items", item.Id, item)
+	err := fb.update(ctx, itemsStr, item.Id, item)
 	return item, err
 }
 
 func (fb *FirestoreBackend) UpdateLocation(ctx context.Context, location *Location) (*Location, error) {
-	err := fb.update(ctx, "locations", location.Id, location)
+	err := fb.update(ctx, locationsStr, location.Id, location)
 	return location, err
 }
 
@@ -373,7 +379,7 @@ func (fb *FirestoreBackend) lookupInventory(ctx context.Context, itemID, locatio
 	}
 
 	// Lookup the inventory id
-	invs := client.Collection("inventories")
+	invs := client.Collection(inventoriesStr)
 	var inv *Inventory
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		// Find the inventory
