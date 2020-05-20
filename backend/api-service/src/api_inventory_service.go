@@ -22,7 +22,10 @@ package service
 
 import (
 	"context"
+	"flag"
 	"fmt"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"log"
 	"net/http"
 	"os"
 )
@@ -31,14 +34,19 @@ import (
 // This service should implement the business logic for every endpoint for the InventoryApi API.
 // Include any external packages or services that will be required by this service.
 type InventoryApiService struct {
-	db DatabaseBackend
+	db                  DatabaseBackend
+	eventBrokerHostname string
+	eventingEnabled     bool
 }
 
 // NewInventoryApiService creates a default api service
 func NewInventoryApiService() InventoryApiServicer {
 	projectID := os.Getenv("PROJECT_ID")
+	eventBrokerHostname := flag.String("EVENT_BROKER_HOSTNAME", "", "local hostname of the event broker for eventing")
+	eventingEnabled := flag.Bool("EVENTING_ENABLED", false, "true if eventing is enabled")
+	flag.Parse()
 	backend := NewFirestoreBackend(projectID)
-	return &InventoryApiService{backend}
+	return &InventoryApiService{backend, *eventBrokerHostname, *eventingEnabled}
 }
 
 // DeleteItem - Delete Item by ID
@@ -192,6 +200,10 @@ func (s *InventoryApiService) NewInventoryTransaction(inventoryTransaction Inven
 		return err
 	}
 
+	if s.eventingEnabled {
+		s.SendEvent(inventoryTransaction)
+	}
+
 	status := http.StatusCreated
 	return EncodeJSONResponse(r, &status, w)
 }
@@ -250,4 +262,27 @@ func (s *InventoryApiService) UpdateLocation(id string, location Location, w htt
 	}
 
 	return EncodeJSONResponse(r, nil, w)
+}
+
+// Send an event containing an InventoryTransaction
+func (s *InventoryApiService) SendEvent(inventoryTransaction InventoryTransaction) {
+	ctx := cloudevents.ContextWithTarget(context.Background(), s.eventBrokerHostname)
+	p, err := cloudevents.NewHTTP()
+	if err != nil {
+		log.Printf("failed to create cloudevents protocol: %s", err.Error())
+	}
+
+	c, err := cloudevents.NewClient(p, cloudevents.WithTimeNow())
+	if err != nil {
+		log.Printf("failed to create cloudevents client: %v", err)
+	}
+	// Create an Event.
+	event := cloudevents.NewEvent()
+	event.SetSource("api-service")
+	event.SetType("service.InventoryTransaction")
+	event.SetData(cloudevents.ApplicationJSON, inventoryTransaction)
+
+	if result := c.Send(ctx, event); !cloudevents.IsACK(result) {
+		log.Printf("failed to send event: %v", result)
+	}
 }

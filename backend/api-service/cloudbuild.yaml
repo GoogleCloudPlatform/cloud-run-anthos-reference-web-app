@@ -52,5 +52,6 @@ steps:
          '--namespace', '${_NAMESPACE}',
          '--service-account', '${_BACKEND_KSA}',
          '--set-env-vars=PROJECT_ID=${PROJECT_ID}',
+         '--args=-EVENTING_ENABLED=${_EVENTING_ENABLED},-EVENT_BROKER_HOSTNAME=${_EVENT_BROKER_HOSTNAME}'
         ]
 images: ['gcr.io/$PROJECT_ID/${_BACKEND_IMAGE_NAME}']
