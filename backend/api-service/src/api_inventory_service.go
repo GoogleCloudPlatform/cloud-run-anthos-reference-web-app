@@ -32,9 +32,9 @@ import (
 // This service should implement the business logic for every endpoint for the InventoryApi API.
 // Include any external packages or services that will be required by this service.
 type InventoryApiService struct {
-	db                  DatabaseBackend
-	es                  EventSender
-	eventingEnabled     bool
+	db              DatabaseBackend
+	es              EventSender
+	eventingEnabled bool
 }
 
 // NewInventoryApiService creates a default api service
