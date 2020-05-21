@@ -30,9 +30,9 @@ jobs:
     - name: install dependencies
       working-directory: ./webui
       run: npm ci
-    - uses: ssmall/npm-audit-action@ssmall/working-directory
+    - uses: ssmall/npm-audit-action@8958b9f775e63f0e6123baa16215318bdb4b4167
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        dedupe_issues: true
+        # dedupe_issues: true
         working_directory: ${GITHUB_WORKSPACE}/webui
     
