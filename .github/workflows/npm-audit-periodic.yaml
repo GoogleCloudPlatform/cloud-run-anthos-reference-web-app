@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "npm-audit"
+name: "npm-audit-periodic"
 
 on:
   pull_request:
     branches: [ master ]
 jobs:
 
-  npm-audit:
+  npm-audit-periodic:
     runs-on: ubuntu-latest
 
     steps:
