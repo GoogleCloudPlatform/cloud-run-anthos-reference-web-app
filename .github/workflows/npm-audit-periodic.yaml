@@ -31,6 +31,7 @@ jobs:
       working-directory: ./webui
       run: npm ci
     - uses: ssmall/npm-audit-action@ssmall/dedupe-issues
+      working-directory: ./webui
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         dedupe_issues: true
