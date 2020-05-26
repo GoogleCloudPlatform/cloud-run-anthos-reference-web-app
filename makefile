@@ -8,31 +8,31 @@ ifdef CB_MACHINE_TYPE
 endif
 
 # Shared cluster substitution args
-CLUSTER_ARGS := \
+CLUSTER_ARGS = \
 	_CLUSTER_LOCATION=$(CLUSTER_LOCATION) \
 	_CLUSTER_NAME=$(CLUSTER_NAME) \
 	_NAMESPACE=$(NAMESPACE)
 
 # Shared istio substitution args
-ISTIO_ARGS := \
+ISTIO_ARGS = \
 	_ISTIO_INGRESS_NAMESPACE=$(ISTIO_INGRESS_NAMESPACE) \
 	_ISTIO_INGRESS_SERVICE=$(ISTIO_INGRESS_SERVICE)
 
 # backend/cloudbuild.yaml
-BACKEND_SUBS := $(CLUSTER_ARGS) \
+BACKEND_SUBS = $(CLUSTER_ARGS) \
 	_BACKEND_IMAGE_NAME=$(BACKEND_IMAGE_NAME) \
 	_BACKEND_KSA=$(BACKEND_KSA) \
 	_BACKEND_SERVICE_NAME=$(BACKEND_SERVICE_NAME) \
 	_GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
 
-BACKEND_TEST_SUBS := _GIT_USER_ID=$(GIT_USER_ID) \
+BACKEND_TEST_SUBS = _GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
 
-FRONTEND_E2E_SUBS := _DOMAIN=$(DOMAIN)
+FRONTEND_E2E_SUBS = _DOMAIN=$(DOMAIN)
 
 # cloudbuild.yaml
-INFRA_SUBS := $(CLUSTER_ARGS) $(ISTIO_ARGS) \
+INFRA_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 	_BACKEND_GSA=$(BACKEND_GSA) \
 	_BACKEND_KSA=$(BACKEND_KSA) \
 	_BACKEND_SERVICE_HOST_NAME=$(BACKEND_SERVICE_HOST_NAME) \
@@ -41,21 +41,17 @@ INFRA_SUBS := $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 	_SSL_CERT_NAME=$(SSL_CERT_NAME)
 
 # cloudbuild-provision-cluster.yaml
-PROVISION_SUBS := $(CLUSTER_ARGS) $(ISTIO_ARGS) \
+PROVISION_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 	_CLUSTER_GKE_VERSION=$(CLUSTER_GKE_VERSION)
 
 # webui/cloudbuild.yaml
-WEBUI_SUBS := _DOMAIN=$(DOMAIN)
+WEBUI_SUBS = _DOMAIN=$(DOMAIN)
 
 # Comma separate substitution args
 comma := ,
 empty :=
 space := $(empty) $(empty)
-BACKEND_SUBS := $(subst $(space),$(comma),$(BACKEND_SUBS))
-BACKEND_TEST_SUBS := $(subst $(space),$(comma),$(BACKEND_TEST_SUBS))
-INFRA_SUBS := $(subst $(space),$(comma),$(INFRA_SUBS))
-PROVISION_SUBS := $(subst $(space),$(comma),$(PROVISION_SUBS))
-WEBUI_SUBS := $(subst $(space),$(comma),$(WEBUI_SUBS))
+join_subs = $(subst $(space),$(comma),$(1))
 
 # Open API args
 CUSTOM_TEMPLATES=backend/templates
@@ -113,34 +109,35 @@ test-webui-e2e-local: webui/api-client webui/node_modules
 	cd webui && npm run e2e -- --dev-server-target= --base-url=http://localhost:4200 
 
 ## RULES FOR CLOUD DEVELOPMENT
+GCLOUD_BUILD=gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --verbosity=info .
 
 cluster:
-ifneq ($(CLUSTER_MISSING),0)
-	@echo Cluster $(CLUSTER_NAME) does not exist, creating cluster
-	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --verbosity=info --config cloudbuild-provision-cluster.yaml --substitutions $(PROVISION_SUBS) .
-	gcloud --project=$(PROJECT_ID) container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION)
-endif
+	if ! gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; then \
+	  echo Cluster $(CLUSTER_NAME) does not exist, creating cluster; \
+	  $(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions $(call join_subs,$(PROVISION_SUBS)); \
+	  gcloud --project=$(PROJECT_ID) container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION); \
+	fi
 
 delete:
-	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(INFRA_SUBS) .
+	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(call join_subs,$(INFRA_SUBS))
 
 build-webui: cluster
-	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./webui/cloudbuild.yaml --substitutions $(WEBUI_SUBS) .
+	$(GCLOUD_BUILD) --config ./webui/cloudbuild.yaml --substitutions $(call join_subs,$(WEBUI_SUBS))
 
 test-backend:
-	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./backend/api-service/cloudbuild-test.yaml --substitutions $(BACKEND_TEST_SUBS)  .
+	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild-test.yaml --substitutions $(call join_subs,$(BACKEND_TEST_SUBS))
 
 test-webui:
-	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./webui/cloudbuild-test.yaml .
+	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml .
 
 test-webui-e2e:
-	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./webui/e2e/cloudbuild.yaml --substitutions $(FRONTEND_E2E_SUBS) .
+	$(GCLOUD_BUILD) --config ./webui/e2e/cloudbuild.yaml --substitutions $(call join_subs,$(FRONTEND_E2E_SUBS))
 
 build-backend: cluster
-	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --config ./backend/api-service/cloudbuild.yaml --substitutions $(BACKEND_SUBS) .
+	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild.yaml --substitutions $(call join_subs,$(BACKEND_SUBS))
 
 build-infrastructure: cluster
-	gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(INFRA_SUBS)
+	$(GCLOUD_BUILD) . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(call join_subs,$(INFRA_SUBS))
 
 build-all: build-infrastructure build-webui build-backend
 
