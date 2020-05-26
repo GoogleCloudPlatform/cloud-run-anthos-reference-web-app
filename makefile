@@ -128,7 +128,7 @@ test-backend:
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild-test.yaml --substitutions $(call join_subs,$(BACKEND_TEST_SUBS))
 
 test-webui:
-	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml .
+	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml
 
 test-webui-e2e:
 	$(GCLOUD_BUILD) --config ./webui/e2e/cloudbuild.yaml --substitutions $(call join_subs,$(FRONTEND_E2E_SUBS))
@@ -137,7 +137,7 @@ build-backend: cluster
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild.yaml --substitutions $(call join_subs,$(BACKEND_SUBS))
 
 build-infrastructure: cluster
-	$(GCLOUD_BUILD) . --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(call join_subs,$(INFRA_SUBS))
+	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(call join_subs,$(INFRA_SUBS))
 
 build-all: build-infrastructure build-webui build-backend
 
