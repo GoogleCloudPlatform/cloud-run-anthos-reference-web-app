@@ -2,42 +2,44 @@ package service
 
 import (
 	"context"
-	"flag"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"log"
 )
 
-// EventSender sends cloud events containing an InventoryTransaction
-type EventSender struct {
-	eventBrokerHostname string
+type EventSender interface {
+	SendInventoryTransactionEvent(inventoryTransaction InventoryTransaction) error
 }
 
-// NewInventoryApiService creates a default api service
-func NewEventSender() EventSender {
-	eventBrokerHostname := flag.String("EVENT_BROKER_HOSTNAME", "", "local hostname of the event broker for eventing")
-	flag.Parse()
-	return EventSender{*eventBrokerHostname}
+// BrokerEventSender sends cloudevents to a Broker for API actions
+type BrokerEventSender struct {
+	client cloudevents.Client
 }
 
-// Send an event containing an InventoryTransaction
-func (s *EventSender) SendEvent(inventoryTransaction InventoryTransaction) {
-	ctx := cloudevents.ContextWithTarget(context.Background(), s.eventBrokerHostname)
-	p, err := cloudevents.NewHTTP()
+func NewBrokerEventSender(eventBrokerHostname string) (*BrokerEventSender, error) {
+	p, err := cloudevents.NewHTTP(cloudevents.WithTarget(eventBrokerHostname))
 	if err != nil {
-		log.Printf("failed to create cloudevents protocol: %s", err.Error())
+		return nil, err
 	}
-
 	c, err := cloudevents.NewClient(p, cloudevents.WithTimeNow())
 	if err != nil {
-		log.Printf("failed to create cloudevents client: %v", err)
+		return nil, err
 	}
-	// Create an Event.
+	return &BrokerEventSender{c}, nil
+}
+
+// Send an event for the given InventoryTransaction
+func (s *BrokerEventSender) SendInventoryTransactionEvent(inventoryTransaction InventoryTransaction) error {
+	event := inventoryTransactionToEvent(inventoryTransaction)
+	if result := s.client.Send(context.Background(), event); !cloudevents.IsACK(result) {
+		return result
+	}
+	return nil
+}
+
+func inventoryTransactionToEvent(inventoryTransaction InventoryTransaction) cloudevents.Event {
 	event := cloudevents.NewEvent()
+	event.SetID(inventoryTransaction.Id)
 	event.SetSource("api-service")
 	event.SetType("service.InventoryTransaction")
 	event.SetData(cloudevents.ApplicationJSON, inventoryTransaction)
-
-	if result := c.Send(ctx, event); !cloudevents.IsACK(result) {
-		log.Printf("failed to send event: %v", result)
-	}
+	return event
 }
