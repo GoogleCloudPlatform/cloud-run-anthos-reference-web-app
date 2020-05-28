@@ -49,7 +49,7 @@ func NewInventoryApiService() InventoryApiServicer {
 	var es EventSender
 	var err error
 	if *eventingEnabled {
-		if len(*eventBrokerHostname) == 0 {
+		if *eventBrokerHostname == "" {
 			log.Fatalf("EVENT_BROKER_HOSTNAME must be specified if EVENTING_ENABLED is true")
 		}
 		es, err = NewBrokerEventSender(*eventBrokerHostname)
