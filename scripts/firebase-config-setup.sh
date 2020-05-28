@@ -40,8 +40,9 @@ fi
 export readonly API_KEY="$2"
 echo ${API_KEY}
 
-cat ${FIREBASECONFIG_SAMPLE}
-cat ${FIREBASECONFIG_SAMPLE} | envsubst > ${FIREBASECONFIG_JS}
+cat ${FIREBASECONFIG_SAMPLE} | \
+sed "s/\${PROJECT_ID}/${PROJECT_ID}/g" | \
+sed "s/\${API_KEY}/${API_KEY}/g" > ${FIREBASECONFIG_JS}
 
 echo
 echo "Wrote to $(realpath ${FIREBASECONFIG_JS}):"
