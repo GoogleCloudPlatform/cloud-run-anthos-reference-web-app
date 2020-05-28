@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable, from, of } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { InventoryService } from 'api-client';

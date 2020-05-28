@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { InventoryTransaction, InventoryService, Item, Location } from 'api-client';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -43,7 +43,7 @@ export class InventoryTransactionDialogComponent {
 
   constructor(
     private dialogRef: MatDialogRef<InventoryTransactionDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) private data: InventoryTransactionDialogData,
+    @Inject(MAT_DIALOG_DATA) data: InventoryTransactionDialogData,
     private inventoryService: InventoryService,
   ) {
     this.inventoryTransactionForm.patchValue(Object.assign( {action: 'ADD'}, data.transaction));

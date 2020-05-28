@@ -43,10 +43,6 @@ describe('AppComponent', () => {
     projectId: 'unit test'
   };
 
-  const AngularFireAuthMock: any = {
-    user: of(null),
-  };
-
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ AppComponent ],
