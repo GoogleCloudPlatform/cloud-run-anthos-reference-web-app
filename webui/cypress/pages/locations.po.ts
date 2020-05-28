@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-import { setDefaultTimeout } from 'cucumber';
+import { BasePage } from './base.po';
 
-setDefaultTimeout(15000);
+export class LocationsPage extends BasePage {
+  getLocationTitle() {
+    return cy.get('.location-info mat-card-title');
+  }
+
+  getLocationWarehouse() {
+    return cy.get('.location-info mat-card-content');
+  }
+}

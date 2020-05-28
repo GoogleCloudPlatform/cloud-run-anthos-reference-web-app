@@ -14,28 +14,40 @@
  * limitations under the License.
  */
 
-import { Then, Given } from 'cucumber';
-import { expect } from 'chai';
+import { Then, Given, When } from 'cypress-cucumber-preprocessor/steps';
 
-import { LocationsPage } from '../pages/locations.po';
+import { LocationsPage } from '../../pages/locations.po';
 
 const page = new LocationsPage();
 
 Then('I should see Location named {string}', async (name) => {
-  expect(await page.getLocationTitle().getText()).equals(name);
+  page.getLocationTitle().should('have.text', name);
 });
 
 Then('I should see Location in warehouse {string}', async (warehouse) => {
-  expect(await page.getLocationWarehouse().getText()).equals(warehouse);
+  page.getLocationWarehouse().should('contain.text', warehouse);
 });
 
 Given('There is a location named {string}', async (name) => {
-  await page.navigateTo();
-  const link = page.getLinkByName(name);
-  if (!await link.isPresent()) {
-    page.clickButton('Create');
-    await page.getFormField('name').sendKeys(name);
-    await page.getFormField('warehouse').sendKeys(`WH ${name}`);
-    await page.clickButton('Submit');
-  }
+  page.navigateToPath('locations');
+  cy.wait('@locationList');
+  page.getLinkByName(name).then(elm => {
+    if (elm.length === 0) {
+      page.getButton('Create').click();
+      page.getFormField('name').type(name);
+      page.getFormField('warehouse').type(`WH ${name}`);
+      page.getButton('Submit').click();
+      cy.wait('@locationCreate');
+    }
+  });
+});
+
+When('I go to locations page', () => {
+  page.navigateToPath('locations');
+  cy.wait('@locationList');
+});
+
+When('wait for location to load', () => {
+  cy.wait('@locationGet');
+  cy.wait('@invTransList');
 });

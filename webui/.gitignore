@@ -46,4 +46,6 @@ testem.log
 Thumbs.db
 
 firebaseConfig.js
-e2e/src/credentials.ts
+cypress/credentials.ts
+cypress/videos
+cypress/screenshots

@@ -1,0 +1,5 @@
+{
+  "testFiles": "**/*.{feature,features}",
+  "baseUrl": "http://localhost:4200/",
+  "requestTimeout": 5000
+}

@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference types="Cypress" />
 
-import { browser, by, element, ExpectedConditions } from 'protractor';
-import { BasePage } from './base.po';
+import { Given } from 'cypress-cucumber-preprocessor/steps';
 
-export class ItemsPage extends BasePage {
-  navigateTo() {
-    return this.navigateToPath('items');
-  }
+import { LoginPage } from '../../pages/login.po';
 
-  getItemTitle() {
-    return element(by.css('.item-info mat-card-title'));
-  }
+const page = new LoginPage();
 
-  getItemDescription() {
-    return element(by.css('.item-info mat-card-content'));
-  }
-}
+Given('I logged in', async () => {
+  await page.login();
+});
+

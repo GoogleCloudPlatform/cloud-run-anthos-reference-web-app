@@ -8,7 +8,8 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "cypress run",
+    "cypress": "cypress open"
   },
   "private": true,
   "dependencies": {
@@ -37,8 +38,10 @@
     "@angular/cli": "^9.1.0",
     "@angular/compiler-cli": "~9.1.0",
     "@angular/language-service": "~9.1.0",
+    "@cypress/webpack-preprocessor": "^5.4.1",
     "@types/chai": "^4.2.11",
     "@types/cucumber": "^6.0.1",
+    "@types/cypress-cucumber-preprocessor": "^1.14.1",
     "@types/jasmine": "~3.3.8",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.11.1",
@@ -46,6 +49,8 @@
     "chai-as-promised": "^7.1.1",
     "codelyzer": "^5.1.2",
     "cucumber": "^6.0.5",
+    "cypress": "^4.5.0",
+    "cypress-cucumber-preprocessor": "^2.3.1",
     "jasmine-core": "^3.5.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "^5.0.2",
@@ -56,9 +61,12 @@
     "npm-force-resolutions": "0.0.3",
     "protractor": "=5.4.4",
     "protractor-cucumber-framework": "^6.2.1",
+    "ts-loader": "^7.0.4",
     "ts-node": "~7.0.0",
+    "tsify": "^4.0.1",
     "tslint": "~5.15.0",
-    "typescript": "~3.8.3"
+    "typescript": "~3.8.3",
+    "webpack": "^4.43.0"
   },
   "resolutions": {
     "yargs-parser": "^18.1.3"

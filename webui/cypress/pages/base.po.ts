@@ -14,19 +14,38 @@
  * limitations under the License.
  */
 
-import { browser, by, element, ExpectedConditions } from 'protractor';
-import { BasePage } from './base.po';
+export class BasePage {
 
-export class LocationsPage extends BasePage {
-  navigateTo() {
-    return this.navigateToPath('locations');
+  async navigateToPath(path: string) {
+    cy.visit(`/${path}`, {failOnStatusCode: false});
   }
 
-  getLocationTitle() {
-    return element(by.css('.location-info mat-card-title'));
+  getPageTitle()  {
+    return cy.get('mat-card-title');
   }
 
-  getLocationWarehouse() {
-    return element(by.css('.location-info mat-card-content'));
+  getTableRows() {
+    return cy.get('tbody tr');
   }
+
+  getFormField(name: string)  {
+    return cy.get(`[formcontrolname=${name}]`);
+  }
+
+  getButton(name: string)  {
+    return cy.contains('button', name);
+  }
+
+  getLinkByName(name: string) {
+    return cy.contains('a', name);
+  }
+
+  getLoadingSpinner()  {
+    return cy.get('mat-progress-spinner');
+  }
+
+  getProgressBar()  {
+    return cy.get('mat-progress-bar');
+  }
+
 }

@@ -29,7 +29,7 @@ export interface InventoryTransactionDialogData {
   templateUrl: './inventory-transaction-dialog.component.html',
   styleUrls: ['./inventory-transaction-dialog.component.scss']
 })
-export class InventoryTransactionDialogComponent implements OnInit {
+export class InventoryTransactionDialogComponent {
   inventoryTransactionForm = new FormGroup({
     item_id: new FormControl('', Validators.required),
     location_id: new FormControl('', Validators.required),
@@ -37,8 +37,8 @@ export class InventoryTransactionDialogComponent implements OnInit {
     count: new FormControl('', Validators.required),
     note: new FormControl(''),
   });
-  items: Item[] = [];
-  locations: Location[] = [];
+  items: Item[];
+  locations: Location[];
   submitting = false;
 
   constructor(
@@ -47,15 +47,8 @@ export class InventoryTransactionDialogComponent implements OnInit {
     private inventoryService: InventoryService,
   ) {
     this.inventoryTransactionForm.patchValue(Object.assign( {action: 'ADD'}, data.transaction));
-  }
-
-  ngOnInit() {
-    this.inventoryService.listItems().subscribe(items => {
-      this.items = items;
-    });
-    this.inventoryService.listLocations().subscribe(locations => {
-      this.locations = locations;
-    });
+    this.items = data.items;
+    this.locations = data.locations;
   }
 
   onCancel(): void {
