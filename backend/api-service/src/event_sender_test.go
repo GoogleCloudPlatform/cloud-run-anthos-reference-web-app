@@ -80,7 +80,7 @@ func TestSendInventoryTransactionEventSuccess(t *testing.T) {
 	brokerEventSender := brokerEventSender{mockClient, eventBrokerHostname}
 	err := brokerEventSender.SendInventoryTransactionEvent(inventoryTransaction)
 	if err != nil {
-		t.Errorf("Expected success; got %s", err)
+		t.Fatalf("Expected success; got %s", err)
 	}
 	got := <-eventCh
 	if !cmp.Equal(got, expectedEvent) {
