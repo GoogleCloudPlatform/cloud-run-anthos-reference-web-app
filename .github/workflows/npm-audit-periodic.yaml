@@ -16,7 +16,7 @@ name: "npm-audit-periodic"
 
 on:
   schedule:
-      - cron: '0 7 * * 1-5'
+      - cron: '0 16 * * 1-5'
 jobs:
 
   npm-audit-periodic:
