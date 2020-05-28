@@ -16,7 +16,7 @@ Feature: Inventory Transactions
     And I check radio button <action>
     And I fill in "count" with <count>
     And I fill in "note" with <action>
-    And I submit the transaction inventory
+    And I submit the inventory transaction
     Then I should see the latest transaction is for item "inventory test item" in location "inventory test location" for <diff>
 
     Examples:

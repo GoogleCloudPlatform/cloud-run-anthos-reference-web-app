@@ -72,7 +72,7 @@ When ('I click on the plus icon button and wait', async () => {
   cy.wait('@locationList');
 });
 
-When ('I submit the transaction inventory', () => {
+When ('I submit the inventory transaction', () => {
   page.getButton('Submit').click();
   cy.wait('@invTransCreate');
   cy.wait(1000);
