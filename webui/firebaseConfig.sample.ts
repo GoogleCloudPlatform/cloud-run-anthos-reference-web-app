@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-import { browser, by, element, ExpectedConditions } from 'protractor';
-import { BasePage } from './base.po';
-
-export class LocationsPage extends BasePage {
-  navigateTo() {
-    return this.navigateToPath('locations');
-  }
-
-  getLocationTitle() {
-    return element(by.css('.location-info mat-card-title'));
-  }
-
-  getLocationWarehouse() {
-    return element(by.css('.location-info mat-card-content'));
-  }
-}
+export const firebaseConfig: any = {
+  projectId: '${PROJECT_ID}',
+  apiKey: '${API_KEY}',
+  authDomain: '${PROJECT_ID}.firebaseapp.com'
+};

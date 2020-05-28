@@ -14,27 +14,38 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+export class BasePage {
 
-@Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
-})
-export class LoginComponent implements OnInit {
-  returnUrl: string | null = null;
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-  ) { }
-
-  ngOnInit(): void {
-    this.returnUrl = this.route.snapshot.queryParams.returnUrl || '/';
+  async navigateToPath(path: string) {
+    cy.visit(`/${path}`, {failOnStatusCode: false});
   }
 
-  handleLoginSuccess(): void {
-    this.router.navigate([this.returnUrl]);
+  getPageTitle()  {
+    return cy.get('mat-card-title');
   }
+
+  getTableRows() {
+    return cy.get('tbody tr');
+  }
+
+  getFormField(name: string)  {
+    return cy.get(`[formcontrolname=${name}]`);
+  }
+
+  getButton(name: string)  {
+    return cy.contains('button', name);
+  }
+
+  getLinkByName(name: string) {
+    return cy.contains('a', name);
+  }
+
+  getLoadingSpinner()  {
+    return cy.get('mat-progress-spinner');
+  }
+
+  getProgressBar()  {
+    return cy.get('mat-progress-bar');
+  }
+
 }

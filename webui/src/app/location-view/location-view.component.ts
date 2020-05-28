@@ -24,7 +24,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrls: ['./location-view.component.scss']
 })
 export class LocationViewComponent implements OnInit {
-  location: Location = null;
+  location: Location | null = null;
   loading = false;
 
   constructor(
@@ -56,7 +56,7 @@ export class LocationViewComponent implements OnInit {
   }
 
   handleDelete(): void {
-    if (this.location) {
+    if (this.location && this.location.id) {
       this.inventoryService.deleteLocation(this.location.id).subscribe(() => {
         this.router.navigate(['/locations']);
       });

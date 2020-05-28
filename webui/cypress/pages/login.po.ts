@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-import { Given } from 'cucumber';
+// import { browser, by, element } from 'protractor';
+import {email, password} from '../credentials';
+import { BasePage } from './base.po';
 
-import { LoginPage } from '../pages/login.po';
+export class LoginPage extends BasePage {
 
-const page = new LoginPage();
+  async login() {
+    this.navigateToPath('login');
+    this.getFormField('email').type(email);
+    this.getFormField('password').type(password);
+    this.getButton('LOGIN').click();
+    cy.wait('@verifyPassword');
+    cy.wait('@getAccountInfo');
+  }
 
-Given('I logged in', async () => {
-  await page.login();
-});
-
+}

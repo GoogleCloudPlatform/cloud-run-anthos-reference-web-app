@@ -1,7 +1,0 @@
-
-// TODO: Fill out all three config properties.
-export const firebaseConfig = {
-  "projectId": "$PROJECT_ID",
-  "apiKey": "",
-  "authDomain": ""
-};

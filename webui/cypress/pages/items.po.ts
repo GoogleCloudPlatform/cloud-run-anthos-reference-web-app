@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { browser, by, element } from 'protractor';
+import { BasePage } from './base.po';
 
-export class AppPage {
-  navigateTo() {
-    return browser.get(browser.baseUrl) as Promise<any>;
+export class ItemsPage extends BasePage {
+  getItemTitle() {
+    return cy.get('.item-info mat-card-title');
   }
 
-  getTitleText() {
-    return element(by.css('app-root .mat-toolbar span')).getText() as Promise<string>;
+  getItemDescription() {
+    return cy.get('.item-info mat-card-content');
   }
 }

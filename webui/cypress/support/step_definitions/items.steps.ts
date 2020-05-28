@@ -14,28 +14,39 @@
  * limitations under the License.
  */
 
-import { Then, Given } from 'cucumber';
-import { expect } from 'chai';
-
-import { ItemsPage } from '../pages/items.po';
+import { Then, Given, When } from 'cypress-cucumber-preprocessor/steps';
+import { ItemsPage } from '../../pages/items.po';
 
 const page = new ItemsPage();
 
 Then('I should see Item named {string}', async (name) => {
-  expect(await page.getItemTitle().getText()).equals(name);
+  page.getItemTitle().should('have.text', name);
 });
 
 Then('I should see Item description as {string}', async (description) => {
-  expect(await page.getItemDescription().getText()).equals(description);
+  page.getItemDescription().should('contain.text', description);
 });
 
 Given('There is an item named {string}', async (name) => {
-  await page.navigateTo();
-  const link = page.getLinkByName(name);
-  if (!await link.isPresent()) {
-    page.clickButton('Create');
-    await page.getFormField('name').sendKeys(name);
-    await page.getFormField('description').sendKeys(`test item ${name}`);
-    await page.clickButton('Submit');
-  }
+  page.navigateToPath('items');
+  cy.wait('@itemList');
+  page.getLinkByName(name).then(elm => {
+    if (elm.length === 0) {
+      page.getButton('Create').click();
+      page.getFormField('name').type(name);
+      page.getFormField('description').type(`test item ${name}`);
+      page.getButton('Submit').click();
+      cy.wait('@itemCreate');
+    }
+  });
+});
+
+When('I go to items page', () => {
+  page.navigateToPath('items');
+  cy.wait('@itemList');
+});
+
+When('wait for item to load', () => {
+  cy.wait('@itemGet');
+  cy.wait('@invTransList');
 });

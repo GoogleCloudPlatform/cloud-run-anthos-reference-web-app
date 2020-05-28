@@ -28,7 +28,7 @@ export class ItemEditorComponent implements OnInit {
   isNew = true;
   loading = false;
   submitting = false;
-  itemId: string;
+  itemId: string | null = null;
 
   itemForm = new FormGroup({
     name: new FormControl(''),

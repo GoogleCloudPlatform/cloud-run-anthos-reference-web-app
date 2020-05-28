@@ -17,7 +17,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { InventoryService, Item } from 'api-client';
-import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
@@ -34,7 +33,6 @@ export class ItemsComponent implements OnInit {
 
   constructor(
     private inventoryService: InventoryService,
-    private router: Router,
   ) { }
 
   ngOnInit() {

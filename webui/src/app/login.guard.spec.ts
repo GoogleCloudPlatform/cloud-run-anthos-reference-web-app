@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { TestBed, async, inject } from '@angular/core/testing';
+import { TestBed, inject } from '@angular/core/testing';
 
 import { LoginGuard } from './login.guard';
 import { HttpHeaders } from '@angular/common/http';

@@ -32,6 +32,7 @@ describe('UsersComponent', () => {
     constructor() {}
 
     collection<T>(pathOrRef: string|CollectionReference, queryFn?: QueryFn): AngularFirestoreCollection<T> {
+      // @ts-ignore
       const response =  new AngularFirestoreCollection<T>(null, null, null);
       response.valueChanges = (): any => {
         return new Observable();

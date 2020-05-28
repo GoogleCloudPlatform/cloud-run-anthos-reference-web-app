@@ -106,7 +106,10 @@ test-webui-local: webui/api-client webui/node_modules
 	cd webui && npm run test -- --watch=false --browsers=ChromeHeadless
 
 test-webui-e2e-local: webui/api-client webui/node_modules
-	cd webui && npm run e2e -- --dev-server-target= --base-url=http://localhost:4200 
+	cd webui && npm run e2e
+
+test-webui-e2e-prod: webui/api-client webui/node_modules
+	cd webui && npm run e2e -- --headless --config baseUrl=https://${DOMAIN}
 
 ## RULES FOR CLOUD DEVELOPMENT
 GCLOUD_BUILD=gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --verbosity=info .
