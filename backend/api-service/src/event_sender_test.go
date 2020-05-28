@@ -53,7 +53,7 @@ func TestNewBrokerEventSender(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected success; got %s", err)
 	}
-	if (sender == nil) {
+	if sender == nil {
 		t.Fatalf("Expected a sender")
 	}
 

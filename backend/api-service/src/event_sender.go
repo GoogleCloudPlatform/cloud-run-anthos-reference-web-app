@@ -25,7 +25,7 @@ type EventSender interface {
 }
 
 type brokerEventSender struct {
-	client cloudevents.Client
+	client   cloudevents.Client
 	hostname string
 }
 
