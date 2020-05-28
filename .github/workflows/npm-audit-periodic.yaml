@@ -15,8 +15,8 @@
 name: "npm-audit-periodic"
 
 on:
-  push:
-    branches: [ ssmall/npm-audit-workflow ]
+  schedule:
+      - cron: '0 7 * * 1-5'
 jobs:
 
   npm-audit-periodic:
