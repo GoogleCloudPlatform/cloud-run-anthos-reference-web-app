@@ -49,17 +49,6 @@ jobs:
     - run: go get -u github.com/google/addlicense
     - run: addlicense -check .
   
-  npm-audit-advisory:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
-      with:
-        node-version: '12.16.2'
-    - working-directory: ./webui
-      run: npm audit
-  
   webui-lint:
     runs-on: ubuntu-latest
 

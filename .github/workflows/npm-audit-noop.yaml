@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "no-op"
+name: "non-blocking"
 
 on:
   pull_request:
@@ -26,3 +26,14 @@ jobs:
 
     steps:
     - run: echo "No changes to package dependencies!"
+
+  npm-audit-advisory:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.16.2'
+    - working-directory: ./webui
+      run: npm audit
