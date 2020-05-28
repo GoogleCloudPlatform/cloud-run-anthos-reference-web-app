@@ -24,31 +24,22 @@ type EventSender interface {
 	SendInventoryTransactionEvent(inventoryTransaction InventoryTransaction) error
 }
 
-// BrokerEventSender sends cloudevents to a Broker for API actions
-type BrokerEventSender struct {
-	client   cloudevents.Client
+type brokerEventSender struct {
+	client cloudevents.Client
 	hostname string
 }
 
-// Creates a new BrokerEventSender
-func NewBrokerEventSender(eventBrokerHostname string) (*BrokerEventSender, error) {
-	//p, err := cloudevents.NewHTTP(cloudevents.WithTarget(eventBrokerHostname))
-	//if err != nil {
-	//	return nil, err
-	//}
-	//c, err := cloudevents.NewClient(p, cloudevents.WithTimeNow())
-	//if err != nil {
-	//		return nil, err
-	//}
+// Creates a new brokerEventSender
+func NewBrokerEventSender(eventBrokerHostname string) (EventSender, error) {
 	c, err := cloudevents.NewDefaultClient()
 	if err != nil {
 		return nil, err
 	}
-	return &BrokerEventSender{c, eventBrokerHostname}, nil
+	return &brokerEventSender{c, eventBrokerHostname}, nil
 }
 
 // Send an event for the given InventoryTransaction
-func (s *BrokerEventSender) SendInventoryTransactionEvent(inventoryTransaction InventoryTransaction) error {
+func (s brokerEventSender) SendInventoryTransactionEvent(inventoryTransaction InventoryTransaction) error {
 	event := inventoryTransactionToEvent(inventoryTransaction)
 	ctx := cloudevents.ContextWithTarget(context.Background(), s.hostname)
 	if result := s.client.Send(ctx, event); !cloudevents.IsACK(result) {

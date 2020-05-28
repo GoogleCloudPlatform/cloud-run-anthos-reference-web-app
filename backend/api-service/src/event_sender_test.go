@@ -51,13 +51,21 @@ func (t TargetCheckingSender) Send(ctx context.Context, m binding.Message, trans
 func TestNewBrokerEventSender(t *testing.T) {
 	sender, err := NewBrokerEventSender(eventBrokerHostname)
 	if err != nil {
-		t.Errorf("Expected success; got %s", err)
+		t.Fatalf("Expected success; got %s", err)
 	}
-	if sender.client == nil {
+	if (sender == nil) {
+		t.Fatalf("Expected a sender")
+	}
+
+	s, ok := sender.(*brokerEventSender)
+	if !ok {
+		t.Fatalf("Expected to get a brokerEventSender %s, %s", s, sender)
+	}
+	if s.client == nil {
 		t.Errorf("Expected a client")
 	}
-	if eventBrokerHostname != sender.hostname {
-		t.Errorf("Expected %s; got %s", eventBrokerHostname, sender.hostname)
+	if eventBrokerHostname != s.hostname {
+		t.Errorf("Expected %s; got %s", eventBrokerHostname, s.hostname)
 	}
 }
 
@@ -69,7 +77,7 @@ func TestSendInventoryTransactionEventSuccess(t *testing.T) {
 	expectedEvent.SetData(cloudevents.ApplicationJSON, inventoryTransaction)
 
 	mockClient, eventCh := test.NewMockSenderClient(t, 1)
-	brokerEventSender := BrokerEventSender{mockClient, eventBrokerHostname}
+	brokerEventSender := brokerEventSender{mockClient, eventBrokerHostname}
 	err := brokerEventSender.SendInventoryTransactionEvent(inventoryTransaction)
 	if err != nil {
 		t.Errorf("Expected success; got %s", err)
@@ -82,10 +90,10 @@ func TestSendInventoryTransactionEventSuccess(t *testing.T) {
 
 func TestSendInventoryTransactionEventError(t *testing.T) {
 	mockClient, _ := client.New(TargetCheckingSender{})
-	brokerEventSender := BrokerEventSender{mockClient, "bad host name"}
+	brokerEventSender := brokerEventSender{mockClient, "bad host name"}
 	err := brokerEventSender.SendInventoryTransactionEvent(inventoryTransaction)
 	if err == nil {
-		t.Errorf("Expected an error.")
+		t.Fatalf("Expected an error.")
 	}
 	if !strings.HasPrefix(err.Error(), incorrectTargetErrorStringForTest) {
 		t.Errorf("Expected a different error; got %s", err)
@@ -94,7 +102,7 @@ func TestSendInventoryTransactionEventError(t *testing.T) {
 
 func TestSendInventoryTransactionEventCheckHostname(t *testing.T) {
 	mockClient, _ := client.New(TargetCheckingSender{})
-	brokerEventSender := BrokerEventSender{mockClient, eventBrokerHostname}
+	brokerEventSender := brokerEventSender{mockClient, eventBrokerHostname}
 	err := brokerEventSender.SendInventoryTransactionEvent(inventoryTransaction)
 	if err != nil {
 		t.Errorf("Expected success; got %s", err)
