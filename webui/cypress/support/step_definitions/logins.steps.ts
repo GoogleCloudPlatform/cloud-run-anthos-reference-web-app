@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference types="Cypress" />
 
 import { Given } from 'cypress-cucumber-preprocessor/steps';
 
