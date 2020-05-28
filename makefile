@@ -106,7 +106,7 @@ test-webui-local: webui/api-client webui/node_modules
 	cd webui && npm run test -- --watch=false --browsers=ChromeHeadless
 
 test-webui-e2e-local: webui/api-client webui/node_modules
-	cd webui && npm run e2e -- headed
+	cd webui && npm run e2e
 
 test-webui-e2e-prod: webui/api-client webui/node_modules
 	cd webui && npm run e2e -- --headless --config baseUrl=https://${DOMAIN}
