@@ -34,7 +34,6 @@ Before(async () => {
   cy.route('DELETE', '/api/locations/**').as('locationDelete');
   cy.route('POST', '/api/inventoryTransactions').as('invTransCreate');
   cy.route('GET', '/api/*/*/inventoryTransactions').as('invTransList');
-  // cy.route('GET', '/api/locations/*/inventoryTransactions').as('locationTransList');
   cy.route('POST', 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword*').as('verifyPassword');
   cy.route('POST', 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo*').as('getAccountInfo');
 });

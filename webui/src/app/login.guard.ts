@@ -28,8 +28,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class LoginGuard implements CanActivate {
 
-  private user: firebase.User;
-
   constructor(
     private afAuth: AngularFireAuth,
     private router: Router,

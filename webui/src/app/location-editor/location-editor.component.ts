@@ -28,7 +28,7 @@ export class LocationEditorComponent implements OnInit {
   isNew = true;
   loading = false;
   submitting = false;
-  locationId: string;
+  locationId: string | null = null;
 
   locationForm = new FormGroup({
     name: new FormControl(''),

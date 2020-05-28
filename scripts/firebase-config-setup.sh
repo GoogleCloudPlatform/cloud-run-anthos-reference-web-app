@@ -28,23 +28,20 @@ usage() {
   exit 1
 }
 
-readonly PROJECT_ID="$1"
+export readonly PROJECT_ID="$1"
 readonly APP_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-readonly FIREBASECONFIG_JS="${APP_ROOT}/webui/firebaseConfig.js"
+readonly FIREBASECONFIG_SAMPLE="${APP_ROOT}/webui/firebaseConfig.sample.ts"
+readonly FIREBASECONFIG_JS="${APP_ROOT}/webui/firebaseConfig.ts"
 
 if [[ "$#" -ne 2 ]]; then
   usage
 fi
 
-readonly API_KEY="$2"
+export readonly API_KEY="$2"
+echo ${API_KEY}
 
-cat > "${FIREBASECONFIG_JS}" << FIREBASECONFIG
-export const firebaseConfig = {
-  "projectId": "${PROJECT_ID}",
-  "apiKey": "${API_KEY}",
-  "authDomain": "${PROJECT_ID}.firebaseapp.com"
-};
-FIREBASECONFIG
+cat ${FIREBASECONFIG_SAMPLE}
+cat ${FIREBASECONFIG_SAMPLE} | envsubst > ${FIREBASECONFIG_JS}
 
 echo
 echo "Wrote to $(realpath ${FIREBASECONFIG_JS}):"

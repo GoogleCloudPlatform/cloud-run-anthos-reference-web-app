@@ -45,7 +45,7 @@ testem.log
 .DS_Store
 Thumbs.db
 
-firebaseConfig.js
+firebaseConfig.ts
 cypress/credentials.ts
 cypress/videos
 cypress/screenshots

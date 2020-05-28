@@ -14,27 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-
-@Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
-})
-export class LoginComponent implements OnInit {
-  returnUrl: string | null = null;
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-  ) { }
-
-  ngOnInit(): void {
-    this.returnUrl = this.route.snapshot.queryParams.returnUrl || '/';
-  }
-
-  handleLoginSuccess(): void {
-    this.router.navigate([this.returnUrl]);
-  }
-}
+export const firebaseConfig: any = {
+  projectId: '${PROJECT_ID}',
+  apiKey: '${API_KEY}',
+  authDomain: '${PROJECT_ID}.firebaseapp.com'
+};

@@ -24,7 +24,7 @@ import { Item, InventoryService } from 'api-client';
   styleUrls: ['./item-view.component.scss']
 })
 export class ItemViewComponent implements OnInit {
-  item: Item = null;
+  item: Item | null = null;
   loading = false;
 
   constructor(
@@ -56,7 +56,7 @@ export class ItemViewComponent implements OnInit {
   }
 
   handleDelete(): void {
-    if (this.item) {
+    if (this.item && this.item.id) {
       this.inventoryService.deleteItem(this.item.id).subscribe(() => {
         this.router.navigate(['/items']);
       });
