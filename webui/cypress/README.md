@@ -10,8 +10,8 @@
 
 ### Configure test credentials
 
-With the credentials of the test user, use `src/credentials.sample.ts` as an
-example to create `src/credentials.ts`
+With the credentials of the test user, use `credentials.sample.ts` as an
+example to create `credentials.ts`
 
 ## Run the test
 
@@ -20,7 +20,7 @@ You can run the e2e test against any running instance of the this application.
 Both frontend and backend need to be working together under the same URL.
 
 ```bash
-npm run e2e -- --dev-server-target= --base-url=$TARGET_URL
+npm run e2e -- --config baseUrl=$TARGET_URL
 ```
 
 `$TARGET_URL` could be `http://localhost:4200` if you run it locally,

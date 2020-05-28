@@ -3,7 +3,7 @@ Feature: Location Management
 
   Scenario: Create Location
     Given I logged in
-    When I go to "locations" page
+    When I go to locations page
     Then I should see page title "Locations"
     And I should see some entries
     When I click "Create" button
@@ -11,6 +11,7 @@ Feature: Location Management
     When I fill in "name" with "test loc 1"
     And I fill in "warehouse" with "WH1"
     And I click "Submit" button
+    And wait for "@locationCreate"
     Then I should see Location named "test loc 1"
     Then I should see Location in warehouse "WH1"
     When I click "Back" button
@@ -18,7 +19,7 @@ Feature: Location Management
     And I should see 1 more entries
 
   Scenario: Cancel Create
-    When I go to "locations" page
+    When I go to locations page
     Then I should see page title "Locations"
     And I should see some entries
     When I click "Create" button
@@ -29,19 +30,23 @@ Feature: Location Management
 
   # This scenario depends on the "Create Location" scenario.
   Scenario: Edit Location
-    When I go to "locations" page
+    When I go to locations page
     And I click on link "test loc 1"
+    And wait for location to load
     And I click "Edit" button
     Then I should see page title "Edit Location"
     And I fill in "warehouse" with "WH2"
     And I click "Submit" button
+    And wait for "@locationUpdate"
     Then I should see Location named "test loc 1"
     Then I should see Location in warehouse "WH2"
 
   # This scenario depends on the "Create Location" scenario.
   Scenario: Delete Location
-    When I go to "locations" page
+    When I go to locations page
     And I click on link "test loc 1"
+    And wait for location to load
     And I click "Delete" button
-    And I go to "locations" page
+    And wait for "@locationDelete"
+    And I go to locations page
     Then I should see 1 fewer entries

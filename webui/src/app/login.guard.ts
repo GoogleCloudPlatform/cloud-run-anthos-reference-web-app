@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable, from, of } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { InventoryService } from 'api-client';
@@ -27,8 +27,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   providedIn: 'root'
 })
 export class LoginGuard implements CanActivate {
-
-  private user: firebase.User;
 
   constructor(
     private afAuth: AngularFireAuth,
