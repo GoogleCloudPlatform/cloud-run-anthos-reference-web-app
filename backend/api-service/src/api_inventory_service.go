@@ -22,7 +22,9 @@ package service
 
 import (
 	"context"
+	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 )
@@ -32,13 +34,30 @@ import (
 // Include any external packages or services that will be required by this service.
 type InventoryApiService struct {
 	db DatabaseBackend
+	es EventSender
 }
 
 // NewInventoryApiService creates a default api service
 func NewInventoryApiService() InventoryApiServicer {
 	projectID := os.Getenv("PROJECT_ID")
+	eventingEnabled := flag.Bool("EVENTING_ENABLED", false, "true if eventing is enabled")
+	eventBrokerHostname := flag.String("EVENT_BROKER_HOSTNAME", "", "local hostname of the event broker for eventing")
+	flag.Parse()
+
 	backend := NewFirestoreBackend(projectID)
-	return &InventoryApiService{backend}
+
+	var es EventSender
+	var err error
+	if *eventingEnabled {
+		if *eventBrokerHostname == "" {
+			log.Fatalf("EVENT_BROKER_HOSTNAME must be specified if EVENTING_ENABLED is true")
+		}
+		es, err = NewBrokerEventSender(*eventBrokerHostname)
+		if err != nil {
+			log.Printf("failed to create cloudevents client: %s", err)
+		}
+	}
+	return &InventoryApiService{backend, es}
 }
 
 // DeleteItem - Delete Item by ID
@@ -190,6 +209,13 @@ func (s *InventoryApiService) NewInventoryTransaction(inventoryTransaction Inven
 	r, err := s.db.NewInventoryTransaction(ctx, &inventoryTransaction)
 	if err != nil {
 		return err
+	}
+
+	if s.es != nil {
+		err := s.es.SendInventoryTransactionEvent(inventoryTransaction)
+		if err != nil {
+			log.Printf("Failed to send event: %s ", err)
+		}
 	}
 
 	status := http.StatusCreated
