@@ -117,7 +117,7 @@ GCLOUD_BUILD=gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --verb
 cluster:
 	if ! gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; then \
 	  echo creating cluster $(CLUSTER_NAME); \
-	  $(GCLOUD_BUILD) --config cloudbuild-provision-cluster.yaml --substitutions $(call join_subs,$(PROVISION_SUBS)); \
+	  $(GCLOUD_BUILD) --config cloudbuild-provision-cluster.yaml --substitutions $(call join_subs,$(PROVISION_SUBS)) && \
 	  gcloud --project=$(PROJECT_ID) container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION); \
 	fi
 
