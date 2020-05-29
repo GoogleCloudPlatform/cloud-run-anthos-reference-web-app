@@ -12,17 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "no-op"
+name: "npm-audit-periodic"
 
 on:
-  pull_request:
-    paths-ignore:
-    - "webui/package.json"
-    - "webui/package-lock.json"
+  schedule:
+      - cron: '0 16 * * 1-5'
 jobs:
 
-  npm-audit:
+  npm-audit-periodic:
     runs-on: ubuntu-latest
 
     steps:
-    - run: echo "No changes to package dependencies!"
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.16.2'
+    - name: install dependencies
+      working-directory: ./webui
+      run: npm ci
+    - uses: oke-py/npm-audit-action@v1.5.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        dedupe_issues: true
+        working_directory: webui
+        issue_labels: vulnerability,p0
