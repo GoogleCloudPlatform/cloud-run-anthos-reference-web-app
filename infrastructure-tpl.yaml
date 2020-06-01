@@ -318,4 +318,98 @@ spec:
       triggerRules:
       - includedPaths:
         - prefix: /api
+        - prefix: /users
   principalBinding: USE_ORIGIN
+---
+# Allow non-mTLS peer traffic in the application's namespace
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: web-app-permissive
+  namespace: ${NAMESPACE}
+spec:
+  mtls:
+    mode: PERMISSIVE
+---
+# Do not set up mutual TLS connections to the application's namespace
+# The current version of Istio bundled with CRfA does not suppport mutual TLS.
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: disable-mtls
+  namespace: ${NAMESPACE}
+spec:
+  host: "*.${NAMESPACE}.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+---
+# Require a valid token
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+ name: require-valid-token
+ namespace: ${ISTIO_INGRESS_NAMESPACE}
+spec:
+  action: DENY
+  rules:
+  - from:
+    - source:
+        notRequestPrincipals: ["*"]
+---
+# Allow GETs
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+ name: api-allow-get
+ namespace: ${ISTIO_INGRESS_NAMESPACE}
+spec:
+  rules:
+  - from:
+    - source:
+        requestPrincipals: ["https://securetoken.google.com/${PROJECT_ID}/*"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/api*", "/users*"]
+---
+# Allow Admin access to all API paths + methods
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: api-allow-admin
+  namespace: ${ISTIO_INGRESS_NAMESPACE}
+spec:
+  rules:
+  - from:
+    - source:
+        requestPrincipals: ["https://securetoken.google.com/${PROJECT_ID}/*"]
+    to:
+    - operation:
+        paths: ["/api*", "/users*"]
+    when:
+    - key: request.auth.claims[role]
+      values: ["admin"]
+    - key: request.auth.claims[iss]
+      values: ["https://securetoken.google.com/${PROJECT_ID}"]
+---
+# Allow workers to create inventory transactions
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: api-allow-workers
+  namespace: ${ISTIO_INGRESS_NAMESPACE}
+spec:
+  rules:
+  - from:
+    - source:
+        requestPrincipals: ["https://securetoken.google.com/${PROJECT_ID}/*"]
+    to:
+    - operation:
+        methods: ["POST"]
+        paths: ["/api/inventoryTransactions"]
+    when:
+    - key: request.auth.claims[iss]
+      values: ["https://securetoken.google.com/${PROJECT_ID}"]
+    - key: request.auth.claims[role]
+      values: ["worker"]
