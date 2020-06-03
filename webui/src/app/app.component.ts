@@ -27,7 +27,7 @@ import { AuthProcessService } from 'ngx-auth-firebaseui';
 export class AppComponent implements OnInit {
   title = 'CRfA Canonical Web App';
 
-  private _photoUrl: string | null = null
+  private photoUrl: string | null = null;
 
   constructor(
     public afAuth: AngularFireAuth,
@@ -38,13 +38,13 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.afAuth.onAuthStateChanged((u: firebase.User | null) => {
       if (u) {
-        this._photoUrl = u.photoURL
+        this.photoUrl = u.photoURL;
       }
-    })
+    });
   }
 
-  public get avatarImageUrl() : string | null {
-    return this._photoUrl
+  public get avatarImageUrl(): string | null {
+    return this.photoUrl;
   }
 
   signOut() {

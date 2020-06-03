@@ -49,7 +49,7 @@ export class BasePage {
   }
 
   getAvatar() {
-    return cy.get('.avatar')
+    return cy.get('.avatar');
   }
 
 }
