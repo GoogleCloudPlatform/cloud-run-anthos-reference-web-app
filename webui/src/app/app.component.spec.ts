@@ -66,7 +66,7 @@ describe('AppComponent', () => {
       providers: [
         {
           provide: AngularFireAuth,
-          useValue: { user: of(null) },
+          useValue: { user: of(null), onAuthStateChanged: () => null },
         },
       ],
     })
