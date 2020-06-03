@@ -48,4 +48,8 @@ export class BasePage {
     return cy.get('mat-progress-bar');
   }
 
+  getAvatar() {
+    return cy.get('.avatar')
+  }
+
 }
