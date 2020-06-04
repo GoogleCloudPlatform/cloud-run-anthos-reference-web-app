@@ -34,6 +34,7 @@ steps:
     - name: 'google/cloud-sdk:latest'
       id: Create DNS managed zone
       args:
+      - gcloud
       - dns
       - managed-zones
       - create
