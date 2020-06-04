@@ -43,6 +43,8 @@ describe('AppComponent', () => {
     projectId: 'unit test'
   };
 
+  const onAuthStateChangedSpy = jasmine.createSpy("onAuthStateChanged", (cb: (u: any) => any) => {})
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ AppComponent ],
@@ -66,7 +68,7 @@ describe('AppComponent', () => {
       providers: [
         {
           provide: AngularFireAuth,
-          useValue: { user: of(null), onAuthStateChanged: () => null },
+          useValue: { user: of(null), onAuthStateChanged: onAuthStateChangedSpy },
         },
       ],
     })
@@ -82,4 +84,23 @@ describe('AppComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should set avatar image url', () => {
+    const expectedUrl = 'http://example.com';
+    const userSpy = {photoURL: expectedUrl};
+
+    expect(onAuthStateChangedSpy).toHaveBeenCalledWith(jasmine.any(Function));
+    const [ cb ] = onAuthStateChangedSpy.calls.mostRecent().args;
+    cb(userSpy);
+
+    expect(component.avatarImageUrl).toBe(expectedUrl);
+  })
+
+  it('should not set avatar image url when user is null', () => {
+    expect(onAuthStateChangedSpy).toHaveBeenCalledWith(jasmine.any(Function));
+    const [ cb ] = onAuthStateChangedSpy.calls.mostRecent().args;
+    cb(null);
+
+    expect(component.avatarImageUrl).toBeNull();
+  })
 });
