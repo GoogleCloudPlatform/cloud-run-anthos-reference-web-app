@@ -31,4 +31,18 @@ steps:
       id: DEBUG print env.mk
       entrypoint: /bin/cat
       args: ["env.mk"]
+    - name: 'google/cloud-sdk:latest'
+      id: Create DNS managed zone
+      args:
+      - dns
+      - managed-zones
+      - create
+      - ${_MANAGED_ZONE_NAME}
+      - --description="Managed zone for e2e testing See ${_HEAD_REPO_URL}/pull/${_PR_NUMBER}"
+      - --dns-name=${_DNS_NAME}
+      - --visibility=public
+      substitutions:
+        _DNS_NAME: e2e-test-${SHORT_SHA}.thisisatest.app
+        _MANAGED_ZONE_NAME: e2e-test-${SHORT_SHA}
+
     
