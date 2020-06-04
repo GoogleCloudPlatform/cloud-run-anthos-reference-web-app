@@ -27,8 +27,8 @@ import { InventoryTransactionDialogComponent } from '../inventory-transaction-di
   styleUrls: ['./inventory-transactions.component.scss']
 })
 export class InventoryTransactionsComponent implements OnInit {
-  @Input() itemId: string;
-  @Input() locationId: string;
+  @Input() itemId: string | null = null;
+  @Input() locationId: string | null = null;
 
   displayedColumns: string[] = ['item', 'location', 'diff', 'time', 'note', 'createdBy'];
   dataSource = new MatTableDataSource<InventoryTransaction>();

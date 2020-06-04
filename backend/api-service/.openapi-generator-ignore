@@ -6,4 +6,5 @@
 
 Dockerfile
 go.mod
+src/api_alert_service.go
 src/api_inventory_service.go

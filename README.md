@@ -1,3 +1,5 @@
+![npm-audit-periodic](https://github.com/GoogleCloudPlatform/cloud-run-anthos-reference-web-app/workflows/npm-audit-periodic/badge.svg)
+
 # Cloud Run for Anthos Reference Web App
 
 This repository, including all associated workflows and automations, represents

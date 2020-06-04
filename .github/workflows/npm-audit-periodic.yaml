@@ -12,19 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-## The steps in this Cloud Build script run the e2e test against the frontend
+name: "npm-audit-periodic"
 
-steps:
-# run Angular frontend e2e test
-- name: node:12.16
-  id: Prepare
-  waitFor: ['-']
-  dir: 'webui'
-  entrypoint: npm
-  args: ['ci']
-- name: trion/ng-cli-karma:latest
-  id: Test
-  waitFor: ['Prepare']
-  dir: 'webui'
-  entrypoint: ng
-  args: ['e2e', '--dev-server-target=', '--base-url=https://${_DOMAIN}']
+on:
+  schedule:
+      - cron: '0 16 * * 1-5'
+jobs:
+
+  npm-audit-periodic:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.16.2'
+    - name: install dependencies
+      working-directory: ./webui
+      run: npm ci
+    - uses: oke-py/npm-audit-action@v1.5.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        dedupe_issues: true
+        working_directory: webui
+        issue_labels: vulnerability,p0
+        issue_assignees: adamdkane

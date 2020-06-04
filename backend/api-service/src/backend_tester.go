@@ -29,6 +29,7 @@ type initialBackendState struct {
 	inventories           map[string]*Inventory
 	inventoryTransactions map[string]*InventoryTransaction
 	locations             map[string]*Location
+	alerts                map[string]*Alert
 }
 
 type backendTester struct {
@@ -47,6 +48,8 @@ func modelLess(a, b interface{}) bool {
 		return l.Id < b.(*Item).Id
 	case *Location:
 		return l.Id < b.(*Location).Id
+	case *Alert:
+		return l.Id < b.(*Alert).Id
 	default:
 		panic(fmt.Sprintf("unknown type: %v", a))
 	}
@@ -121,6 +124,48 @@ func (bt *backendTester) testDeleteLocationNotFound(t *testing.T) {
 	}
 	if nf, ok := err.(*ResourceNotFound); !ok || nf.id != want.id || nf.collection != want.collection {
 		t.Errorf("DeleteLocation(%q) returned %v, want %v", id, err, want)
+	}
+}
+
+func (bt *backendTester) testDeleteAlert(t *testing.T) {
+	ctx := context.Background()
+	id := "alert-id"
+	alert := Alert{
+		Id:            "id",
+		ItemId:        "item_id",
+		TransactionId: "transaction_id",
+		Text:          "text",
+		Timestamp:     time.Now(),
+	}
+	backend := bt.initBackend(t, initialBackendState{alerts: map[string]*Alert{id: &alert}})
+
+	err := backend.DeleteAlert(ctx, id)
+
+	if err != nil {
+		t.Fatalf("DeleteAlert(%q) = %v, want nil", id, err)
+	}
+	got, err := backend.ListAlerts(ctx)
+	if err != nil {
+		t.Fatalf("ListAlerts() returned unexpected err: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("ListAlerts() = %v should be empty", got)
+	}
+}
+
+func (bt *backendTester) testDeleteAlertNotFound(t *testing.T) {
+	ctx := context.Background()
+	id := "not-found-id"
+	backend := bt.resetBackend(t)
+	want := AlertNotFound(id)
+
+	err := backend.DeleteAlert(ctx, id)
+
+	if err == nil {
+		t.Fatalf("DeleteAlert(%q) succeeded, want error", id)
+	}
+	if nf, ok := err.(*ResourceNotFound); !ok || nf.id != want.id || nf.collection != want.collection {
+		t.Errorf("DeleteAlert(%q) returned %v, want %v", id, err, want)
 	}
 }
 
@@ -614,6 +659,47 @@ func (bt *backendTester) testListLocations(t *testing.T) {
 	}
 }
 
+func (bt *backendTester) testListAlerts(t *testing.T) {
+	alert1, alert2 := Alert{Id: "alert1-id"}, Alert{Id: "alert2-id"}
+	cases := []struct {
+		desc string
+		init initialBackendState
+		want []*Alert
+	}{
+		{
+			desc: "no alerts",
+			init: initialBackendState{},
+			want: []*Alert{},
+		},
+		{
+			desc: "single alert",
+			init: initialBackendState{alerts: map[string]*Alert{alert1.Id: &alert1}},
+			want: []*Alert{&alert1},
+		},
+		{
+			desc: "multiple alerts",
+			init: initialBackendState{alerts: map[string]*Alert{alert1.Id: &alert1, alert2.Id: &alert2}},
+			want: []*Alert{&alert1, &alert2},
+		},
+	}
+
+	for _, tc := range cases {
+		ctx := context.Background()
+		t.Run(tc.desc, func(t *testing.T) {
+			backend := bt.initBackend(t, tc.init)
+
+			got, err := backend.ListAlerts(ctx)
+
+			if err != nil {
+				t.Fatalf("ListAlerts() returned unexpected err: %v", err)
+			}
+			if !cmp.Equal(got, tc.want, cmpopts.SortSlices(modelLess)) {
+				t.Errorf("ListAlerts() = %v want %v", got, tc.want)
+			}
+		})
+	}
+}
+
 func (bt *backendTester) testNewInventoryTransaction(t *testing.T) {
 	// properties of a
 	stockedItem := Item{Id: "stocked-item"}
@@ -835,6 +921,41 @@ func (bt *backendTester) testNewLocation(t *testing.T) {
 	}
 	if v, _ := backend.GetLocation(ctx, got.Id); !cmp.Equal(v, got) {
 		t.Errorf("after backend.NewLocation(%v), backend.GetLocation(%v) = %v want %v", location, got.Id, v, got)
+	}
+}
+
+func (bt *backendTester) testNewAlert(t *testing.T) {
+	ctx := context.Background()
+	backend := bt.resetBackend(t)
+	alert := Alert{
+		Id:            "id-to-be-replaced-by-uuid",
+		ItemId:        "item_id",
+		TransactionId: "transaction_id",
+		Text:          "text",
+		Timestamp:     time.Now(),
+	}
+
+	got, err := backend.NewAlert(ctx, &alert)
+
+	if err != nil {
+		t.Fatalf("NewAlert(%v) returned unexpected err: %v", alert, err)
+	}
+	if got.Id == "" {
+		t.Errorf("NewAlert(%v) did not generate Alert.Id", alert)
+	}
+	if !cmp.Equal(got, &alert, cmpopts.IgnoreFields(Alert{}, "Id")) {
+		t.Errorf("NewAlert(%v) = %v want %v (ignoring Id field)", alert, got, alert)
+	}
+
+	v, err := backend.ListAlerts(ctx)
+	if err != nil {
+		t.Fatalf("ListAlerts() returned unexpected err: %v", err)
+	}
+	if len(v) != 1 {
+		t.Errorf("ListAlerts() = %v should have a single alert", got)
+	}
+	if !cmp.Equal(v[0], got, cmpopts.EquateApproxTime(time.Millisecond)) {
+		t.Errorf("after backend.NewAlert(%v), backend.ListAlerts())[0] = %v want %v", alert, v[0], got)
 	}
 }
 
