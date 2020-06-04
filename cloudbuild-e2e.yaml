@@ -37,12 +37,12 @@ steps:
       - dns
       - managed-zones
       - create
-      - ${_MANAGED_ZONE_NAME}
+      - $${_MANAGED_ZONE_NAME}
       - --description="Managed zone for e2e testing See ${_HEAD_REPO_URL}/pull/${_PR_NUMBER}"
-      - --dns-name=${_DNS_NAME}
+      - --dns-name=$${_DNS_NAME}
       - --visibility=public
-      substitutions:
-        _DNS_NAME: e2e-test-${SHORT_SHA}.thisisatest.app
-        _MANAGED_ZONE_NAME: e2e-test-${SHORT_SHA}
+      env:
+      - '_DNS_NAME=e2e-test-${SHORT_SHA}.thisisatest.app'
+      - '_MANAGED_ZONE_NAME=e2e-test-${SHORT_SHA}''
 
     
