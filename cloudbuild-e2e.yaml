@@ -26,7 +26,7 @@ steps:
          envsubst > env.mk
       env:
         - 'PROJECT_ID=${PROJECT_ID}'
-        - 'BUILD_ID=${BUILD_ID}'
+        - 'SHORT_SHA=${SHORT_SHA}'
     - name: 'alpine'
       id: DEBUG print env.mk
       entrypoint: /bin/cat
