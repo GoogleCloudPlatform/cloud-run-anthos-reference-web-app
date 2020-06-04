@@ -43,7 +43,7 @@ describe('AppComponent', () => {
     projectId: 'unit test'
   };
 
-  const onAuthStateChangedSpy = jasmine.createSpy("onAuthStateChanged", (cb: (u: any) => any) => {})
+  const onAuthStateChangedSpy = jasmine.createSpy('onAuthStateChanged', (cb: (u: any) => any) => {});
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -94,7 +94,7 @@ describe('AppComponent', () => {
     cb(userSpy);
 
     expect(component.avatarImageUrl).toBe(expectedUrl);
-  })
+  });
 
   it('should not set avatar image url when user is null', () => {
     expect(onAuthStateChangedSpy).toHaveBeenCalledWith(jasmine.any(Function));
@@ -102,5 +102,5 @@ describe('AppComponent', () => {
     cb(null);
 
     expect(component.avatarImageUrl).toBeNull();
-  })
+  });
 });
