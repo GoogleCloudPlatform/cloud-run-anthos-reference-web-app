@@ -36,3 +36,4 @@ jobs:
         dedupe_issues: true
         working_directory: webui
         issue_labels: vulnerability,p0
+        issue_assignees: adamdkane
