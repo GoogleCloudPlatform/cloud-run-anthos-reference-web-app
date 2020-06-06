@@ -26,7 +26,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFireModule } from '@angular/fire';
 import { NgxAuthFirebaseUIModule } from 'ngx-auth-firebaseui';
 import { appNameFactory } from './app.module';
-import { of, Observable, defer } from 'rxjs';
+import { of } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -45,8 +45,6 @@ describe('AppComponent', () => {
   };
 
   const onAuthStateChangedSpy = jasmine.createSpy('onAuthStateChanged', (cb: (u: any) => any) => {});
-
-  let testUser: Object | null = null
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -71,7 +69,7 @@ describe('AppComponent', () => {
       providers: [
         {
           provide: AngularFireAuth,
-          useValue: { user: defer(() => of(testUser)), onAuthStateChanged: onAuthStateChangedSpy },
+          useValue: { user: of(null), onAuthStateChanged: onAuthStateChangedSpy },
         },
       ],
     })
@@ -84,41 +82,43 @@ describe('AppComponent', () => {
     fixture.detectChanges();
   });
 
-  afterEach(() => {
-    testUser = null // need to reset to null every time
-  })
-
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
   it('should display login when user is null', () => {
     expect(component.avatarImageUrl).toBeNull();
-    expect(fixture.debugElement.query(By.css('img.avatar'))).toBeNull()
-    expect(fixture.debugElement.query(By.css('mat-icon.avatar'))).toBeNull()
-    expect(fixture.debugElement.query(By.css('ngx-auth-firebaseui-providers'))).toBeTruthy()
+    expect(fixture.debugElement.query(By.css('img.avatar'))).toBeNull();
+    expect(fixture.debugElement.query(By.css('mat-icon.avatar'))).toBeNull();
+    expect(fixture.debugElement.query(By.css('ngx-auth-firebaseui-providers'))).toBeTruthy();
   });
 
-  it('should set avatar image url', () => {
-    testUser = {}
+  it('should set avatar image url', async () => {
     const expectedUrl = 'http://example.com';
     const userSpy = {photoURL: expectedUrl};
+    const fa: any = TestBed.get(AngularFireAuth)
+    fa.user = of({})
 
     expect(onAuthStateChangedSpy).toHaveBeenCalledWith(jasmine.any(Function));
     const [ cb ] = onAuthStateChangedSpy.calls.mostRecent().args;
     cb(userSpy);
 
+    fixture.detectChanges()
+    await fixture.whenStable()
     expect(component.avatarImageUrl).toBe(expectedUrl);
     expect(fixture.debugElement.query(By.css('img.avatar'))).toBeTruthy()
     expect(fixture.debugElement.query(By.css('mat-icon.avatar'))).toBeNull()
   });
 
-  it('should not set avatar image url when user photo url is null', () => {
-    testUser = {}
+  it('should not set avatar image url when user photo url is null', async () => {
     expect(onAuthStateChangedSpy).toHaveBeenCalledWith(jasmine.any(Function));
     const [ cb ] = onAuthStateChangedSpy.calls.mostRecent().args;
     cb({photoURL: null});
+    const fa: any = TestBed.get(AngularFireAuth)
+    fa.user = of({})
 
+    fixture.detectChanges()
+    await fixture.whenStable()
     expect(component.avatarImageUrl).toBeNull();
     expect(fixture.debugElement.query(By.css('img.avatar'))).toBeNull()
     expect(fixture.debugElement.query(By.css('mat-icon.avatar'))).toBeTruthy()
