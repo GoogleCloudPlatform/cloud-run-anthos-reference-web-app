@@ -95,13 +95,13 @@ describe('AppComponent', () => {
 
   it('should set avatar image url', async () => {
     const expectedUrl = 'http://example.com';
-    const userSpy = {photoURL: expectedUrl};
+    const testUser = {photoURL: expectedUrl};
     const fa: any = TestBed.inject(AngularFireAuth);
-    fa.user = of({});
+    fa.user = of(testUser);
 
     expect(onAuthStateChangedSpy).toHaveBeenCalledWith(jasmine.any(Function));
     const [ cb ] = onAuthStateChangedSpy.calls.mostRecent().args;
-    cb(userSpy);
+    cb(testUser);
 
     fixture.detectChanges();
     await fixture.whenStable();
@@ -111,11 +111,12 @@ describe('AppComponent', () => {
   });
 
   it('should not set avatar image url when user photo url is null', async () => {
+    const testUser = {photoURL: null};
     expect(onAuthStateChangedSpy).toHaveBeenCalledWith(jasmine.any(Function));
     const [ cb ] = onAuthStateChangedSpy.calls.mostRecent().args;
-    cb({photoURL: null});
+    cb(testUser);
     const fa: any = TestBed.inject(AngularFireAuth);
-    fa.user = of({});
+    fa.user = of(testUser);
 
     fixture.detectChanges();
     await fixture.whenStable();
