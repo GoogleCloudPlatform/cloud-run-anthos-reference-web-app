@@ -23,7 +23,7 @@ steps:
   - beta
   - deployment-manager
   - deployments
-  - create
+  - update
   - cloud-build-triggers
   - --config
   - .github/infra/triggers.yaml
