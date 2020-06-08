@@ -26,7 +26,14 @@
     <mat-menu #userMenu="matMenu">
       <button mat-menu-item (click)="signOut()">Sign out</button>
     </mat-menu>
-    <img class="avatar" [src]="authProcess?.getUserPhotoUrl()" [matMenuTriggerFor]="userMenu"/>
+    <span [matMenuTriggerFor]="userMenu">
+      <span *ngIf="avatarImageUrl; else defaultAvatar">
+        <img class="avatar" [src]="avatarImageUrl" />
+      </span>
+      <ng-template #defaultAvatar>
+        <mat-icon class="avatar">account_circle</mat-icon>
+      </ng-template>
+    </span>
   </span>
   <ng-template #showLogin>
     <ngx-auth-firebaseui-providers layout="row" theme="fab" providers="['google']"></ngx-auth-firebaseui-providers>
