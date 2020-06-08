@@ -17,13 +17,13 @@
 resources:
 - type: gcp-types/cloudbuild-v1:projects.triggers.create
   name: pr-test-webui
-    properties:
-        name: pr-test-webui
-        description: Test the UI components of the reference app
-        github:
-            owner: googlecloudplatform
-            name: cloud-run-anthos-reference-web-app
-            pullRequest:
-                commentControl: COMMENTS_DISABLED
-                branch: "^ssmall/automated-cloud-build$"
-        filename: webui/cloudbuild-test.yaml
+  properties:
+    name: pr-test-webui
+    description: Test the UI components of the reference app
+    filename: webui/cloudbuild-test.yaml
+    github:
+      owner: googlecloudplatform
+      name: cloud-run-anthos-reference-web-app
+      push:
+        # commentControl: COMMENTS_DISABLED
+        branch: "^ssmall/automated-cloud-build$"
