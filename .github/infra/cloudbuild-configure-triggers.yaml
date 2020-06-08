@@ -18,13 +18,10 @@
 steps:
 - name: 'google/cloud-sdk:latest'
   id: Configure Build Triggers
+  entrypoint: /bin/bash
   args:
-  - gcloud
-  - beta
-  - deployment-manager
-  - deployments
-  - update
-  - cloud-build-triggers
-  - --config
-  - .github/infra/triggers.yaml
+  - -c
+  - |
+    gcloud beta deployment-manager deployments update cloud-build-triggers --config .github/infra/triggers.yaml || \
+      gcloud beta deployment-manager deployments create cloud-build-triggers --config .github/infra/triggers.yaml
     
