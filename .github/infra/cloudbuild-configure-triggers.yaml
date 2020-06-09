@@ -32,4 +32,3 @@ steps:
   - -c
   - |
     gcloud beta builds triggers import --source=.github/infra/meta-trigger.yaml
-    
