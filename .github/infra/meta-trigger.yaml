@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: pr-test-webui
-description: Test the UI components of the reference app
-filename: webui/cloudbuild-test.yaml
+name: configure-cloud-build-triggers
+description: Configure Cloud Build triggers based on source control
+filename: .github/infra/cloudbuild-configure-triggers.yaml
+includedFiles:
+- .github/infra/**
 github:
   owner: GoogleCloudPlatform
   name: cloud-run-anthos-reference-web-app
