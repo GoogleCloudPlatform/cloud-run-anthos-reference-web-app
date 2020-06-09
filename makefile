@@ -23,10 +23,16 @@ BACKEND_SUBS = $(CLUSTER_ARGS) \
 	_BACKEND_IMAGE_NAME=$(BACKEND_IMAGE_NAME) \
 	_BACKEND_KSA=$(BACKEND_KSA) \
 	_BACKEND_SERVICE_NAME=$(BACKEND_SERVICE_NAME) \
-	_EVENTING_ENABLED=$(EVENTING_ENABLED) \
 	_EVENT_BROKER_HOSTNAME=$(EVENT_BROKER_HOSTNAME) \
+	_EVENTING_ENABLED=$(EVENTING_ENABLED) \
 	_GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
+
+# backend/inventory-state-service/cloudbuild.yaml
+INVENTORY_STATE_SERVICE_SUBS = $(CLUSTER_ARGS) \
+	_INVENTORY_STATE_IMAGE_NAME=$(INVENTORY_STATE_IMAGE_NAME) \
+	_INVENTORY_STATE_SERVICE_NAME=$(INVENTORY_STATE_SERVICE_NAME) \
+	_BACKEND_CLUSTER_HOST_NAME=$(BACKEND_CLUSTER_HOST_NAME)
 
 BACKEND_TEST_SUBS = _GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
@@ -60,7 +66,8 @@ CUSTOM_TEMPLATES=backend/templates
 OPENAPI_GEN_JAR=openapi-generator-cli-4.3.0.jar
 OPENAPI_GEN_URL="https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/4.3.0/$(OPENAPI_GEN_JAR)"
 OPENAPI_GEN_SERVER_ARGS=-g go-server -i openapi.yaml -o backend/api-service --api-name-suffix= --git-user-id=$(GIT_USER_ID) --git-repo-id=$(GIT_REPO_ID)/api-service --package-name=service -t $(CUSTOM_TEMPLATES) --additional-properties=sourceFolder=src
-OPENAPI_GEN_CLIENT_ARGS=-g typescript-angular -i openapi.yaml -o webui/api-client
+OPENAPI_GEN_TYPESCRIPT_CLIENT_ARGS=-g typescript-angular -i openapi.yaml -o webui/api-client
+OPENAPI_GEN_GO_CLIENT_ARGS=-g go -i openapi.yaml -o backend/api-client --package-name=client
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
 
@@ -75,13 +82,16 @@ clean:
 	wget $(OPENAPI_GEN_URL) -P /tmp/
 
 webui/api-client: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml
-	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_CLIENT_ARGS)
+	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_TYPESCRIPT_CLIENT_ARGS)
 
 webui/node_modules:
 	cd webui && npm ci
 
 backend/api-service/src/api/openapi.yaml: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml $(CUSTOM_TEMPLATES)/*.mustache
 	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_SERVER_ARGS)
+
+backend/api-client/openapi.yaml: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml
+	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_GO_CLIENT_ARGS)
 
 # Uses port 4200
 run-local-webui: webui/api-client
@@ -90,6 +100,9 @@ run-local-webui: webui/api-client
 # Uses port 8080
 run-local-backend: backend/api-service/src/api/openapi.yaml
 	cd backend/api-service && go run main.go
+
+run-local-inventory-state-publisher: backend/api-client/openapi.yaml
+	cd backend/inventory-state-service && go run main.go -backend_cluster_host_name=localhost:8080
 
 lint-webui: webui/node_modules
 	cd webui && npm run lint
@@ -103,6 +116,9 @@ test-backend-local: backend/api-service/src/api/openapi.yaml
 	docker run --network=host jwilder/dockerize:0.6.1 dockerize -timeout=60s -wait=tcp://localhost:9090
 	cd backend/api-service/src && FIRESTORE_EMULATOR_HOST=localhost:9090 go test -tags=emulator -v
 	docker stop firestore-emulator
+
+test-inventory-state-service-local: backend/api-client/openapi.yaml
+	cd backend/inventory-state-service && go test -v ./...
 
 test-webui-local: webui/api-client webui/node_modules
 	cd webui && npm run test -- --watch=false --browsers=ChromeHeadless
@@ -132,6 +148,9 @@ build-webui: cluster
 test-backend:
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild-test.yaml --substitutions $(call join_subs,$(BACKEND_TEST_SUBS))
 
+test-inventory-state-service:
+	$(GCLOUD_BUILD) --config ./backend/inventory-state-service/cloudbuild-test.yaml
+
 test-webui:
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml
 
@@ -141,9 +160,26 @@ test-webui-e2e:
 build-backend: cluster
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild.yaml --substitutions $(call join_subs,$(BACKEND_SUBS))
 
+build-inventory-state-service: cluster
+	$(GCLOUD_BUILD) --config ./backend/inventory-state-service/cloudbuild.yaml --substitutions $(call join_subs,$(INVENTORY_STATE_SERVICE_SUBS))
+
+ifeq ($(EVENTING_ENABLED),true)
+build-eventing: build-inventory-state-service
+else
+build-eventing:
+	@echo Eventing is disabled. To enable eventing set the EVENTING_ENABLED flag to true in env.mk.
+endif
+
+ifeq ($(EVENTING_ENABLED),true)
+test-eventing: test-inventory-state-service
+else
+test-eventing:
+	@echo Eventing is disabled. To test eventing set the EVENTING_ENABLED flag to true in env.mk.
+endif
+
 build-infrastructure: cluster
 	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(call join_subs,$(INFRA_SUBS))
 
-build-all: build-infrastructure build-webui build-backend
+build-all: build-infrastructure build-webui build-backend build-eventing
 
-test: test-backend test-webui
+test: test-backend test-webui test-eventing
