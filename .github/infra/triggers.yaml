@@ -15,7 +15,7 @@
 
 # All Cloud Build triggers
 resources:
-- type: gcp-types/cloudbuild-v1:projects.triggers.create
+- type: gcp-types/cloudbuild-v1:projects.triggers
   name: pr-test-webui
   properties:
     name: pr-test-webui
