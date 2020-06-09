@@ -22,7 +22,7 @@ resources:
     description: Test the UI components of the reference app
     filename: webui/cloudbuild-test.yaml
     github:
-      owner: googlecloudplatform
+      owner: GoogleCloudPlatform
       name: cloud-run-anthos-reference-web-app
       push:
         # commentControl: COMMENTS_DISABLED
