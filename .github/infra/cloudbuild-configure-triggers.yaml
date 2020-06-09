@@ -26,6 +26,7 @@ steps:
 #       gcloud beta deployment-manager deployments create cloud-build-triggers --config .github/infra/triggers.yaml
 - name: 'google/cloud-sdk:slim'
   id: Configure webui unit tests
+  waitFor: ['-']
   entrypoint: /bin/bash
   args:
   - -c
@@ -33,6 +34,7 @@ steps:
     gcloud beta builds triggers import --source=.github/infra/webui-unittest-trigger.yaml
 - name: 'google/cloud-sdk:slim'
   id: Configure meta trigger
+  waitFor: ['-']
   entrypoint: /bin/bash
   args:
   - -c
