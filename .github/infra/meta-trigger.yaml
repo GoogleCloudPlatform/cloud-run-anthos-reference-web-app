@@ -21,5 +21,4 @@ github:
   owner: GoogleCloudPlatform
   name: cloud-run-anthos-reference-web-app
   push:
-    # commentControl: COMMENTS_DISABLED
-    branch: "^ssmall/automated-cloud-build$"
+    branch: "^master$"

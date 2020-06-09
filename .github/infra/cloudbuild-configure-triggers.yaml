@@ -16,14 +16,6 @@
 ## various build actions associated with this repository.
 
 steps:
-# - name: 'google/cloud-sdk:slim'
-#   id: Configure Build Triggers
-#   entrypoint: /bin/bash
-#   args:
-#   - -c
-#   - |
-#     gcloud beta deployment-manager deployments update cloud-build-triggers --config .github/infra/triggers.yaml || \
-#       gcloud beta deployment-manager deployments create cloud-build-triggers --config .github/infra/triggers.yaml
 - name: 'google/cloud-sdk:slim'
   id: Configure webui unit tests
   waitFor: ['-']
