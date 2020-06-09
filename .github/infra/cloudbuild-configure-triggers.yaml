@@ -16,7 +16,7 @@
 ## various build actions associated with this repository.
 
 steps:
-- name: 'google/cloud-sdk:latest'
+- name: 'google/cloud-sdk:slim'
   id: Configure Build Triggers
   entrypoint: /bin/bash
   args:
