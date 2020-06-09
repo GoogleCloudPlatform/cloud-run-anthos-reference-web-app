@@ -1,0 +1,9 @@
+name: pr-test-webui
+description: Test the UI components of the reference app
+filename: webui/cloudbuild-test.yaml
+github:
+  owner: GoogleCloudPlatform
+  name: cloud-run-anthos-reference-web-app
+  push:
+    # commentControl: COMMENTS_DISABLED
+    branch: "^ssmall/automated-cloud-build$"
