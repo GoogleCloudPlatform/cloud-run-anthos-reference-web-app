@@ -18,8 +18,8 @@ steps:
 - name: alpine
   id: Initialize Firebase Config
   waitFor: ['-']
-  entrypoint: /bin/ash
-  args: ['cp', './webui/firebaseConfig.sample.ts', './webui/firebaseConfig.ts']
+  entrypoint: /bin/cp
+  args: ['./webui/firebaseConfig.sample.ts', './webui/firebaseConfig.ts']
 # generate OpenAPI client
 - name: openapitools/openapi-generator-cli:v4.2.3
   id: Generate Client
