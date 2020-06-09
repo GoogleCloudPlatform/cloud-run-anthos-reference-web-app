@@ -15,6 +15,11 @@
 ## The steps in this Cloud Build script lint and test the frontend
 
 steps:
+- name: alpine
+  id: Initialize Firebase Config
+  waitFor: ['-']
+  entrypoint: /bin/ash
+  args: ['cp', './webui/firebaseConfig.sample.ts', './webui/firebaseConfig.ts']
 # generate OpenAPI client
 - name: openapitools/openapi-generator-cli:v4.2.3
   id: Generate Client
@@ -35,7 +40,7 @@ steps:
   args: ['run', 'lint']
 - name: trion/ng-cli-karma:latest
   id: Test
-  waitFor: ['Prepare']
+  waitFor: ['Prepare', 'Generate Client', 'Initialize Firebase Config']
   dir: 'webui'
   entrypoint: ng
   args: ['test', '--watch','false']
