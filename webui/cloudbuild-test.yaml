@@ -54,6 +54,7 @@ steps:
   - |
     set -e
     git clone ${_HEAD_REPO_URL} /tmp/${REPO_NAME}
+    cd /tmp/${REPO_NAME}
     git checkout ${COMMIT_SHA}
     mv /tmp/${REPO_NAME}/.git /workspace/
 - name: node:12.16
