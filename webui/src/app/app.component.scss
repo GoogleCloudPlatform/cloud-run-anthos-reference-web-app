@@ -30,6 +30,10 @@ mat-toolbar {
     // in IE, but we're using it as a progressive enhancement.
     object-fit: cover;
   }
+
+  mat-icon.avatar {
+    font-size: 48px;
+  }
 }
 
 h1 {

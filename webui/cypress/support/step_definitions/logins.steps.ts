@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import { Given } from 'cypress-cucumber-preprocessor/steps';
+import { Given, Then } from 'cypress-cucumber-preprocessor/steps';
 
 import { LoginPage } from '../../pages/login.po';
 
 const page = new LoginPage();
 
-Given('I logged in', async () => {
+Given('I log(ged) in', async () => {
   await page.login();
+});
+
+Then('my avatar image should be set', async () => {
+  page.getAvatar().should('exist');
 });
 
