@@ -9,7 +9,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "cypress run",
-    "cypress": "cypress open"
+    "cypress": "cypress open",
+    "report-coverage": "codecov"
   },
   "private": true,
   "dependencies": {
@@ -42,6 +43,7 @@
     "@types/cypress-cucumber-preprocessor": "^1.14.1",
     "@types/jasmine": "~3.3.8",
     "@types/node": "^12.11.1",
+    "codecov": "^3.7.0",
     "codelyzer": "^5.1.2",
     "cypress": "^4.5.0",
     "cypress-cucumber-preprocessor": "^2.3.1",

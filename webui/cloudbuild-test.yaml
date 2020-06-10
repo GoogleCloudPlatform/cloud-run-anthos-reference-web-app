@@ -43,4 +43,10 @@ steps:
   waitFor: ['Prepare', 'Generate Client', 'Initialize Firebase Config']
   dir: 'webui'
   entrypoint: ng
-  args: ['test', '--watch','false']
+  args: ['test', '--watch=false', '--code-coverage']
+- name: node:12.16
+  id: Upload coverage report
+  waitFor: ['Test']
+  dir: 'webui'
+  entrypoint: npm
+  args: ['run', 'report-coverage']
