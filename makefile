@@ -29,6 +29,11 @@ BACKEND_SUBS = $(CLUSTER_ARGS) \
 BACKEND_TEST_SUBS = _GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
 
+USER_SVC_SUBS = $(CLUSTER_ARGS) \
+	_USER_SVC_IMAGE=$(USER_SVC_IMAGE_NAME) \
+	_USER_SVC_KSA=$(USER_SVC_KSA) \
+	_USER_SVC_NAME=$(USER_SVC_NAME) \
+
 FRONTEND_E2E_SUBS = _DOMAIN=$(DOMAIN)
 
 # cloudbuild.yaml
@@ -36,9 +41,13 @@ INFRA_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 	_BACKEND_GSA=$(BACKEND_GSA) \
 	_BACKEND_KSA=$(BACKEND_KSA) \
 	_BACKEND_SERVICE_HOST_NAME=$(BACKEND_SERVICE_HOST_NAME) \
+	_USER_SVC_KSA=$(USER_SVC_KSA) \
+	_USER_SVC_GSA=$(USER_SVC_GSA) \
 	_DOMAIN=$(DOMAIN) \
 	_MANAGED_ZONE_NAME=$(MANAGED_ZONE_NAME) \
 	_SSL_CERT_NAME=$(SSL_CERT_NAME)
+
+	# _USER_SVC_HOST_NAME=$(USER_SVC_HOST_NAME) \
 
 # cloudbuild-provision-cluster.yaml
 PROVISION_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
@@ -138,6 +147,9 @@ test-webui-e2e:
 
 build-backend: cluster
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild.yaml --substitutions $(call join_subs,$(BACKEND_SUBS))
+
+build-userservice: cluster
+	$(GCLOUD_BUILD) --config ./backend/user-service/cloudbuild.yaml --substitutions $(call join_subs,$(USER_SVC_SUBS))
 
 build-infrastructure: cluster
 	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(call join_subs,$(INFRA_SUBS))

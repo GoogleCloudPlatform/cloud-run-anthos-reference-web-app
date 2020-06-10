@@ -79,9 +79,7 @@ app.put(
   }
 );
 
-admin.initializeApp({
-  credential: admin.credential.applicationDefault(),
-});
+admin.initializeApp({});
 admin.auth();
 
 /**
