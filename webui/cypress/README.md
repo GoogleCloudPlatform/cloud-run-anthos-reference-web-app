@@ -25,3 +25,6 @@ npm run e2e -- --config baseUrl=$TARGET_URL
 
 `$TARGET_URL` could be `http://localhost:4200` if you run it locally,
 or `https://$DOMAIN` if you run it on Google Cloud.
+
+[Identity Platform Providers]: https://console.cloud.google.com/customer-identity/providers
+[Identity Platform Users]: https://console.cloud.google.com/customer-identity/users
