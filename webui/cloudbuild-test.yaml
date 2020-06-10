@@ -53,13 +53,16 @@ steps:
   - -c
   - |
     set -e
-    git clone ${_HEAD_REPO_URL} /tmp/${REPO_NAME}
+    git clone --branch ${_HEAD_BRANCH} ${_HEAD_REPO_URL} /tmp/${REPO_NAME}
     cd /tmp/${REPO_NAME}
     git checkout ${COMMIT_SHA}
     mv /tmp/${REPO_NAME}/.git /workspace/
-- name: node:12.16
+- name: gcr.io/cloud-builders/curl
   id: Upload coverage report
   waitFor: ['Fetch .git directory', 'Test']
   dir: 'webui'
-  entrypoint: npm
-  args: ['run', 'report-coverage']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    curl -s https://codecov.io/bash | bash
