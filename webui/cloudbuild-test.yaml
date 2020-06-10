@@ -57,7 +57,7 @@ steps:
     cd /tmp/${REPO_NAME}
     git checkout ${COMMIT_SHA}
     mv /tmp/${REPO_NAME}/.git /workspace/
-- name: gcr.io/cloud-builders/curl
+- name: gcr.io/cloud-builders/git
   id: Upload coverage report
   waitFor: ['Fetch .git directory', 'Test']
   dir: 'webui'
@@ -65,4 +65,5 @@ steps:
   args:
   - -c
   - |
+    apt update && apt install curl
     curl -s https://codecov.io/bash | bash
