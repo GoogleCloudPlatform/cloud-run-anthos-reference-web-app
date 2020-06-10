@@ -44,9 +44,14 @@ steps:
   dir: 'webui'
   entrypoint: ng
   args: ['test', '--watch=false', '--code-coverage']
+# the Fetch repo step is only necessary to work around https://issuetracker.google.com/issues/136435027
+- name: gcr.io/cloud-builders/git
+  id: Fetch repo
+  waitFor: ['Test']
+  args: ["fetch", "--unshallow", "--tags"]
 - name: node:12.16
   id: Upload coverage report
-  waitFor: ['Test']
+  waitFor: ['Fetch repo', 'Test']
   dir: 'webui'
   entrypoint: npm
   args: ['run', 'report-coverage']
