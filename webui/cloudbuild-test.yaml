@@ -46,12 +46,19 @@ steps:
   args: ['test', '--watch=false', '--code-coverage']
 # the Fetch repo step is only necessary to work around https://issuetracker.google.com/issues/136435027
 - name: gcr.io/cloud-builders/git
-  id: Fetch repo
-  waitFor: ['Test']
-  args: ["fetch", "--unshallow", "--tags"]
+  id: Fetch .git directory
+  waitFor: ['-']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    set -e
+    git clone ${_HEAD_REPO_URL} /tmp/${REPO_NAME}
+    git checkout ${COMMIT_SHA}
+    mv /tmp/${REPO_NAME}/.git /workspace/
 - name: node:12.16
   id: Upload coverage report
-  waitFor: ['Fetch repo', 'Test']
+  waitFor: ['Fetch .git directory', 'Test']
   dir: 'webui'
   entrypoint: npm
   args: ['run', 'report-coverage']
