@@ -33,6 +33,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { By } from '@angular/platform-browser';
 
 
 describe('AppComponent', () => {
@@ -42,6 +43,8 @@ describe('AppComponent', () => {
   const firebaseConfig = {
     projectId: 'unit test'
   };
+
+  const onAuthStateChangedSpy = jasmine.createSpy('onAuthStateChanged', (cb: (u: any) => any) => {});
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -66,7 +69,7 @@ describe('AppComponent', () => {
       providers: [
         {
           provide: AngularFireAuth,
-          useValue: { user: of(null) },
+          useValue: { user: of(null), onAuthStateChanged: onAuthStateChangedSpy },
         },
       ],
     })
@@ -81,5 +84,44 @@ describe('AppComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should display login when user is null', () => {
+    expect(component.avatarImageUrl).toBeNull();
+    expect(fixture.debugElement.query(By.css('img.avatar'))).toBeNull();
+    expect(fixture.debugElement.query(By.css('mat-icon.avatar'))).toBeNull();
+    expect(fixture.debugElement.query(By.css('ngx-auth-firebaseui-providers'))).toBeTruthy();
+  });
+
+  it('should set avatar image url', async () => {
+    const expectedUrl = 'http://example.com';
+    const testUser = {photoURL: expectedUrl};
+    const fa: any = TestBed.inject(AngularFireAuth);
+    fa.user = of(testUser);
+
+    expect(onAuthStateChangedSpy).toHaveBeenCalledWith(jasmine.any(Function));
+    const [ cb ] = onAuthStateChangedSpy.calls.mostRecent().args;
+    cb(testUser);
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.avatarImageUrl).toBe(expectedUrl);
+    expect(fixture.debugElement.query(By.css('img.avatar'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('mat-icon.avatar'))).toBeNull();
+  });
+
+  it('should not set avatar image url when user photo url is null', async () => {
+    const testUser = {photoURL: null};
+    expect(onAuthStateChangedSpy).toHaveBeenCalledWith(jasmine.any(Function));
+    const [ cb ] = onAuthStateChangedSpy.calls.mostRecent().args;
+    cb(testUser);
+    const fa: any = TestBed.inject(AngularFireAuth);
+    fa.user = of(testUser);
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.avatarImageUrl).toBeNull();
+    expect(fixture.debugElement.query(By.css('img.avatar'))).toBeNull();
+    expect(fixture.debugElement.query(By.css('mat-icon.avatar'))).toBeTruthy();
   });
 });
