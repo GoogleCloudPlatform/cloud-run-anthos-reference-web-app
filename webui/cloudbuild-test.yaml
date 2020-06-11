@@ -48,7 +48,7 @@ steps:
   id: Get codecov token
   waitFor: ['-']
   entrypoint: 'bash'
-  args: [ '-c', 'gcloud secrets versions access latest --secret=codecov-token > codecov-token.txt' ]
+  args: [ '-c', 'gcloud secrets versions access latest --secret=codecov-token > /workspace/codecov-token.txt' ]
 - name: node:12.16
   id: Upload coverage report
   waitFor: ['Test', 'Get codecov token']
@@ -57,5 +57,5 @@ steps:
   args: 
   - -c
   - |
-    TOKEN=$$(<codecov-token.txt)
+    TOKEN=$$(</workspace/codecov-token.txt)
     npm report-coverage -- --disable=detect --commit=${COMMIT_SHA} --branch=${BRANCH_NAME} --token=$${TOKEN}
