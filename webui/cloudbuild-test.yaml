@@ -45,12 +45,12 @@ steps:
   entrypoint: ng
   args: ['test', '--watch=false', '--code-coverage']
 - name: gcr.io/cloud-builders/gcloud
-  id: 
+  id: Get codecov token
   entrypoint: 'bash'
   args: [ '-c', 'gcloud secrets versions access latest --secret=codecov-token > codecov-token.txt' ]
 - name: node:12.16
   id: Upload coverage report
-  waitFor: ['Test']
+  waitFor: ['Test', 'Get codecov token']
   dir: 'webui'
   entrypoint: /bin/bash
   args: 
