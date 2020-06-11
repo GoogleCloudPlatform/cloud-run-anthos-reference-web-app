@@ -44,26 +44,17 @@ steps:
   dir: 'webui'
   entrypoint: ng
   args: ['test', '--watch=false', '--code-coverage']
-# the Fetch repo step is only necessary to work around https://issuetracker.google.com/issues/136435027
-- name: gcr.io/cloud-builders/git
-  id: Fetch .git directory
-  waitFor: ['-']
-  entrypoint: /bin/bash
-  args:
-  - -c
-  - |
-    set -e
-    git clone --branch ${_HEAD_BRANCH} ${_HEAD_REPO_URL} /tmp/${REPO_NAME}
-    cd /tmp/${REPO_NAME}
-    git checkout ${COMMIT_SHA}
-    mv /tmp/${REPO_NAME}/.git /workspace/
-- name: gcr.io/cloud-builders/git
+- name: gcr.io/cloud-builders/gcloud
+  id: 
+  entrypoint: 'bash'
+  args: [ '-c', 'gcloud secrets versions access latest --secret=codecov-token > codecov-token.txt' ]
+- name: node:12.16
   id: Upload coverage report
-  waitFor: ['Fetch .git directory', 'Test']
+  waitFor: ['Test']
   dir: 'webui'
   entrypoint: /bin/bash
-  args:
+  args: 
   - -c
   - |
-    apt update && apt install curl
-    curl -s https://codecov.io/bash | bash
+    TOKEN=$(<codecov-token.txt)
+    npm report-coverage -- --disable=detect --commit=${COMMIT_SHA} --branch=${BRANCH_NAME} --token=${TOKEN}
