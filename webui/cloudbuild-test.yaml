@@ -56,5 +56,5 @@ steps:
   args: 
   - -c
   - |
-    TOKEN=$(<codecov-token.txt)
-    npm report-coverage -- --disable=detect --commit=${COMMIT_SHA} --branch=${BRANCH_NAME} --token=${TOKEN}
+    TOKEN=$$(<codecov-token.txt)
+    npm report-coverage -- --disable=detect --commit=${COMMIT_SHA} --branch=${BRANCH_NAME} --token=$${TOKEN}
