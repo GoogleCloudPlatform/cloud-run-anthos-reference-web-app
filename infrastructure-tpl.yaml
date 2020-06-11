@@ -100,11 +100,16 @@ spec:
         backendBucketRef:
           name: web-app-backend-bucket
       pathRule:
-        # API requests go to the backend instead
+        # Paths to the API service
         - paths: ["/api", "/api/*"]
           service:
             backendServiceRef:
-              name: web-app-backend-service
+              name: web-app-backend-api-service
+        # Paths to the User service
+        - paths: ["/api/users", "/api/users/*"]
+          service:
+            backendServiceRef:
+              name: web-app-backend-user-service
   hostRule:
     - hosts: ["*"]
       pathMatcher: allpaths
@@ -267,11 +272,11 @@ spec:
 apiVersion: iam.cnrm.cloud.google.com/v1beta1
 kind: IAMPolicyMember
 metadata:
-  name: iampolicymember-firebase-usersvc
+  name: iampolicymember-firebaseauth-usersvc
   namespace: ${NAMESPACE}
 spec:
   member: serviceAccount:${USER_SVC_GSA}@${PROJECT_ID}.iam.gserviceaccount.com
-  role: roles/firebase.admin
+  role: roles/firebaseauth.admin
   resourceRef:
     apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
     kind: Project

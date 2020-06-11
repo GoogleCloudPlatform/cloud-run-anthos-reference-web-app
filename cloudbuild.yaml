@@ -101,9 +101,9 @@ steps:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
 
-# Use jq to substitute SNEG values into the template for the backend service
+# Use jq to substitute SNEG values into the template for the backend api service
 - name: 'alpine'
-  id: Generate Backend Service Definition
+  id: Generate Backend API Service Definition
   waitFor: ['Get Standalone NEGs']
   entrypoint: /bin/ash
   args:
@@ -112,17 +112,45 @@ steps:
     apk add --update --no-cache jq
     jq -f backend-service-template.jq neg-status.json | \
     sed "s/$\[PROJECT_ID\]/${PROJECT_ID}/g" | \
-    sed "s/$\[BACKEND_SERVICE_HOST_NAME\]/${_BACKEND_SERVICE_HOST_NAME}/g" > backend-service-hydrated.json
+    sed "s/$\[BACKEND_RESOURCE_NAME\]/web-app-backend-api-service/g" | \
+    sed "s/$\[BACKEND_HOST_NAME\]/${_BACKEND_SERVICE_HOST_NAME}/g" > backend-api-service-hydrated.json
 
-# Apply/delete backend service definition
+# Apply/delete backend api service definition
 - name: 'gcr.io/cloud-builders/kubectl'
-  id: Create Backend Service
-  waitFor: ['Generate Backend Service Definition', 'Infrastructure Resources']
+  id: Create Backend API Service
+  waitFor: ['Generate Backend API Service Definition', 'Infrastructure Resources']
   entrypoint: /bin/bash
   args:
   - '-c'
   - |
-    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f backend-service-hydrated.json || [ "${_APPLY_OR_DELETE}" = "delete" ]
+    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f backend-api-service-hydrated.json || [ "${_APPLY_OR_DELETE}" = "delete" ]
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
+# Use jq to substitute SNEG values into the template for the backend user service
+- name: 'alpine'
+  id: Generate Backend User Service Definition
+  waitFor: ['Get Standalone NEGs']
+  entrypoint: /bin/ash
+  args:
+  - '-c'
+  - |
+    apk add --update --no-cache jq
+    jq -f backend-service-template.jq neg-status.json | \
+    sed "s/$\[PROJECT_ID\]/${PROJECT_ID}/g" | \
+    sed "s/$\[BACKEND_RESOURCE_NAME\]/web-app-backend-user-service/g" | \
+    sed "s/$\[BACKEND_HOST_NAME\]/${_USER_SVC_HOST_NAME}/g" > backend-user-service-hydrated.json
+
+# Apply/delete backend user service definition
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Create Backend User Service
+  waitFor: ['Generate Backend User Service Definition', 'Infrastructure Resources']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f backend-user-service-hydrated.json || [ "${_APPLY_OR_DELETE}" = "delete" ]
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
