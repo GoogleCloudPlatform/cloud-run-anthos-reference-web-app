@@ -154,6 +154,6 @@ build-userservice: cluster
 build-infrastructure: cluster
 	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(call join_subs,$(INFRA_SUBS))
 
-build-all: build-infrastructure build-webui build-backend
+build-all: build-infrastructure build-webui build-backend build-userservice
 
 test: test-backend test-webui
