@@ -46,6 +46,7 @@ steps:
   args: ['test', '--watch=false', '--code-coverage']
 - name: gcr.io/cloud-builders/gcloud
   id: Get codecov token
+  waitFor: ['-']
   entrypoint: 'bash'
   args: [ '-c', 'gcloud secrets versions access latest --secret=codecov-token > codecov-token.txt' ]
 - name: node:12.16
