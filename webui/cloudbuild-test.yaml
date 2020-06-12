@@ -58,4 +58,4 @@ steps:
   - -c
   - |
     TOKEN=$$(</workspace/codecov-token.txt)
-    npm report-coverage -- --disable=detect --commit=${COMMIT_SHA} --branch=${BRANCH_NAME} --token=$${TOKEN}
+    npm run report-coverage -- --disable=detect --commit=${COMMIT_SHA} --branch=${BRANCH_NAME} --token=$${TOKEN}
