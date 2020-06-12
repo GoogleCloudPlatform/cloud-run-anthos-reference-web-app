@@ -24,6 +24,7 @@ import { ItemViewComponent } from './item-view/item-view.component';
 import { UsersComponent } from './users/users.component';
 import { LocationEditorComponent } from './location-editor/location-editor.component';
 import { LocationViewComponent } from './location-view/location-view.component';
+import { AlertsComponent } from './alerts/alerts.component';
 import { LoginGuard } from './login.guard';
 import { LoginComponent } from './login/login.component';
 
@@ -81,6 +82,11 @@ const routes: Routes = [
   {
     path: 'users',
     component: UsersComponent,
+    canActivate: [LoginGuard],
+  },
+  {
+    path: 'alerts',
+    component: AlertsComponent,
     canActivate: [LoginGuard],
   }
 ];

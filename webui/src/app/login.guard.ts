@@ -18,7 +18,7 @@ import { Injectable } from '@angular/core';
 import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable, from, of } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { InventoryService } from 'api-client';
+import { AlertService, InventoryService } from 'api-client';
 import { map, mergeMap } from 'rxjs/operators';
 import { HttpHeaders } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -31,6 +31,7 @@ export class LoginGuard implements CanActivate {
   constructor(
     private afAuth: AngularFireAuth,
     private router: Router,
+    private alertService: AlertService,
     private inventoryService: InventoryService,
     private snackBar: MatSnackBar,
   ) {
@@ -50,7 +51,7 @@ export class LoginGuard implements CanActivate {
               const headers = new HttpHeaders({
                 Authorization: 'Bearer ' + idToken,
               });
-
+              this.alertService.defaultHeaders = headers;
               this.inventoryService.defaultHeaders = headers;
               return true;
             }
