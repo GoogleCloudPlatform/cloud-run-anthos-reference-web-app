@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { OpenApiValidator } from 'express-openapi-validator'
+import {OpenApiValidator} from 'express-openapi-validator';
 import * as swaggerUI from 'swagger-ui-express';
 import * as yaml from 'yamljs';
 import * as express from 'express';
