@@ -14,73 +14,25 @@
  * limitations under the License.
  */
 
-import * as admin from 'firebase-admin';
+import { OpenApiValidator } from 'express-openapi-validator'
+import * as swaggerUI from 'swagger-ui-express';
+import * as yaml from 'yamljs';
 import * as express from 'express';
 import * as morgan from 'morgan';
-import {check, validationResult} from 'express-validator';
+import path = require('path');
 
 const app = express();
-app.use(morgan('common'));
+app.use(morgan('dev'));
+const apiSpec = path.join(__dirname, '../user-api.yaml');
+app.use('/spec', express.static(apiSpec));
+app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(yaml.load(apiSpec)));
 
-app.get(
-  '/api/users',
-  async (request: express.Request, response: express.Response) => {
-    try {
-      const result = await admin.auth().listUsers();
-      response.send(result.users);
-    } catch (e) {
-      response.status(500).send(e);
-    }
-  }
-);
-
-app.get(
-  '/api/users/:uid',
-  async (request: express.Request, response: express.Response) => {
-    const uid = request.params.uid;
-    try {
-      const user = await admin.auth().getUser(uid);
-      return response.send(user);
-    } catch (e) {
-      if (e.code === 'auth/user-not-found') {
-        return response.status(404).send(e);
-      }
-      return response.status(500).send(e);
-    }
-  }
-);
-
-app.put(
-  '/api/users/:uid',
-  [
-    check('uid').isLength({min: 20}),
-    check('role').isIn(['', 'worker', 'admin']),
-  ],
-  async (request: express.Request, response: express.Response) => {
-    const errors = validationResult(request);
-    if (!errors.isEmpty()) {
-      return response.status(422).json({errors: errors.array()});
-    }
-
-    const uid = request.params.uid;
-    const role = request.query.role;
-    if (uid && typeof uid === 'string' && role) {
-      try {
-        await admin.auth().setCustomUserClaims(uid, {role});
-        response.sendStatus(200);
-      } catch (e) {
-        if (e.code === 'auth/user-not-found') {
-          return response.status(404).send(e);
-        }
-        return response.status(500).send(e);
-      }
-    }
-    return response.sendStatus(400);
-  }
-);
-
-admin.initializeApp({});
-admin.auth();
+new OpenApiValidator({
+  apiSpec,
+  validateRequests: true, // (default)
+  validateResponses: true, // false by default
+  operationHandlers: path.join(__dirname), // default false
+}).install(app);
 
 /**
  * Start Express server.

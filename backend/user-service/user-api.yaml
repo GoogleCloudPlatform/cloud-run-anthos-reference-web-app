@@ -1,0 +1,110 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+openapi: 3.0.0
+info:
+  description: "Inventory API for the Cloud Run for Anthos Reference Web App"
+  version: "1.0.0"
+  title: "Inventory API"
+servers:
+  - url: /{basePath}
+    variables:
+      basePath:
+        default: api
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        uid:
+          type: string
+          readOnly: true
+        email:
+          type: string
+        emailVerified:
+          type: boolean
+        disabled:
+          type: boolean
+        metadata:
+          type: object
+        customClaims:
+          type: object
+        providerData:
+          type: array
+      example:
+        uid: userid
+        email: useremail@gmail.com
+        emailVerified: false
+        disabled: false
+        metadata:
+          lastSignInTime: Mon, 13 Apr 2020 18:25:44 GMT
+          creationTime: Mon, 13 Apr 2020 18:25:15 GMT
+        customClaims:
+          role: worker
+  parameters:
+    Uid:
+      name: uid
+      in: path
+      required: true
+      schema:
+        type: string
+    Role:
+      name: role
+      in: query
+      required: true
+      schema:
+        type: string
+        enum: ['', worker, admin]
+paths:
+  /users:
+    get:
+      summary: List all Users
+      operationId: listUsers
+      x-eov-operation-handler: handlers
+      tags: [user]
+      responses:
+        '200':
+          description: List of Users
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /users/{uid}:
+    parameters:
+      - $ref: '#/components/parameters/Uid'
+    get:
+      summary: Get User by ID
+      operationId: getUser
+      x-eov-operation-handler: handlers
+      tags: [user]
+      responses:
+        '200':
+          description: User object
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      parameters:
+        - $ref: '#/components/parameters/Role'
+      summary: Update User by ID
+      operationId: updateUser
+      x-eov-operation-handler: handlers
+      tags: [user]
+      responses:
+        '200':
+          description: Updated sucessfully
+          
