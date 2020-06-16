@@ -43,4 +43,24 @@ steps:
   waitFor: ['Prepare', 'Generate Client', 'Initialize Firebase Config']
   dir: 'webui'
   entrypoint: ng
-  args: ['test', '--watch','false']
+  args: ['test', '--watch=false', '--code-coverage']
+- name: gcr.io/cloud-builders/gcloud
+  id: Get codecov token
+  waitFor: ['-']
+  entrypoint: 'bash'
+  args: [ '-c', 'gcloud secrets versions access latest --secret=codecov-token > /workspace/codecov-token.txt' ]
+- name: node:12.16
+  id: Upload coverage report
+  waitFor: ['Test', 'Get codecov token']
+  dir: 'webui'
+  entrypoint: /bin/bash
+  args: 
+  - -c
+  - |
+    TOKEN=$$(</workspace/codecov-token.txt)
+    npm run report-coverage -- \
+      --disable=detect \
+      --commit=${COMMIT_SHA} \
+      --branch=${BRANCH_NAME} \
+      --token=$${TOKEN} \
+      --yml=/workspace/.github/infra/codecov.yml
