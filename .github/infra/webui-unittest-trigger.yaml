@@ -18,6 +18,5 @@ filename: webui/cloudbuild-test.yaml
 github:
   owner: GoogleCloudPlatform
   name: cloud-run-anthos-reference-web-app
-  pullRequest:
-    commentControl: COMMENTS_DISABLED
-    branch: "^master$"
+  push:
+    branch: ".*"
