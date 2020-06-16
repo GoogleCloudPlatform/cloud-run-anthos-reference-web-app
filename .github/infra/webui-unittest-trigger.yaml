@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: pr-test-webui
+name: test-webui
 description: Test the UI components of the reference app
 filename: webui/cloudbuild-test.yaml
 includedFiles:
