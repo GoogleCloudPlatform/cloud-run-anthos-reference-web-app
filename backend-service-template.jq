@@ -2,7 +2,7 @@
     "apiVersion": "compute.cnrm.cloud.google.com/v1beta1",
     "kind": "ComputeBackendService",
     "metadata": {
-        "name": "web-app-backend-service"
+        "name": "$[BACKEND_RESOURCE_NAME]"
     },
     "spec": {
         "backend": [
@@ -23,7 +23,7 @@
         ],
         "location": "global",
         "customRequestHeaders": [
-            "Host:$[BACKEND_SERVICE_HOST_NAME]"
+            "Host:$[BACKEND_HOST_NAME]"
         ],
         "loadBalancingScheme": "EXTERNAL",
         "protocol": "HTTP",
