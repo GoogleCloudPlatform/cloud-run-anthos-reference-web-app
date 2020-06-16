@@ -15,6 +15,9 @@
 name: pr-test-webui
 description: Test the UI components of the reference app
 filename: webui/cloudbuild-test.yaml
+includedFiles:
+- webui/**
+- .github/infra/**
 github:
   owner: GoogleCloudPlatform
   name: cloud-run-anthos-reference-web-app
