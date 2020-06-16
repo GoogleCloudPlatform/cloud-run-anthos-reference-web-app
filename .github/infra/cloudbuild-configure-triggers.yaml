@@ -17,12 +17,24 @@
 
 steps:
 - name: 'google/cloud-sdk:slim'
+<<<<<<< HEAD
   id: Configure build triggers deployment
+=======
+  id: Configure all triggers
+  waitFor: ['-']
+>>>>>>> 3ee1795... Add trigger to run backend api service unit tests
   entrypoint: /bin/bash
   args:
   - -c
   - |
     set -o errexit
     set -o xtrace
+<<<<<<< HEAD
     gcloud beta deployment-manager deployments create cloud-build-triggers --config .github/infra/build-triggers.yaml || \
       gcloud beta deployment-manager deployments update cloud-build-triggers --config .github/infra/build-triggers.yaml
+=======
+    for f in .github/infra/*-trigger.yaml
+    do
+      gcloud beta builds triggers import --source=$f
+    done
+>>>>>>> 3ee1795... Add trigger to run backend api service unit tests
