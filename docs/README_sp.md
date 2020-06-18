@@ -183,7 +183,7 @@ La ejecución de `make delete` eliminará los recursos del conector de configura
 [OAuth consent screen]: https://console.cloud.google.com/apis/credentials/consent
 [Identity Platform -> Settings]: https://console.cloud.google.com/customer-identity/settings
 [Setting up OAuth 2.0 guide]: https://support.google.com/cloud/answer/6158849?hl=en
-[set up gcloud]: https://cloud.google.com/sdk/docs
+[configurar gcloud]: https://cloud.google.com/sdk/docs
 [`makefile`]: ../makefile
 [Owner permission]: https://console.cloud.google.com/iam-admin/roles/details/roles%3Cowner
 [architecture.md]: architecture_sp.md
