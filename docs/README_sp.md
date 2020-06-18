@@ -184,12 +184,12 @@ La ejecución de `make delete` eliminará los recursos del conector de configura
 [Identity Platform -> Settings]: https://console.cloud.google.com/customer-identity/settings
 [Setting up OAuth 2.0 guide]: https://support.google.com/cloud/answer/6158849?hl=en
 [set up gcloud]: https://cloud.google.com/sdk/docs
-[`makefile`]: makefile
+[`makefile`]: ../makefile
 [Owner permission]: https://console.cloud.google.com/iam-admin/roles/details/roles%3Cowner
-[architecture.md]: ./docs/architecture.md
+[architecture.md]: architecture_sp.md
 [cloud-tutorial.dev]: https://cloud-tutorial.dev/
-[bootstrap.sh]: scripts/bootstrap.sh
-[firebase-config-setup.sh]: scripts/firebase-config-setup.sh
-[domain-setup.sh]: scripts/domain-setup.sh
-[firestore rules page screenshot]: docs/img/firestore_rules_page.png
-[`firestore/firestore.rules`]: firestore/firestore.rules
+[bootstrap.sh]: ../scripts/bootstrap.sh
+[firebase-config-setup.sh]: ../scripts/firebase-config-setup.sh
+[domain-setup.sh]: ../scripts/domain-setup.sh
+[firestore rules page screenshot]: img/firestore_rules_page.png
+[`firestore/firestore.rules`]: ../firestore/firestore.rules
