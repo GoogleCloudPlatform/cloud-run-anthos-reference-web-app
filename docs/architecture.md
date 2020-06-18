@@ -1,6 +1,6 @@
 <p align="center">
   <span>English</span> |
-  <a href="https://github.com/GoogleCloudPlatform/cloud-run-anthos-reference-web-app/blob/master/docs/architecture_sp.md">Español</a> |
+  <a href="architecture_sp.md">Español</a> |
 </p>
 
 # Architecture
