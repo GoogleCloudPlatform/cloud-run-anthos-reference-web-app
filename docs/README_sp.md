@@ -2,7 +2,7 @@
 
 <p align="center">
   <span>Español</span> |
-  <a href="https://github.com/GoogleCloudPlatform/cloud-run-anthos-reference-web-app/blob/master/README.md">English</a> |
+  <a href="../README.md">English</a> |
 </p>
 
 # Aplicación Web de referencia para Cloud Run for Anthos
