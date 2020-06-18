@@ -7,7 +7,7 @@
 
 # Aplicación Web de referencia para Cloud Run for Anthos
 
-Este repositorio, que incluye todos los flujos de trabajo y automatizaciones asociados, representa un conjunto de mejores prácticas destinadas a demostrar una arquitectura de referencia para crear una aplicación web en Google Cloud utilizando Cloud Run para Anthos.
+Este repositorio, que incluye todos los flujos de trabajo y automatizaciones asociados, representa un conjunto de mejores prácticas dirigidas a demostrar una arquitectura de referencia para crear una aplicación web en Google Cloud utilizando Cloud Run para Anthos.
 
 Se puede encontrar una descripción detallada de la arquitectura de la aplicación web en [architecture.md][].
 
