@@ -14,29 +14,29 @@
 
 resources:
 - type: gcp-types/cloudbuild-v1:projects.triggers
-    name: configure-cloud-build-triggers
-    properties:
-        name: configure-cloud-build-triggers
-        description: Configure Cloud Build triggers based on source control
-        filename: .github/infra/cloudbuild-configure-triggers.yaml
-        includedFiles:
-        - .github/infra/**
-        github:
-            owner: GoogleCloudPlatform
-            name: cloud-run-anthos-reference-web-app
-            push:
-                branch: "^master$"
+  name: configure-cloud-build-triggers
+  properties:
+      name: configure-cloud-build-triggers
+      description: Configure Cloud Build triggers based on source control
+      filename: .github/infra/cloudbuild-configure-triggers.yaml
+      includedFiles:
+      - .github/infra/**
+      github:
+          owner: GoogleCloudPlatform
+          name: cloud-run-anthos-reference-web-app
+          push:
+              branch: "^master$"
 - type: gcp-types/cloudbuild-v1:projects.triggers
-    name: test-webui
-    properties:
-        name: test-webui
-        description: Test the UI components of the reference app
-        filename: webui/cloudbuild-test.yaml
-        includedFiles:
-        - webui/**
-        - .github/infra/**
-        github:
-            owner: GoogleCloudPlatform
-            name: cloud-run-anthos-reference-web-app
-            push:
-                branch: ".*"
+  name: test-webui
+  properties:
+      name: test-webui
+      description: Test the UI components of the reference app
+      filename: webui/cloudbuild-test.yaml
+      includedFiles:
+      - webui/**
+      - .github/infra/**
+      github:
+          owner: GoogleCloudPlatform
+          name: cloud-run-anthos-reference-web-app
+          push:
+              branch: ".*"
