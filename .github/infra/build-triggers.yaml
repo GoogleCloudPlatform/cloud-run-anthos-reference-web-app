@@ -50,6 +50,9 @@ resources:
       - backend/api-service/**
       - openapi.yaml
       - .github/infra/**
+      substitutions:
+        _GIT_USER_ID: GoogleCloudPlatform
+        _GIT_REPO_ID: cloud-run-anthos-reference-web-app
       github:
           owner: GoogleCloudPlatform
           name: cloud-run-anthos-reference-web-app
