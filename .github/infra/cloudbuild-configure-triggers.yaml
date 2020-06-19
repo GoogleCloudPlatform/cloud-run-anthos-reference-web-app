@@ -17,7 +17,7 @@
 
 steps:
 - name: 'google/cloud-sdk:slim'
-  id: Configure deployment
+  id: Configure build triggers deployment
   entrypoint: /bin/bash
   args:
   - -c
