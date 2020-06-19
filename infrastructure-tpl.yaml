@@ -282,7 +282,7 @@ spec:
     kind: Project
     external: projects/${PROJECT_ID}
 ---
-  # IAM role bindings for the backend service account for writing metrics
+  # IAM role bindings for the user service account for writing metrics
   apiVersion: iam.cnrm.cloud.google.com/v1beta1
   kind: IAMPolicyMember
   metadata:
