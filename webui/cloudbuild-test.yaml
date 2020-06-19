@@ -25,6 +25,11 @@ steps:
   id: Generate Client
   waitFor: ['-']
   args: ['generate', '-g','typescript-angular','-i','openapi.yaml','-o','webui/api-client']
+# generate User Service client
+- name: openapitools/openapi-generator-cli:v4.2.3
+  id: Generate User Service Client
+  waitFor: ['-']
+  args: ['generate', '-g','typescript-angular','-i','backend/user-service/user-api.yaml','-o','webui/user-svc-client']
 # build and test the Angular frontend
 - name: node:12.16
   id: Prepare
@@ -54,7 +59,7 @@ steps:
   waitFor: ['Test', 'Get codecov token']
   dir: 'webui'
   entrypoint: /bin/bash
-  args: 
+  args:
   - -c
   - |
     TOKEN=$$(</workspace/codecov-token.txt)
