@@ -16,15 +16,13 @@
 
 import { AllowedDirective } from './allowed.directive';
 import { LoginGuard } from './login.guard';
-import { TemplateRef, ViewContainerRef, Component } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
+import { async, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { of, Observable } from 'rxjs';
-import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
 describe('AllowedDirective', () => {
   @Component({
@@ -60,7 +58,7 @@ describe('AllowedDirective', () => {
     fixture.detectChanges();
     const directive = fixture.debugElement.queryAllNodes(By.directive(AllowedDirective));
     expect(directive).toBeTruthy();
-    console.log(fixture.debugElement)
+    console.log(fixture.debugElement);
     const testComponent = fixture.debugElement.query(By.css('span[data-testid="content"]'));
     expect(testComponent).toBeFalsy();
   });
@@ -71,7 +69,7 @@ describe('AllowedDirective', () => {
     fixture.detectChanges();
     const directive = fixture.debugElement.queryAllNodes(By.directive(AllowedDirective));
     expect(directive).toBeTruthy();
-    console.log(fixture.debugElement)
+    console.log(fixture.debugElement);
     const testComponent = fixture.debugElement.query(By.css('span[data-testid="content"]'));
     expect(testComponent).toBeTruthy();
   });
