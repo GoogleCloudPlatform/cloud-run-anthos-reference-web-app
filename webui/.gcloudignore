@@ -1,4 +1,5 @@
 /api-client
+/user-svc-client
 /dist
 /tmp
 /out-tsc

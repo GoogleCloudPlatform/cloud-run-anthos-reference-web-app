@@ -9,3 +9,4 @@ backend/api-service/main.go
 backend/api-service/README.md
 
 webui/api-client
+webui/user-svc-client

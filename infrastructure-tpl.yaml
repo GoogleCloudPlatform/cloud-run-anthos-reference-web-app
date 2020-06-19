@@ -282,6 +282,20 @@ spec:
     kind: Project
     external: projects/${PROJECT_ID}
 ---
+  # IAM role bindings for the backend service account for writing metrics
+  apiVersion: iam.cnrm.cloud.google.com/v1beta1
+  kind: IAMPolicyMember
+  metadata:
+    name: iampolicymember-metrics-usersvc
+    namespace: ${NAMESPACE}
+  spec:
+    member: serviceAccount:${USER_SVC_GSA}@${PROJECT_ID}.iam.gserviceaccount.com
+    role: roles/monitoring.metricWriter
+    resourceRef:
+      apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+      kind: Project
+      external: projects/${PROJECT_ID}
+---
 # Istio backend authentication policy
 # See: https://cloud.google.com/solutions/authenticating-cloud-run-on-gke-end-users-using-istio-and-identity-platform
 apiVersion: authentication.istio.io/v1alpha1

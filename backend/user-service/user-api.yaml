@@ -40,8 +40,16 @@ components:
           type: object
         customClaims:
           type: object
+          properties:
+            role:
+              type: string
+              enum: ['', worker, admin]
+          additionalProperties:
+            type: string
         providerData:
           type: array
+          items: 
+            type: object
       example:
         uid: userid
         email: useremail@gmail.com
@@ -63,6 +71,7 @@ components:
       name: role
       in: query
       required: true
+      allowEmptyValue: true
       schema:
         type: string
         enum: ['', worker, admin]

@@ -16,22 +16,26 @@
 
 import { Injectable } from '@angular/core';
 import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { Observable, from, of } from 'rxjs';
+import { Observable, from, of, forkJoin } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { InventoryService } from 'api-client';
 import { map, mergeMap } from 'rxjs/operators';
 import { HttpHeaders } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { UserService } from 'user-svc-client';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoginGuard implements CanActivate {
 
+  userRole = '';
+
   constructor(
     private afAuth: AngularFireAuth,
     private router: Router,
     private inventoryService: InventoryService,
+    private userService: UserService,
     private snackBar: MatSnackBar,
   ) {
   }
@@ -44,17 +48,31 @@ export class LoginGuard implements CanActivate {
           this.snackBar.open('Please login first', '', { duration: 2000, });
           return of(false);
         }
-        return from(user.getIdToken()).pipe(
-          map(idToken => {
-            if (idToken) {
-              const headers = new HttpHeaders({
-                Authorization: 'Bearer ' + idToken,
-              });
 
-              this.inventoryService.defaultHeaders = headers;
-              return true;
+        return forkJoin({
+          idTokenResult: from(user.getIdTokenResult()),
+          idToken: from(user.getIdToken())
+        }).pipe(
+          map( ({idToken, idTokenResult}) => {
+            if (!idToken) {
+              this.router.navigate(['/login'], { queryParams: { returnUrl: state.url }});
+              this.snackBar.open('Failed to retrieve user token.', '', { duration: 5000, });
+              return false;
             }
-            return false;
+            if (idTokenResult && idTokenResult.claims.role) {
+              this.userRole = idTokenResult.claims.role;
+            }
+            if (next.data.roles && next.data.roles.indexOf(this.userRole) < 0) {
+              this.snackBar.open(`You don't have permission to go there.`, '', { duration: 5000, });
+              return false;
+            }
+            const headers = new HttpHeaders({
+              Authorization: 'Bearer ' + idToken,
+            });
+
+            this.inventoryService.defaultHeaders = headers;
+            this.userService.defaultHeaders = headers;
+            return true;
           })
         );
       })

@@ -34,7 +34,9 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
-    <button mat-button color="primary" routerLink="/locations/new" routerLinkActive="active">Create</button>
   </ng-template>
+  <mat-card-actions>
+    <button *appAllowed="['admin']" mat-button color="primary" routerLink="/locations/new" routerLinkActive="active">Create</button>
+  </mat-card-actions>
 </mat-card>
 

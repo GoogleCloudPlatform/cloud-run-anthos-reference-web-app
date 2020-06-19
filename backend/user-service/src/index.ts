@@ -37,7 +37,7 @@ new OpenApiValidator({
 /**
  * Start Express server.
  */
-const port = process.env.PORT || 8088;
+const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
   console.log('  App is running at http://localhost:%d\n', port);
 });

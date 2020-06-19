@@ -22,6 +22,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { InventoryService } from 'api-client';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('LoginGuard', () => {
 
@@ -48,6 +49,7 @@ describe('LoginGuard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
+        HttpClientTestingModule,
         RouterTestingModule,
         MatSnackBarModule,
       ],
