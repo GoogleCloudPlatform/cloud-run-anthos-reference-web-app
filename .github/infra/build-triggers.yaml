@@ -40,3 +40,18 @@ resources:
           name: cloud-run-anthos-reference-web-app
           push:
               branch: ".*"
+- type: gcp-types/cloudbuild-v1:projects.triggers
+  name: test-api-service
+  properties:
+      name: test-api-service
+      description: Test the API service component of the reference app
+      filename: backend/api-service/cloudbuild-test.yaml
+      includedFiles:
+      - backend/api-service/**
+      - openapi.yaml
+      - .github/infra/**
+      github:
+          owner: GoogleCloudPlatform
+          name: cloud-run-anthos-reference-web-app
+          push:
+              branch: "^ssmall/backend-unit-test-cloud-build$"
