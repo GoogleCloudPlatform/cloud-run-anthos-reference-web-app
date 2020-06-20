@@ -17,15 +17,16 @@ package main
 import (
 	state "github.com/GoogleCloudPlatform/cloud-run-anthos-reference-web-app/inventory-state-service/src"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/google/go-cmp/cmp"
+	"github.com/cloudevents/sdk-go/v2/test"
 	"testing"
 )
 
 func TestItemInventoryStateToEvent(t *testing.T) {
 	transactionId := "123"
 	s := state.ItemInventoryState{
-		ItemId:     "111",
-		TotalCount: 5,
+		ItemId:         "111",
+		TotalCount:     5,
+		Classification: state.Normal,
 	}
 
 	expectedEvent := cloudevents.NewEvent()
@@ -33,9 +34,11 @@ func TestItemInventoryStateToEvent(t *testing.T) {
 	expectedEvent.SetSource("inventory-state-service")
 	expectedEvent.SetType("state.ItemInventoryState")
 	expectedEvent.SetData(cloudevents.ApplicationJSON, s)
+	expectedEvent.SetExtension("iteminventoryclassification", state.Normal)
 
 	event := itemInventoryStateToEvent(transactionId, s)
-	if !cmp.Equal(event, expectedEvent) {
-		t.Errorf("Expected = %s; got %s", expectedEvent, event)
+	if len(event.FieldErrors) != 0 {
+		t.Fatalf("Expected valid event, got errors: %s", event.FieldErrors)
 	}
+	test.AssertEventEquals(t, expectedEvent, event)
 }

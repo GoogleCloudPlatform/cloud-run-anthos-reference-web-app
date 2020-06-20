@@ -50,6 +50,7 @@ func itemInventoryStateToEvent(transactionId string, s state.ItemInventoryState)
 	e.SetSource("inventory-state-service")
 	e.SetType("state.ItemInventoryState")
 	e.SetData(cloudevents.ApplicationJSON, s)
+	e.SetExtension("iteminventoryclassification", s.Classification)
 	return e
 }
 

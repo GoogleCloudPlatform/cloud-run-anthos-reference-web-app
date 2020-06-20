@@ -59,8 +59,9 @@ func TestGetItemInventoryStateSuccess(t *testing.T) {
 	}
 
 	expectedState := ItemInventoryState{
-		ItemId:     itemId,
-		TotalCount: total,
+		ItemId:         itemId,
+		TotalCount:     total,
+		Classification: Low,
 	}
 	if !cmp.Equal(state, &expectedState) {
 		t.Errorf("Expected = %v; got %v", expectedState, state)
@@ -75,6 +76,59 @@ func TestGetItemInventoryStateError(t *testing.T) {
 	_, err := calculator.GetItemInventoryState(&inventoryTransaction)
 	if err == nil {
 		t.Fatalf("Expected an error due to an incorrect item id.")
+	}
+}
+
+func TestGetItemInventoryClassification(t *testing.T) {
+	cases := []struct {
+		desc  string
+		count int64
+		want  ItemInventoryClassification
+	}{
+		{
+			desc:  "zero is low",
+			count: 0,
+			want:  Low,
+		},
+		{
+			desc:  "1 is Low",
+			count: 1,
+			want:  Low,
+		},
+		{
+			desc:  "99 is Low",
+			count: 99,
+			want:  Low,
+		},
+		{
+			desc:  "100 is normal",
+			count: 100,
+			want:  Normal,
+		},
+		{
+			desc:  "999 is normal",
+			count: 999,
+			want:  Normal,
+		},
+		{
+			desc:  "1000 is high",
+			count: 1000,
+			want:  High,
+		},
+		{
+			desc:  "10000 is high",
+			count: 10000,
+			want:  High,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.desc, func(t *testing.T) {
+			got := getItemInventoryClassification(tc.count)
+			if got != tc.want {
+				t.Errorf("got %s, expected %s", got, tc.want)
+			}
+		})
 	}
 }
 

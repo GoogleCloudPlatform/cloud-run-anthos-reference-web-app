@@ -34,6 +34,12 @@ INVENTORY_STATE_SERVICE_SUBS = $(CLUSTER_ARGS) \
 	_INVENTORY_STATE_SERVICE_NAME=$(INVENTORY_STATE_SERVICE_NAME) \
 	_BACKEND_CLUSTER_HOST_NAME=$(BACKEND_CLUSTER_HOST_NAME)
 
+# backend/inventory-level-monitor-service/cloudbuild.yaml
+INVENTORY_LEVEL_MONITOR_SERVICE_SUBS = $(CLUSTER_ARGS) \
+	_INVENTORY_LEVEL_MONITOR_IMAGE_NAME=$(INVENTORY_LEVEL_MONITOR_IMAGE_NAME) \
+	_INVENTORY_LEVEL_MONITOR_SERVICE_NAME=$(INVENTORY_LEVEL_MONITOR_SERVICE_NAME) \
+	_BACKEND_CLUSTER_HOST_NAME=$(BACKEND_CLUSTER_HOST_NAME)
+
 BACKEND_TEST_SUBS = _GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
 
@@ -101,8 +107,11 @@ run-local-webui: webui/api-client
 run-local-backend: backend/api-service/src/api/openapi.yaml
 	cd backend/api-service && go run main.go
 
-run-local-inventory-state-publisher: backend/api-client/openapi.yaml
+run-local-inventory-state-service: backend/api-client/openapi.yaml
 	cd backend/inventory-state-service && go run main.go -backend_cluster_host_name=localhost:8080
+
+run-local-inventory-level-monitor-service: backend/api-client/openapi.yaml
+	cd backend/inventory-level-monitor-service && go run main.go -backend_cluster_host_name=localhost:8080
 
 lint-webui: webui/node_modules
 	cd webui && npm run lint
@@ -119,6 +128,9 @@ test-backend-local: backend/api-service/src/api/openapi.yaml
 
 test-inventory-state-service-local: backend/api-client/openapi.yaml
 	cd backend/inventory-state-service && go test -v ./...
+
+test-inventory-level-monitor-service-local: backend/api-client/openapi.yaml
+	cd backend/inventory-level-monitor-service/src && go test -v
 
 test-webui-local: webui/api-client webui/node_modules
 	cd webui && npm run test -- --watch=false --browsers=ChromeHeadless
@@ -151,6 +163,9 @@ test-backend:
 test-inventory-state-service:
 	$(GCLOUD_BUILD) --config ./backend/inventory-state-service/cloudbuild-test.yaml
 
+test-inventory-level-monitor-service:
+	$(GCLOUD_BUILD) --config ./backend/inventory-level-monitor-service/cloudbuild-test.yaml
+
 test-webui:
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml
 
@@ -163,15 +178,18 @@ build-backend: cluster
 build-inventory-state-service: cluster
 	$(GCLOUD_BUILD) --config ./backend/inventory-state-service/cloudbuild.yaml --substitutions $(call join_subs,$(INVENTORY_STATE_SERVICE_SUBS))
 
+build-inventory-level-monitor-service: cluster
+	$(GCLOUD_BUILD) --config ./backend/inventory-level-monitor-service/cloudbuild.yaml --substitutions $(call join_subs,$(INVENTORY_LEVEL_MONITOR_SERVICE_SUBS))
+
 ifeq ($(EVENTING_ENABLED),true)
-build-eventing: build-inventory-state-service
+build-eventing: build-inventory-state-service build-inventory-level-monitor-service
 else
 build-eventing:
 	@echo Eventing is disabled. To enable eventing set the EVENTING_ENABLED flag to true in env.mk.
 endif
 
 ifeq ($(EVENTING_ENABLED),true)
-test-eventing: test-inventory-state-service
+test-eventing: test-inventory-state-service test-inventory-level-monitor-service
 else
 test-eventing:
 	@echo Eventing is disabled. To test eventing set the EVENTING_ENABLED flag to true in env.mk.

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 ## The steps in this Cloud Build script build and deploy the inventory
-## state service.
+## MONITOR service.
 steps:
 # generate OpenAPI client
 - name: openapitools/openapi-generator-cli:v4.2.3
@@ -27,18 +27,18 @@ steps:
   id: Go Build
   dir: 'backend/'
   env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux']
-  args: ['go','build','-mod=readonly', '-v', '-o', 'inventory-state-service/server', './inventory-state-service']
+  args: ['go','build','-mod=readonly', '-v', '-o', 'inventory-level-monitor-service/server', './inventory-level-monitor-service']
 - name: 'gcr.io/cloud-builders/docker'
   id: Build Docker Image
-  dir: 'backend/inventory-state-service/'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/${_INVENTORY_STATE_IMAGE_NAME}:${BUILD_ID}', '.']
+  dir: 'backend/inventory-level-monitor-service/'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/${_INVENTORY_LEVEL_MONITOR_IMAGE_NAME}:${BUILD_ID}', '.']
 - name: 'gcr.io/cloud-builders/docker'
   id: Push
-  args: ['push', 'gcr.io/$PROJECT_ID/${_INVENTORY_STATE_IMAGE_NAME}']
+  args: ['push', 'gcr.io/$PROJECT_ID/${_INVENTORY_LEVEL_MONITOR_IMAGE_NAME}']
 - name: 'google/cloud-sdk:latest'
   id: Deploy
-  args: ['gcloud', 'alpha', 'run', 'deploy', '${_INVENTORY_STATE_SERVICE_NAME}',
-         '--image', 'gcr.io/$PROJECT_ID/${_INVENTORY_STATE_IMAGE_NAME}:${BUILD_ID}',
+  args: ['gcloud', 'alpha', 'run', 'deploy', '${_INVENTORY_LEVEL_MONITOR_SERVICE_NAME}',
+         '--image', 'gcr.io/$PROJECT_ID/${_INVENTORY_LEVEL_MONITOR_IMAGE_NAME}:${BUILD_ID}',
          '--platform', 'gke',
          '--cluster', '${_CLUSTER_NAME}',
          '--cluster-location', '${_CLUSTER_LOCATION}',
@@ -46,4 +46,4 @@ steps:
          '--set-env-vars=PROJECT_ID=${PROJECT_ID}',
          '--args=-backend_cluster_host_name=${_BACKEND_CLUSTER_HOST_NAME}'
         ]
-images: ['gcr.io/$PROJECT_ID/${_INVENTORY_STATE_IMAGE_NAME}']
+images: ['gcr.io/$PROJECT_ID/${_INVENTORY_LEVEL_MONITOR_IMAGE_NAME}']

@@ -14,10 +14,21 @@
 
 package state
 
+type ItemInventoryClassification = string
+
+const (
+	Low    ItemInventoryClassification = "Low"
+	Normal                             = "Normal"
+	High                               = "High"
+)
+
 type ItemInventoryState struct {
 	// The item whose state this event is about
 	ItemId string `json:"item_id,omitempty"`
 
 	// The total count of the item (i.e. its state)
 	TotalCount int64 `json:"total_count,omitempty"`
+
+	// A classification of whether the TotalCount is considered "Low", "Normal" or "High"
+	Classification ItemInventoryClassification `json:"item_inventory_classification,omitempty"`
 }

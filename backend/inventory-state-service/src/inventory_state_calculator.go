@@ -43,8 +43,20 @@ func (r InventoryStateCalculator) GetItemInventoryState(i *client.InventoryTrans
 	}
 
 	s := ItemInventoryState{
-		ItemId:     i.ItemId,
-		TotalCount: total,
+		ItemId:         i.ItemId,
+		TotalCount:     total,
+		Classification: getItemInventoryClassification(total),
 	}
 	return &s, nil
+}
+
+func getItemInventoryClassification(total int64) ItemInventoryClassification {
+	switch {
+	case total < 100:
+		return Low
+	case total >= 1000:
+		return High
+	default:
+		return Normal
+	}
 }
