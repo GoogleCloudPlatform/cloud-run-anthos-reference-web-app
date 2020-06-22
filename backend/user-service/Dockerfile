@@ -20,6 +20,7 @@ RUN apk add --no-cache ca-certificates
 COPY package*.json /
 RUN npm ci --only=production
 COPY dist /dist
+COPY user-api.yaml /user-api.yaml
 
 # Run the web service on container startup.
 CMD ["node", "/dist/index.js"]

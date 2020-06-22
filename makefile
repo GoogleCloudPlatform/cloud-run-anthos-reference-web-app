@@ -66,7 +66,8 @@ CUSTOM_TEMPLATES=backend/templates
 OPENAPI_GEN_JAR=openapi-generator-cli-4.3.0.jar
 OPENAPI_GEN_URL="https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/4.3.0/$(OPENAPI_GEN_JAR)"
 OPENAPI_GEN_SERVER_ARGS=-g go-server -i openapi.yaml -o backend/api-service --api-name-suffix= --git-user-id=$(GIT_USER_ID) --git-repo-id=$(GIT_REPO_ID)/api-service --package-name=service -t $(CUSTOM_TEMPLATES) --additional-properties=sourceFolder=src
-OPENAPI_GEN_CLIENT_ARGS=-g typescript-angular -i openapi.yaml -o webui/api-client
+OPENAPI_GEN_API_CLIENT_ARGS=-g typescript-angular -i openapi.yaml -o webui/api-client
+OPENAPI_GEN_USER_CLIENT_ARGS=-g typescript-angular -i backend/user-service/user-api.yaml -o webui/user-svc-client
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
 
@@ -81,7 +82,10 @@ clean:
 	wget $(OPENAPI_GEN_URL) -P /tmp/
 
 webui/api-client: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml
-	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_CLIENT_ARGS)
+	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_API_CLIENT_ARGS)
+
+webui/user-svc-client: /tmp/$(OPENAPI_GEN_JAR) backend/user-service/user-api.yaml
+	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_USER_CLIENT_ARGS)
 
 webui/node_modules:
 	cd webui && npm ci
@@ -153,6 +157,8 @@ build-userservice: cluster
 build-infrastructure: cluster
 	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(call join_subs,$(INFRA_SUBS))
 
-build-all: build-infrastructure build-webui build-backend build-userservice
+build-infra: build-infrastructure
+
+build-all: build-infrastructure build-backend build-userservice build-webui
 
 test: test-backend test-webui

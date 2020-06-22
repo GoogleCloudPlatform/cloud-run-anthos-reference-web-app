@@ -54,10 +54,10 @@ export const updateUser = async (
 ) => {
   const uid = request.params.uid;
   const role = request.query.role;
-  if (uid && typeof uid === 'string' && role) {
+  if (uid && typeof uid === 'string') {
     try {
       await admin.auth().setCustomUserClaims(uid, {role});
-      return response.sendStatus(201);
+      return response.status(200).send();
     } catch (e) {
       if (e.code === 'auth/user-not-found') {
         return response.status(404).send(e);
@@ -65,5 +65,5 @@ export const updateUser = async (
       return response.status(500).send(e);
     }
   }
-  return response.sendStatus(400);
+  return response.status(400).send();
 };

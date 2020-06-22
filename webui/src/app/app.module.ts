@@ -21,7 +21,9 @@ import { AngularFireModule } from '@angular/fire';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
-import { BASE_PATH, ApiModule, Configuration, ConfigurationParameters } from 'api-client';
+import { BASE_PATH as API_BASE_PATH, ApiModule, Configuration, ConfigurationParameters } from 'api-client';
+
+import { BASE_PATH as USER_BASE_PATH, ApiModule as UserApiModule } from 'user-svc-client';
 
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
@@ -54,6 +56,7 @@ import { InventoryTransactionDialogComponent } from './inventory-transaction-dia
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { AllowedDirective } from './allowed.directive';
 
 export function apiConfigFactory(): Configuration {
   const params: ConfigurationParameters = {
@@ -80,12 +83,14 @@ export function appNameFactory() {
     InventoryTransactionDialogComponent,
     HomeComponent,
     LoginComponent,
+    AllowedDirective,
   ],
   entryComponents: [
     InventoryTransactionDialogComponent,
   ],
   imports: [
     ApiModule,
+    UserApiModule,
     HttpClientModule,
     BrowserModule,
     AppRoutingModule,
@@ -113,7 +118,8 @@ export function appNameFactory() {
     }),
   ],
   providers: [
-    { provide: BASE_PATH, useValue: environment.API_BASE_PATH },
+    { provide: API_BASE_PATH, useValue: environment.API_BASE_PATH },
+    { provide: USER_BASE_PATH, useValue: environment.API_BASE_PATH },
   ],
   bootstrap: [AppComponent]
 })

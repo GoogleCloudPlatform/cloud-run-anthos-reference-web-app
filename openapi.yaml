@@ -57,25 +57,6 @@ components:
         name: test item
         id: item-uuid
         description: awesome stuff
-    User:
-      type: object
-      properties:
-        name:
-          type: string
-        id:
-          type: integer
-          format: int64
-          readOnly: true
-        role:
-          type: string
-          enum: [worker, admin]
-      required:
-        - name
-        - role
-      example:
-        name: Some Manager
-        id: user-uuid
-        role: admin
     Location:
       type: object
       properties:

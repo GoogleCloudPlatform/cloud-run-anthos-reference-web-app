@@ -18,28 +18,20 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { UsersComponent } from './users.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { AngularFirestore, QueryFn, AngularFirestoreCollection, CollectionReference } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
+import { UserService, User } from 'user-svc-client';
+import { By } from '@angular/platform-browser';
 
 describe('UsersComponent', () => {
   let component: UsersComponent;
   let fixture: ComponentFixture<UsersComponent>;
-
-  class AngularFirestoreMock {
-
-    constructor() {}
-
-    collection<T>(pathOrRef: string|CollectionReference, queryFn?: QueryFn): AngularFirestoreCollection<T> {
-      // @ts-ignore
-      const response =  new AngularFirestoreCollection<T>(null, null, null);
-      response.valueChanges = (): any => {
-        return new Observable();
-      };
-      return response;
-    }
-  }
+  let userService: UserService;
+  let listUserSpy: jasmine.Spy<
+    (observe?: 'body', reportProgress?: boolean, options?: {})
+      => Observable<Array<User>>
+  >;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -49,23 +41,43 @@ describe('UsersComponent', () => {
         MatCardModule,
         MatTableModule,
       ],
-      providers: [
-        {
-          provide: AngularFirestore,
-          useClass: AngularFirestoreMock,
-        }
-      ],
     })
     .compileComponents();
+    userService = TestBed.inject(UserService);
+    listUserSpy = spyOn(userService, 'listUsers');
   }));
 
-  beforeEach(() => {
+  const initComponent = () => {
     fixture = TestBed.createComponent(UsersComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
+  };
 
   it('should create', () => {
+    listUserSpy.and.returnValue(of([]));
+    initComponent();
     expect(component).toBeTruthy();
+    expect(listUserSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should show users', () => {
+    listUserSpy.and.returnValues(of([
+      {
+        uid: '12345abcde',
+        email: 'worker@test.org',
+        customClaims: { roles: 'worker' }
+      },
+      {
+        uid: '23456bcdef',
+        email: 'admin@test.org',
+        customClaims: { roles: 'admin' }
+      },
+    ]));
+    initComponent();
+    expect(listUserSpy).toHaveBeenCalledTimes(1);
+    const rows = fixture.debugElement.queryAll(By.css('tbody tr'));
+    expect(rows.length).toEqual(2);
+    expect(rows[0].query(By.css('.mat-column-email')).nativeElement.textContent).toContain('worker@test.org');
+    expect(rows[1].query(By.css('.mat-column-email')).nativeElement.textContent).toContain('admin@test.org');
   });
 });

@@ -28,9 +28,9 @@
     <mat-card-actions>
       <div>
         <button mat-button routerLink="/locations">Back</button>
-        <button mat-button routerLink="/locations/{{location.id}}/edit">Edit</button>
+        <button *appAllowed="['admin']" mat-button routerLink="/locations/{{location.id}}/edit">Edit</button>
       </div>
-      <button mat-button color="warn" (click)='handleDelete()'>Delete</button>
+      <button *appAllowed="['admin']" mat-button color="warn" (click)='handleDelete()'>Delete</button>
     </mat-card-actions>
   </mat-card>
 

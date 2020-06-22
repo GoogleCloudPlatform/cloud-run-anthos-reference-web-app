@@ -30,6 +30,7 @@ import { of, Observable } from 'rxjs';
 import { Location } from '@angular/common';
 import { DummyComponent } from '../testing/dummy.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MockAllowedDirective } from '../allowed.directive.mock';
 
 describe('ItemsComponent', () => {
   let component: ItemsComponent;
@@ -43,7 +44,7 @@ describe('ItemsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ItemsComponent, DummyComponent ],
+      declarations: [ ItemsComponent, DummyComponent, MockAllowedDirective ],
       imports: [
         HttpClientTestingModule,
         MatButtonModule,

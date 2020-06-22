@@ -30,9 +30,9 @@
     <mat-card-actions>
       <div>
         <button mat-button routerLink="/items">Back</button>
-        <button mat-button routerLink="/items/{{item.id}}/edit">Edit</button>
+        <button *appAllowed="['admin']" mat-button routerLink="/items/{{item.id}}/edit">Edit</button>
       </div>
-      <button mat-button color="warn" (click)='handleDelete()'>Delete</button>
+      <button *appAllowed="['admin']" mat-button color="warn" (click)='handleDelete()'>Delete</button>
     </mat-card-actions>
   </mat-card>
 
