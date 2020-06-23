@@ -2,7 +2,7 @@ Feature: Location Management
   # Scenarios on this feature need to be run in the defined order.
 
   Scenario: Create Location
-    Given I logged in
+    Given I logged in as admin
     When I go to locations page
     Then I should see page title "Locations"
     And I should see some entries

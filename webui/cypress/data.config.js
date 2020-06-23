@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-import { Then, When } from 'cypress-cucumber-preprocessor/steps';
-import { ItemsPage } from '../../pages/items.po';
 
-const page = new ItemsPage();
+const testItem = {
+  Description: "test item inventory test item",
+  Name: "inventory test item",
+}
+const testLocation = {
+  Warehouse: "WH test",
+  Name: "inventory test location",
+}
 
-Then('I should see Item named {string}', async (name) => {
-  page.getItemTitle().should('have.text', name);
-});
-
-Then('I should see Item description as {string}', async (description) => {
-  page.getItemDescription().should('contain.text', description);
-});
-
-When('I go to items page', () => {
-  page.navigateToPath('items');
-  cy.wait('@itemList');
-});
-
-When('wait for item to load', () => {
-  cy.wait('@itemGet');
-  cy.wait('@invTransList');
-});
+module.exports = {
+  testItem,
+  testLocation
+}

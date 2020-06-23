@@ -15,6 +15,19 @@
  */
 
 
-// TODO: Copy this file to credentials.ts with credential for the test account.
-export const email = '';
-export const password = '';
+import * as admin from 'firebase-admin' ;
+import {cleanupUsers} from './user';
+import {cleanupData} from './data';
+
+const main = async () => {
+  try {
+    admin.initializeApp();
+    await cleanupUsers();
+    await cleanupData();
+    process.exit();
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
+};
+main();

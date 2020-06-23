@@ -3,5 +3,5 @@ Feature: Avatar Photo
     logged in.
 
     Scenario: User is logged in
-        When I log in
+        When I log in as admin
         Then my avatar image should be set

@@ -14,25 +14,8 @@
  * limitations under the License.
  */
 
-import { Then, When } from 'cypress-cucumber-preprocessor/steps';
-import { ItemsPage } from '../../pages/items.po';
+exports.adminEmail = 'frontend-e2e-cwa-admin@gmail.com';
+exports.adminPassword = 'crcwae2eadmin';
 
-const page = new ItemsPage();
-
-Then('I should see Item named {string}', async (name) => {
-  page.getItemTitle().should('have.text', name);
-});
-
-Then('I should see Item description as {string}', async (description) => {
-  page.getItemDescription().should('contain.text', description);
-});
-
-When('I go to items page', () => {
-  page.navigateToPath('items');
-  cy.wait('@itemList');
-});
-
-When('wait for item to load', () => {
-  cy.wait('@itemGet');
-  cy.wait('@invTransList');
-});
+exports.workerEmail = 'frontend-e2e-cwa-worker@gmail.com';
+exports.workerPassword = 'crcwae2eworker';

@@ -16,6 +16,7 @@
 
 import { When, Then, Before } from 'cypress-cucumber-preprocessor/steps';
 import { BasePage } from '../../pages/base.po';
+import { testItem, testLocation } from '../../data.config';
 
 const page = new BasePage();
 
@@ -36,6 +37,8 @@ Before(async () => {
   cy.route('GET', '/api/*/*/inventoryTransactions').as('invTransList');
   cy.route('POST', 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword*').as('verifyPassword');
   cy.route('POST', 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo*').as('getAccountInfo');
+  cy.route('GET', '/api/users').as('userList');
+  cy.route('PUT', '/api/users/**').as('userUpdate');
 });
 
 When('I go to {string} page', async (path) => {
@@ -79,10 +82,11 @@ When ('I submit the inventory transaction', () => {
   cy.wait('@invTransList');
 });
 
-When ('I select {string} in selector {string}', async (optionText, selectName) => {
+const selectValue = async (optionText: string, selectName: string) => {
   page.getFormField(selectName).click();
   cy.get('mat-option').contains(optionText).click();
-});
+};
+When ('I select {string} in selector {string}', selectValue);
 
 When ('I check radio button {string}', async (value) => {
   cy.get(`mat-radio-button[value=${value}]`).click();
@@ -104,13 +108,25 @@ Then('I should see {int} fewer entries', async (diff) =>  {
   page.getTableRows().then(elm => lastCount = elm.length);
 });
 
-Then('I should see the latest transaction is for item {string} in location {string} for {string}', async (item, loc, diff) => {
+Then('I should see the latest transaction is for test item in test location for {string}', async (diff) => {
   const firstRowSelector = 'table[data-testid="transactions"] tbody tr:first-child';
-  cy.get(firstRowSelector + ' td.mat-column-item').should('have.text', item);
-  cy.get(firstRowSelector + ' td.mat-column-location').should('have.text', loc);
+  cy.get(firstRowSelector + ' td.mat-column-item').should('have.text', testItem.Name);
+  cy.get(firstRowSelector + ' td.mat-column-location').should('have.text', testLocation.Name);
   cy.get(firstRowSelector + ' td.mat-column-diff').should('have.text', diff);
 });
 
 Then('I should see page title {string}', async (title) => {
   page.getPageTitle().should('have.text', title);
+});
+
+Then('I click on test item', async () => {
+  page.getLinkByName(testItem.Name).click();
+});
+
+When ('I select test item', async () => {
+  selectValue(testItem.Name, 'item_id');
+});
+
+When ('I select test location', async () => {
+  selectValue(testLocation.Name, 'location_id');
 });

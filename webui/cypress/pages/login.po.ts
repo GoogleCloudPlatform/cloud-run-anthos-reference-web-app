@@ -15,18 +15,29 @@
  */
 
 // import { browser, by, element } from 'protractor';
-import {email, password} from '../credentials';
+import {adminEmail, adminPassword, workerEmail, workerPassword} from '../credentials';
 import { BasePage } from './base.po';
 
 export class LoginPage extends BasePage {
 
-  async login() {
+  async loginAsAdmin() {
     this.navigateToPath('login');
-    this.getFormField('email').type(email);
-    this.getFormField('password').type(password);
+    this.getFormField('email').type(adminEmail);
+    this.getFormField('password').type(adminPassword);
     this.getButton('LOGIN').click();
     cy.wait('@verifyPassword');
     cy.wait('@getAccountInfo');
+    cy.location('pathname').should('eq', '/');
+  }
+
+  async loginAsWorker() {
+    this.navigateToPath('login');
+    this.getFormField('email').type(workerEmail);
+    this.getFormField('password').type(workerPassword);
+    this.getButton('LOGIN').click();
+    cy.wait('@verifyPassword');
+    cy.wait('@getAccountInfo');
+    cy.location('pathname').should('eq', '/');
   }
 
 }

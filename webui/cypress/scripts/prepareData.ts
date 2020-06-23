@@ -14,25 +14,20 @@
  * limitations under the License.
  */
 
-import { Then, When } from 'cypress-cucumber-preprocessor/steps';
-import { ItemsPage } from '../../pages/items.po';
 
-const page = new ItemsPage();
+import * as admin from 'firebase-admin';
+import {ensureUsers} from './user';
+import {ensureData} from './data';
 
-Then('I should see Item named {string}', async (name) => {
-  page.getItemTitle().should('have.text', name);
-});
-
-Then('I should see Item description as {string}', async (description) => {
-  page.getItemDescription().should('contain.text', description);
-});
-
-When('I go to items page', () => {
-  page.navigateToPath('items');
-  cy.wait('@itemList');
-});
-
-When('wait for item to load', () => {
-  cy.wait('@itemGet');
-  cy.wait('@invTransList');
-});
+const main = async () => {
+  try {
+    admin.initializeApp();
+    await ensureUsers();
+    await ensureData();
+    process.exit();
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
+};
+main();

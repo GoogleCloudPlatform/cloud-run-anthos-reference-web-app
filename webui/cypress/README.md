@@ -3,15 +3,11 @@
 
 ## Prerequisite
 
-### Prepare a test user
+### Setup firebase private key
 
-1. Go to [Identity Platform Providers][] to enable "Email/Password" provider.
-1. Go to [Identity Platform Users][] to create a user for e2e test.
+This is not needed if run the e2e test on Cloud Build, in which workload identity will take care of it.
 
-### Configure test credentials
-
-With the credentials of the test user, use `credentials.sample.ts` as an
-example to create `credentials.ts`
+Follow the [Firebase Admin Initialize SDK] to setup `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
 ## Run the test
 
@@ -26,5 +22,5 @@ npm run e2e -- --config baseUrl=$TARGET_URL
 `$TARGET_URL` could be `http://localhost:4200` if you run it locally,
 or `https://$DOMAIN` if you run it on Google Cloud.
 
-[Identity Platform Providers]: https://console.cloud.google.com/customer-identity/providers
-[Identity Platform Users]: https://console.cloud.google.com/customer-identity/users
+[Firebase Admin Initialize SDK]: https://firebase.google.com/docs/admin/setup#initialize-sdk
+
