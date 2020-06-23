@@ -13,10 +13,8 @@
 # limitations under the License.
 
 codecov:
-  fixes:
-    - "::webui/" 
   ignore:
-    - "src/app/testing"
+    - "**/src/app/testing"
     - "**/*.mock.ts"
   coverage:
     range: "80...100"
