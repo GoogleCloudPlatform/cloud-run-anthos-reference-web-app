@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-
 const testItem = {
   Description: "test item inventory test item",
   Name: "inventory test item",
-}
+};
 const testLocation = {
-  Warehouse: "WH test",
   Name: "inventory test location",
-}
+  Warehouse: "WH test",
+};
 
 module.exports = {
   testItem,
-  testLocation
-}
+  testLocation,
+};
