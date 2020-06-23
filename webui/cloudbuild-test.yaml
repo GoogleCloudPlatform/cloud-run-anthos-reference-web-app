@@ -68,4 +68,4 @@ steps:
       --commit=${COMMIT_SHA} \
       --branch=${BRANCH_NAME} \
       --token=$${TOKEN} \
-      --yml=/workspace/.github/infra/codecov.yml
+      --yml=./codecov.yml
