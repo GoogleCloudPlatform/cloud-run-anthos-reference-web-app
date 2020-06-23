@@ -14,7 +14,7 @@
 
 codecov:
   ignore:
-    - "**/src/app/testing"
+    - "webui/src/app/testing"
     - "**/*.mock.ts"
   coverage:
     range: "80...100"
