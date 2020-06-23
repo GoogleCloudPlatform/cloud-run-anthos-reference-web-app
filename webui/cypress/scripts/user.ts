@@ -21,12 +21,12 @@ const {adminEmail, adminPassword, workerEmail, workerPassword} = require('../cre
 const ensureUser = async (email: string, password: string, role: string, displayName: string) => {
   try {
     const userRecord = await admin.auth().getUserByEmail(email);
-    console.log(`Test user [${displayName}](${password}) found with id ${userRecord.uid}.`);
+    console.log(`Test user [${displayName}](${email}) found with id ${userRecord.uid}.`);
     if (userRecord.customClaims && userRecord.customClaims.role !== role) {
       return updateUserRoleClaim(userRecord.uid, role);
     }
   } catch (error) {
-    console.log(`[${displayName}](${password}) not found, creating one.`);
+    console.log(`[${displayName}](${email}) not found, creating one.`);
     try {
       const newUser = await admin.auth().createUser({
         email,

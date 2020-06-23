@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import { Given, Then, When, Before } from 'cypress-cucumber-preprocessor/steps';
+import { Given, Then, When } from 'cypress-cucumber-preprocessor/steps';
 
 import { LoginPage } from '../../pages/login.po';
 
 const page = new LoginPage();
-
-// Given('I log(ged) in', async () => {
-//   await page.loginAsAdmin();
-// });
 
 Given('I log(ged) in as admin', async () => {
   await page.loginAsAdmin();
@@ -35,7 +31,6 @@ Given('I log(ged) in as worker', async () => {
 Then('my avatar image should be set', async () => {
   page.getAvatar().should('exist');
 });
-
 
 When('I go to users page', () => {
   page.navigateToPath('users');
