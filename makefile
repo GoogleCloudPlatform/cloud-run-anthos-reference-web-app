@@ -40,6 +40,12 @@ INVENTORY_LEVEL_MONITOR_SERVICE_SUBS = $(CLUSTER_ARGS) \
 	_INVENTORY_LEVEL_MONITOR_SERVICE_NAME=$(INVENTORY_LEVEL_MONITOR_SERVICE_NAME) \
 	_BACKEND_CLUSTER_HOST_NAME=$(BACKEND_CLUSTER_HOST_NAME)
 
+# backend/inventory-balance-monitor-service/cloudbuild.yaml
+INVENTORY_BALANCE_MONITOR_SERVICE_SUBS = $(CLUSTER_ARGS) \
+	_INVENTORY_BALANCE_MONITOR_IMAGE_NAME=$(INVENTORY_BALANCE_MONITOR_IMAGE_NAME) \
+	_INVENTORY_BALANCE_MONITOR_SERVICE_NAME=$(INVENTORY_BALANCE_MONITOR_SERVICE_NAME) \
+	_BACKEND_CLUSTER_HOST_NAME=$(BACKEND_CLUSTER_HOST_NAME)
+
 BACKEND_TEST_SUBS = _GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
 
@@ -81,7 +87,11 @@ OPENAPI_GEN_GO_CLIENT_ARGS=-g go -i openapi.yaml -o backend/api-client --package
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
 
-.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local build-webui test-webui build-backend build-eventing-triggers build-infrastructure build-all test cluster
+.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local build-webui test-webui build-backend build-infrastructure build-all test cluster
+# Build eventing
+.PHONY: build-eventing build-eventing-triggers run-local-inventory-state-service run-local-inventory-level-monitor-service run-local-inventory-balance-monitor-service build-inventory-state-service build-inventory-level-monitor-service build-inventory-balance-monitor-service
+# Test eventing
+.PHONY: test-eventing test-inventory-state-service-local test-inventory-level-monitor-service-local test-inventory-balance-monitor-service-local test-inventory-state-service test-inventory-level-monitor-service test-inventory-balance-monitor-service
 
 ## RULES FOR LOCAL DEVELOPMENT
 clean:
@@ -117,6 +127,9 @@ run-local-inventory-state-service: backend/api-client/openapi.yaml
 run-local-inventory-level-monitor-service: backend/api-client/openapi.yaml
 	cd backend/inventory-level-monitor-service && go run main.go -backend_cluster_host_name=localhost:8080
 
+run-local-inventory-balance-monitor-service: backend/api-client/openapi.yaml
+	cd backend/inventory-balance-monitor-service && go run main.go -backend_cluster_host_name=localhost:8080
+
 lint-webui: webui/node_modules
 	cd webui && npm run lint
 
@@ -135,6 +148,9 @@ test-inventory-state-service-local: backend/api-client/openapi.yaml
 
 test-inventory-level-monitor-service-local: backend/api-client/openapi.yaml
 	cd backend/inventory-level-monitor-service/src && go test -v
+
+test-inventory-balance-monitor-service-local: backend/api-client/openapi.yaml
+	cd backend/inventory-balance-monitor-service/src && go test -v
 
 test-webui-local: webui/api-client webui/node_modules
 	cd webui && npm run test -- --watch=false --browsers=ChromeHeadless
@@ -170,6 +186,9 @@ test-inventory-state-service:
 test-inventory-level-monitor-service:
 	$(GCLOUD_BUILD) --config ./backend/inventory-level-monitor-service/cloudbuild-test.yaml
 
+test-inventory-balance-monitor-service:
+	$(GCLOUD_BUILD) --config ./backend/inventory-balance-monitor-service/cloudbuild-test.yaml
+
 test-webui:
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml
 
@@ -184,12 +203,15 @@ build-inventory-state-service: cluster
 
 build-inventory-level-monitor-service: cluster
 	$(GCLOUD_BUILD) --config ./backend/inventory-level-monitor-service/cloudbuild.yaml --substitutions $(call join_subs,$(INVENTORY_LEVEL_MONITOR_SERVICE_SUBS))
-
+  
+build-inventory-balance-monitor-service: cluster
+	$(GCLOUD_BUILD) --config ./backend/inventory-balance-monitor-service/cloudbuild.yaml --substitutions $(call join_subs,$(INVENTORY_BALANCE_MONITOR_SERVICE_SUBS))
+  
 build-eventing-triggers:
 	$(GCLOUD_BUILD) --config cloudbuild-eventing-triggers.yaml --substitutions $(call join_subs,$(EVENTING_TRIGGERS_SUBS))
 
 ifeq ($(EVENTING_ENABLED),true)
-build-eventing: build-inventory-state-service build-inventory-level-monitor-service
+build-eventing: build-inventory-state-service build-inventory-level-monitor-service build-inventory-balance-monitor-service
 	# Eventing triggers have to be set up after the eventing services which they trigger.
 	$(MAKE) build-eventing-triggers
 else
@@ -198,7 +220,7 @@ build-eventing:
 endif
 
 ifeq ($(EVENTING_ENABLED),true)
-test-eventing: test-inventory-state-service test-inventory-level-monitor-service
+test-eventing: test-inventory-state-service test-inventory-level-monitor-service test-inventory-balance-monitor-service
 else
 test-eventing:
 	@echo Eventing is disabled. To test eventing set the EVENTING_ENABLED flag to true in env.mk.
