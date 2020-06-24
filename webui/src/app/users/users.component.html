@@ -34,11 +34,12 @@
         <ng-container matColumnDef="role">
           <th mat-header-cell *matHeaderCellDef>Role</th>
           <td mat-cell *matCellDef="let user">
-            <mat-select [(value)]="userRoles[user.uid]" (selectionChange)="onRoleChange(user)">
+            <mat-select [(value)]="userRoles[user.uid]" (selectionChange)="onRoleChange(user)" *appAllowed="['admin']">
               <mat-option *ngFor="let r of roleList" [value]="r">
                 {{r}}
               </mat-option>
             </mat-select>
+            <span *appAllowed="['','worker']">{{userRoles[user.uid]}}</span>
           </td>
         </ng-container>
 

@@ -41,6 +41,10 @@ Then('I should see user with name {string} and role {string}', (name, role) => {
   cy.contains('tbody td.mat-column-name', name).siblings().contains('td.mat-column-role', role);
 });
 
+Then('I should not be able to select roles', () => {
+  cy.get('tbody td.mat-column-role mat-select').should('not.exist');
+});
+
 When('I select role {string} for user {string}', (role, name) => {
   cy.contains('tbody td.mat-column-name', name).siblings().find('mat-select').click();
   cy.contains('mat-option', role).click();
