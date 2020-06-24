@@ -21,3 +21,5 @@ readonly WORKDER_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 |
 cat ${BASE_PATH}/credentials.template.js | \
 sed "s/\${ADMIN_PASSWORD}/${ADMIN_PASSWORD}/g" | \
 sed "s/\${WORKDER_PASSWORD}/${WORKDER_PASSWORD}/g" > ${BASE_PATH}/credentials.js
+
+echo "Test user passwords generated."

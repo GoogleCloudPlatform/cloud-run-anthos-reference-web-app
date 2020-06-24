@@ -14,7 +14,7 @@
     "cypress": "cypress open",
     "precypress": "npm run prepare-e2e",
     "postcypress": "npm run cleanup",
-    "prepare-e2e": "ts-node cypress/scripts/prepareData.ts",
+    "prepare-e2e": "cypress/scripts/pass-gen.sh && ts-node cypress/scripts/prepareData.ts",
     "cleanup": "ts-node cypress/scripts/cleanup.ts",
     "report-coverage": "codecov"
   },
