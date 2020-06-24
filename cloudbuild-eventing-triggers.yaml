@@ -1,0 +1,49 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+## The steps in this Cloud Build script are used to set up eventing
+## triggers. To use eventing, set EVENTING_ENABLED to true in env.mk.
+
+steps:
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Setup gcloud config
+  waitFor: ['-']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+      gcloud config set run/platform gke
+      gcloud config set run/cluster_location ${_CLUSTER_LOCATION}
+      gcloud config set run/cluster ${_CLUSTER_NAME}
+
+# TODO(#7): Remove "alpha" before launch.
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Create transaction-to-invstate-trigger
+  waitFor: ['Setup gcloud config']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+      # Checks if the trigger exists and creates it if it does not.
+      # An expected error will be printed if the trigger does not already exist.
+      if ! gcloud alpha events triggers describe transaction-to-invstate-trigger --namespace=${_NAMESPACE} 2>&1 > /dev/null; then \
+        echo 'Trigger does not exist - creating it. The above error is expected when the trigger does not exist.'
+        gcloud alpha events triggers create transaction-to-invstate-trigger \
+        --namespace=${_NAMESPACE} \
+        --target-service=${_INVENTORY_STATE_SERVICE_NAME} \
+        --type=service.InventoryTransaction \
+        --custom-type; \
+      fi
+

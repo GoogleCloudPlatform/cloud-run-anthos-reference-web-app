@@ -58,6 +58,10 @@ INFRA_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 PROVISION_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 	_CLUSTER_GKE_VERSION=$(CLUSTER_GKE_VERSION)
 
+# cloudbuild-eventing-triggers.yaml
+EVENTING_TRIGGERS_SUBS = $(CLUSTER_ARGS) \
+	_INVENTORY_STATE_SERVICE_NAME=$(INVENTORY_STATE_SERVICE_NAME)
+
 # webui/cloudbuild.yaml
 WEBUI_SUBS = _DOMAIN=$(DOMAIN)
 
@@ -77,7 +81,7 @@ OPENAPI_GEN_GO_CLIENT_ARGS=-g go -i openapi.yaml -o backend/api-client --package
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
 
-.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local build-webui test-webui build-backend build-infrastructure build-all test cluster
+.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local build-webui test-webui build-backend build-eventing-triggers build-infrastructure build-all test cluster
 
 ## RULES FOR LOCAL DEVELOPMENT
 clean:
@@ -181,8 +185,13 @@ build-inventory-state-service: cluster
 build-inventory-level-monitor-service: cluster
 	$(GCLOUD_BUILD) --config ./backend/inventory-level-monitor-service/cloudbuild.yaml --substitutions $(call join_subs,$(INVENTORY_LEVEL_MONITOR_SERVICE_SUBS))
 
+build-eventing-triggers:
+	$(GCLOUD_BUILD) --config cloudbuild-eventing-triggers.yaml --substitutions $(call join_subs,$(EVENTING_TRIGGERS_SUBS))
+
 ifeq ($(EVENTING_ENABLED),true)
 build-eventing: build-inventory-state-service build-inventory-level-monitor-service
+	# Eventing triggers have to be set up after the eventing services which they trigger.
+	$(MAKE) build-eventing-triggers
 else
 build-eventing:
 	@echo Eventing is disabled. To enable eventing set the EVENTING_ENABLED flag to true in env.mk.
