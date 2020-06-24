@@ -20,7 +20,7 @@
  // and clean up them at the end.
 
 exports.adminEmail = "frontend-e2e-cwa-admin@gmail.com";
-exports.adminPassword = "crcwae2eadmin";
+exports.adminPassword = "${ADMIN_PASSWORD}";
 
 exports.workerEmail = "frontend-e2e-cwa-worker@gmail.com";
-exports.workerPassword = "crcwae2eworker";
+exports.workerPassword = "${WORKDER_PASSWORD}";
