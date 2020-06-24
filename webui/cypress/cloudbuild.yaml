@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-## The steps in this Cloud Build script build and publish the frontend
+## The steps in this Cloud Build script run the frontend e2e test
 
 steps:
-  # Generate the API client for the backend
+  # Generate API Service client
   - name: openapitools/openapi-generator-cli:v4.2.3
     id: Generate Client
-    args: ['generate', '-g','typescript-angular','-i','openapi.yaml','-o','webui/api-client']# generate User Service client
+    args: ['generate', '-g','typescript-angular','-i','openapi.yaml','-o','webui/api-client']
+  # Generate User Service client
   - name: openapitools/openapi-generator-cli:v4.2.3
     id: Generate User Service Client
     waitFor: ['-']

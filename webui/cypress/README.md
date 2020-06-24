@@ -6,7 +6,7 @@
 ### Setup firebase private key
 
 This is not needed if running the e2e test on Cloud Build,
-when the Cloud Build service account already have permission configured.
+when the Cloud Build service account already has permissions configured.
 
 Follow the [Firebase Admin Initialize SDK]
 to setup `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
