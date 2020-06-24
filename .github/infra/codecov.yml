@@ -14,22 +14,19 @@
 
 codecov:
   strict_yaml_branch: "master"
-  ignore:
-    - "webui/src/app/testing"
-    - "**/*.mock.ts"
-  coverage:
-    range: "80...100"
-    status:
-      project:
-        default:
-          target: auto
-          threshold: 0%
-          base: auto
-          only_pulls: true
-      patch:
-        default:
-          target: 100%
-          threshold: 10%
-          base: auto
-          only_pulls: true
-      changes: off
+      coverage:
+          range: "80...100"
+          status:
+            project:
+              default:
+                  target: auto
+                  threshold: 0%
+                  base: auto
+                  only_pulls: true
+            patch:
+              default:
+                  target: 100%
+                  threshold: 10%
+                  base: auto
+                  only_pulls: true
+            changes: off 

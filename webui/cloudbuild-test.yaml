@@ -64,9 +64,8 @@ steps:
   - |
     TOKEN=$$(</workspace/codecov-token.txt)
     npm run report-coverage -- \
-      --disable=detect,gcov \
+      --disable=detect \
       --commit=${COMMIT_SHA} \
       --branch=${BRANCH_NAME} \
       --token=$${TOKEN} \
-      --yml=/workspace/.github/codecov.yml \
-      --root=/workspace
+      --yml=/workspace/.github/infra/codecov.yml
