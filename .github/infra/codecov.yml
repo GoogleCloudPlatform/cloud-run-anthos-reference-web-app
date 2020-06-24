@@ -29,4 +29,4 @@ codecov:
                 threshold: 10%
                 base: auto
                 only_pulls: true
-          changes: off 
+          changes: off
