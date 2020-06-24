@@ -39,7 +39,7 @@ steps:
   - managed-zones
   - create
   - ${_MANAGED_ZONE_NAME}
-  - --description="Managed zone for e2e testing See ${_HEAD_REPO_URL}/pull/${_PR_NUMBER}"
+  - --description="Managed zone for e2e testing commit ${SHORT_SHA}"
   - --dns-name=${_DNS_NAME}
   - --visibility=public
 substitutions:
