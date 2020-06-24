@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Then, Given, When } from 'cypress-cucumber-preprocessor/steps';
+import { Then, When } from 'cypress-cucumber-preprocessor/steps';
 
 import { LocationsPage } from '../../pages/locations.po';
 
@@ -26,20 +26,6 @@ Then('I should see Location named {string}', async (name) => {
 
 Then('I should see Location in warehouse {string}', async (warehouse) => {
   page.getLocationWarehouse().should('contain.text', warehouse);
-});
-
-Given('There is a location named {string}', async (name) => {
-  page.navigateToPath('locations');
-  cy.wait('@locationList');
-  page.getLinkByName(name).then(elm => {
-    if (elm.length === 0) {
-      page.getButton('Create').click();
-      page.getFormField('name').type(name);
-      page.getFormField('warehouse').type(`WH ${name}`);
-      page.getButton('Submit').click();
-      cy.wait('@locationCreate');
-    }
-  });
 });
 
 When('I go to locations page', () => {

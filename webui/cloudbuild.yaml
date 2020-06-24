@@ -15,17 +15,23 @@
 ## The steps in this Cloud Build script build and publish the frontend
 
 steps:
-# Generate the API client for the backend
+# Generate the client for the API backend and user service
 - name: openapitools/openapi-generator-cli:v4.2.3
-  id: Generate Client
-  args: ['generate', '-g','typescript-angular','-i','openapi.yaml','-o','webui/api-client']
+  id: Generate API Client
+  args: ['generate', '-g','typescript-angular','-i','openapi.yaml','-o','webui/api-client']# generate User Service client
+- name: openapitools/openapi-generator-cli:v4.2.3
+  id: Generate User Service Client
+  waitFor: ['-']
+  args: ['generate', '-g','typescript-angular','-i','backend/user-service/user-api.yaml','-o','webui/user-svc-client']
 # build the frontend Angular app and deploy it to GCS
 - name: node:12.16
   id: Prepare
   entrypoint: npm
   args: ['install']
   dir: 'webui'
+  waitFor: ['-']
 - name: node:12.16
+  waitFor: ['Prepare', 'Generate API Client', 'Generate User Service Client']
   id: Build
   entrypoint: npm
   args: ['run', 'build', '--', '--prod']

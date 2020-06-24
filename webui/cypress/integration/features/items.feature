@@ -2,7 +2,7 @@ Feature: Item Management
   # Scenarios on this feature need to be run in the defined order.
 
   Scenario: Create Item
-    Given I logged in
+    Given I logged in as admin
     When I go to items page
     Then I should see page title "Items"
     And I should see some entries

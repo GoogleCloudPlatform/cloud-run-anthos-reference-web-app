@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
+ // These are the account credentials used to run e2e test.
+ // Feel free to change it to any values to suit your need.
+ // The test will create them at the start of the test run,
+ // and clean up them at the end.
 
-// TODO: Copy this file to credentials.ts with credential for the test account.
-export const email = '';
-export const password = '';
+exports.adminEmail = "frontend-e2e-cwa-admin@gmail.com";
+exports.adminPassword = "${ADMIN_PASSWORD}";
+
+exports.workerEmail = "frontend-e2e-cwa-worker@gmail.com";
+exports.workerPassword = "${WORKER_PASSWORD}";

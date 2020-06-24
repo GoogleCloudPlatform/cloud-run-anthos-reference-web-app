@@ -8,7 +8,7 @@
 /bazel-out
 
 # dependencies
-/node_modules
+**/node_modules
 
 # profiling files
 chrome-profiler-events*.json
@@ -46,6 +46,6 @@ testem.log
 Thumbs.db
 
 firebaseConfig.ts
-cypress/credentials.ts
+cypress/credentials.js
 cypress/videos
 cypress/screenshots

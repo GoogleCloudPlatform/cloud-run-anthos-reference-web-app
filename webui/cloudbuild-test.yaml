@@ -45,7 +45,7 @@ steps:
   args: ['run', 'lint']
 - name: trion/ng-cli-karma:latest
   id: Test
-  waitFor: ['Prepare', 'Generate Client', 'Initialize Firebase Config']
+  waitFor: ['Prepare', 'Generate Client', 'Generate User Service Client', 'Initialize Firebase Config']
   dir: 'webui'
   entrypoint: ng
   args: ['test', '--watch=false', '--code-coverage']
