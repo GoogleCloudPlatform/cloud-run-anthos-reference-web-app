@@ -23,4 +23,4 @@ exports.adminEmail = "frontend-e2e-cwa-admin@gmail.com";
 exports.adminPassword = "${ADMIN_PASSWORD}";
 
 exports.workerEmail = "frontend-e2e-cwa-worker@gmail.com";
-exports.workerPassword = "${WORKDER_PASSWORD}";
+exports.workerPassword = "${WORKER_PASSWORD}";
