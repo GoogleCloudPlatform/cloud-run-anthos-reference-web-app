@@ -26,7 +26,7 @@ steps:
       envsubst > env.mk
   env:
   - 'PROJECT_ID=${PROJECT_ID}'
-  - 'BUILD_ID=${BUILD_ID}'
+  - 'BUILD_ID=${_BUILD_ID_SHORT}'
 - name: 'alpine'
   id: DEBUG print env.mk
   entrypoint: /bin/cat
@@ -38,12 +38,12 @@ steps:
   - dns
   - managed-zones
   - create
-  - $${_MANAGED_ZONE_NAME}
+  - ${_MANAGED_ZONE_NAME}
   - --description="Managed zone for e2e testing See ${_HEAD_REPO_URL}/pull/${_PR_NUMBER}"
-  - --dns-name=$${_DNS_NAME}
+  - --dns-name=${_DNS_NAME}
   - --visibility=public
-  env:
-  - '_DNS_NAME=e2e-test-${BUILD_ID}.thisisatest.app'
-  - '_MANAGED_ZONE_NAME=e2e-test-${BUILD_ID}'
-
+substitutions:
+  _BUILD_ID_SHORT: ${BUILD_ID:0:6}
+  _DNS_NAME: e2e-test-${_BUILD_ID_SHORT}.thisisatest.app
+  _MANAGED_ZONE_NAME: e2e-test-${_BUILD_ID_SHORT}
     
