@@ -34,11 +34,14 @@ Authentication is provided by [Identity Platform][], which issues
 a [JSON Web Token (JWT)][] on the frontend that gets passed through
 on subsequent requests and gets [validated by the Istio ingress][].
 
-[Istio Authorization Policies][] enable access control to ensure certain operations are only accessible by certain users. Namely, there are policies to ensure:
+[Istio Authorization Policies][] enable access control to ensure certain
+operations are only accessible by certain users. Namely, there are policies to
+ensure:
  - Access is denied to users without a token
- - `GET` requests to the `/api` endpoint are authorized across all roles
- - `POST` requests to the `/api/inventoryTransactions` endpoint are authorized for workers
- - All operations to the `/api` endpoint are authorized for admins
+ - All roles are authorized to issue `GET` requests to the `/api` endpoint
+ - Workers are authorized to create inventory transactions
+ - Admins are authorized to all operations, including the creation and deletion
+ of items, locations, etc.
 
 ## Build & Infrastructure
 
