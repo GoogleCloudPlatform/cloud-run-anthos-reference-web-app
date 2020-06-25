@@ -82,6 +82,12 @@ steps:
   args:
   - ${PROJECT_ID}
   - ${_WEB_API_KEY}
+- name: 'google/cloud-sdk:latest'
+  id: Run 'make cluster'
+  waitFor: ['Set up env.mk']
+  entrypoint: /bin/make
+  args:
+  - cluster
 substitutions:
   _BUILD_ID_SHORT: ${BUILD_ID:0:6}
   _DNS_NAME: e2e-test-${_BUILD_ID_SHORT}.thisisatest.app
