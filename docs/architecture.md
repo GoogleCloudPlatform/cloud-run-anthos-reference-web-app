@@ -37,6 +37,7 @@ on subsequent requests and gets [validated by the Istio ingress][].
 [Istio Authorization Policies][] enable access control to ensure certain
 operations are only accessible by certain users. Namely, there are policies to
 ensure:
+
  - Access is denied to users without a token
  - All roles are authorized to issue `GET` requests to the `/api` endpoint
  - Workers are authorized to create inventory transactions
