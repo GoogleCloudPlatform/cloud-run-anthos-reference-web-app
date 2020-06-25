@@ -23,3 +23,4 @@ github:
     name: cloud-run-anthos-reference-web-app
     pullRequest:
         branch: "^master$"
+        commentControl: "COMMENTS_ENABLED"
