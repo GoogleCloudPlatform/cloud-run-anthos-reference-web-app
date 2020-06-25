@@ -75,7 +75,7 @@ OPENAPI_GEN_USER_CLIENT_ARGS=-g typescript-angular -i backend/user-service/user-
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
 
-.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local test-istio-auth-local build-webui test-webui test-istio-auth build-backend build-infrastructure build-all test cluster jq
+.PHONY: clean delete delete-cluster run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local test-istio-auth-local build-webui test-webui test-istio-auth build-backend build-infrastructure build-all test cluster jq
 
 ## RULES FOR LOCAL DEVELOPMENT
 clean:
@@ -152,6 +152,9 @@ cluster:
 	  $(GCLOUD_BUILD) --config cloudbuild-provision-cluster.yaml --substitutions $(call join_subs,$(PROVISION_SUBS)) && \
 	  gcloud --project=$(PROJECT_ID) container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION); \
 	fi
+
+delete-cluster:
+	gcloud --project=$(PROJECT_ID) container clusters delete $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION)
 
 delete:
 	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(call join_subs,$(INFRA_SUBS))

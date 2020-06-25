@@ -93,7 +93,24 @@ steps:
   args:
   - -c
   - |
-    make cluster
+    make cluster || touch e2e-failed
+    exit 0
+- name: 'google/cloud-sdk:latest'
+  id: Cleanup
+  waitFor: ["Run 'make cluster'"]
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    make delete-cluster
+- name: 'alpine'
+  id: Set build status
+  waitFor: ["Cleanup"]
+  entrypoint: /bin/ash
+  args:
+  - -c
+  - |
+    test ! -e e2e-failed
 substitutions:
   _BUILD_ID_SHORT: ${BUILD_ID:0:6}
   _DNS_NAME: e2e-test-${_BUILD_ID_SHORT}.thisisatest.app
