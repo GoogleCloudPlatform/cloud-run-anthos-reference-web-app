@@ -30,7 +30,21 @@ resources:
   name: test-webui
   properties:
       name: test-webui
-      description: Test the UI components of the reference app
+      description: Test the UI components of the reference app on pull request
+      filename: webui/cloudbuild-test.yaml
+      includedFiles:
+      - webui/**
+      - .github/infra/**
+      github:
+          owner: GoogleCloudPlatform
+          name: cloud-run-anthos-reference-web-app
+          pullRequest:
+              branch: "^master$"
+- type: gcp-types/cloudbuild-v1:projects.triggers
+  name: test-webui-master
+  properties:
+      name: test-webui-master
+      description: Test the UI components of the reference app on push to master
       filename: webui/cloudbuild-test.yaml
       includedFiles:
       - webui/**
@@ -39,4 +53,4 @@ resources:
           owner: GoogleCloudPlatform
           name: cloud-run-anthos-reference-web-app
           push:
-              branch: ".*"
+              branch: "^master$"
