@@ -17,10 +17,14 @@
 steps:
 - name: 'alpine'
   id: Set up env.mk
+  waitFor: ['-']
   entrypoint: /bin/ash
   args:
   - '-c'
   - |
+      set -o errexit
+      set -o xtrace
+      set 
       apk add gettext
       cat e2e/env.mk.template | \
       envsubst > env.mk
@@ -29,6 +33,7 @@ steps:
   - 'BUILD_ID=${_BUILD_ID_SHORT}'
 - name: 'google/cloud-sdk:latest'
   id: Create DNS managed zone
+  waitFor: ['-']
   args:
   - gcloud
   - dns
@@ -40,6 +45,7 @@ steps:
   - --visibility=public
 - name: 'google/cloud-sdk:latest'
   id: Export zone records
+  waitFor: ['Create DNS managed zone']
   args:
   - gcloud
   - dns
@@ -50,13 +56,17 @@ steps:
   - ${_MANAGED_ZONE_NAME}.zonefile
 - name: 'alpine'
   id: Remove SOA record
+  waitFor: ['Export zone records']
   entrypoint: /bin/ash
   args:
   - '-c'
   - |
+    set -o errexit
+    set -o xtrace
     grep -v SOA ${_MANAGED_ZONE_NAME}.zonefile > ${_MANAGED_ZONE_NAME}.zonefile.modified
 - name: 'google/cloud-sdk:latest'
   id: Import NS records to top level
+  waitFor: ['Remove SOA record']
   args:
   - gcloud
   - dns
@@ -65,9 +75,18 @@ steps:
   - --zone=${_TOP_LEVEL_ZONE_NAME}
   - --zone-file-format
   - ${_MANAGED_ZONE_NAME}.zonefile.modified 
+- name: 'ubuntu:latest'
+  id: Setup Firebase config
+  waitFor: ['-']
+  entrypoint: /workspace/scripts/firebase-config-setup.sh
+  args:
+  - ${PROJECT_ID}
+  - ${_WEB_API_KEY}
 substitutions:
   _BUILD_ID_SHORT: ${BUILD_ID:0:6}
   _DNS_NAME: e2e-test-${_BUILD_ID_SHORT}.thisisatest.app
   _MANAGED_ZONE_NAME: e2e-test-${_BUILD_ID_SHORT}-zone
   _TOP_LEVEL_ZONE_NAME: thisisatest-app
+  _WEB_API_KEY: AIzaSyAUP41pKXJxtpn77GTX0fX-DR-TgnXAxQA
+
     
