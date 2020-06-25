@@ -27,10 +27,6 @@ steps:
   env:
   - 'PROJECT_ID=${PROJECT_ID}'
   - 'BUILD_ID=${_BUILD_ID_SHORT}'
-- name: 'alpine'
-  id: DEBUG print env.mk
-  entrypoint: /bin/cat
-  args: ["env.mk"]
 - name: 'google/cloud-sdk:latest'
   id: Create DNS managed zone
   args:
@@ -42,8 +38,36 @@ steps:
   - --description="Managed zone for e2e testing commit ${SHORT_SHA}"
   - --dns-name=${_DNS_NAME}
   - --visibility=public
+- name: 'google/cloud-sdk:latest'
+  id: Export zone records
+  args:
+  - gcloud
+  - dns
+  - record-sets
+  - export
+  - --zone=${_MANAGED_ZONE_NAME}
+  - --zone-file-format
+  - ${_MANAGED_ZONE_NAME}.zonefile
+- name: 'alpine'
+  id: Remove SOA record
+  entrypoint: /bin/ash
+  args:
+  - '-c'
+  - |
+    grep -v SOA ${_MANAGED_ZONE_NAME}.zonefile > ${_MANAGED_ZONE_NAME}.zonefile.modified
+- name: 'google/cloud-sdk:latest'
+  id: Import NS records to top level
+  args:
+  - gcloud
+  - dns
+  - record-sets
+  - import
+  - --zone=${_TOP_LEVEL_ZONE_NAME}
+  - --zone-file-format
+  - ${_MANAGED_ZONE_NAME}.zonefile.modified 
 substitutions:
   _BUILD_ID_SHORT: ${BUILD_ID:0:6}
   _DNS_NAME: e2e-test-${_BUILD_ID_SHORT}.thisisatest.app
-  _MANAGED_ZONE_NAME: e2e-test-${_BUILD_ID_SHORT}
+  _MANAGED_ZONE_NAME: e2e-test-${_BUILD_ID_SHORT}-zone
+  _TOP_LEVEL_ZONE_NAME: thisisatest-app
     
