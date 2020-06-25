@@ -12,22 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-## This Cloud Build script configures other Cloud Build triggers for
-## various build actions associated with this repository.
-
-steps:
-- name: 'google/cloud-sdk:slim'
-  id: Configure build triggers
-  entrypoint: /bin/bash
-  args:
-  - -c
-  - |
-    set -o errexit
-    set -o xtrace
-    for f in .github/infra/triggers/*.yaml
-    do
-      trigger_filename=$${f##*/}
-      trigger_name=$${trigger_filename%.*} 
-      gcloud beta builds triggers delete --quiet $${trigger_name} || true
-      gcloud beta builds triggers import --source $$f
-    done
+name: test-webui
+description: Test the UI components of the reference app on pull request
+filename: webui/cloudbuild-test.yaml
+includedFiles:
+- webui/**
+- .github/infra/**
+github:
+    owner: GoogleCloudPlatform
+    name: cloud-run-anthos-reference-web-app
+    pullRequest:
+        branch: "^master$"
