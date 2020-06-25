@@ -15,6 +15,10 @@
 ## This Cloud Build script is used to run the automated e2e test workflow
 
 steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: Cache cloud-sdk image
+  waitFor: ['-']
+  args: ['pull', 'google/cloud-sdk:latest']
 - name: 'alpine'
   id: Set up env.mk
   waitFor: ['-']
@@ -33,7 +37,7 @@ steps:
   - 'BUILD_ID=${_BUILD_ID_SHORT}'
 - name: 'google/cloud-sdk:latest'
   id: Create DNS managed zone
-  waitFor: ['-']
+  waitFor: ['Cache cloud-sdk image']
   args:
   - gcloud
   - dns
@@ -45,7 +49,7 @@ steps:
   - --visibility=public
 - name: 'google/cloud-sdk:latest'
   id: Export zone records
-  waitFor: ['Create DNS managed zone']
+  waitFor: ['Create DNS managed zone', 'Cache cloud-sdk image']
   args:
   - gcloud
   - dns
@@ -66,7 +70,7 @@ steps:
     grep -v SOA ${_MANAGED_ZONE_NAME}.zonefile > ${_MANAGED_ZONE_NAME}.zonefile.modified
 - name: 'google/cloud-sdk:latest'
   id: Import NS records to top level
-  waitFor: ['Remove SOA record']
+  waitFor: ['Remove SOA record', 'Cache cloud-sdk image']
   args:
   - gcloud
   - dns
@@ -84,7 +88,7 @@ steps:
   - ${_WEB_API_KEY}
 - name: 'google/cloud-sdk:latest'
   id: Run 'make cluster'
-  waitFor: ['Set up env.mk']
+  waitFor: ['Set up env.mk', 'Cache cloud-sdk image']
   entrypoint: /bin/bash
   args:
   - -c
