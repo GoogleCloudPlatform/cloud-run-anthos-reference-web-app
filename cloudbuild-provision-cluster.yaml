@@ -134,6 +134,7 @@ steps:
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
 
 # Install Istio 1.5 on the cluster so we can use Istio Authorization Policies.
+# TODO(#97): Remove this step once CRfA comes bundled with Istio 1.5+
 - name: 'gcr.io/cloud-builders/kubectl'
   id: Install Istio 1.5
   waitFor: ['Create Cluster','Process Manifest']
