@@ -111,11 +111,10 @@ steps:
   - -c
   - |
     test ! -e e2e-failed
+timeout: 1200s
 substitutions:
   _BUILD_ID_SHORT: ${BUILD_ID:0:6}
   _DNS_NAME: e2e-test-${_BUILD_ID_SHORT}.thisisatest.app
   _MANAGED_ZONE_NAME: e2e-test-${_BUILD_ID_SHORT}-zone
   _TOP_LEVEL_ZONE_NAME: thisisatest-app
   _WEB_API_KEY: AIzaSyAUP41pKXJxtpn77GTX0fX-DR-TgnXAxQA
-
-    
