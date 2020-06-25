@@ -318,7 +318,6 @@ spec:
       triggerRules:
       - includedPaths:
         - prefix: /api
-        - prefix: /users
   principalBinding: USE_ORIGIN
 ---
 # Allow non-mTLS peer traffic in the application's namespace
@@ -371,7 +370,7 @@ spec:
     to:
     - operation:
         methods: ["GET"]
-        paths: ["/api*", "/users*"]
+        paths: ["/api*"]
 ---
 # Allow Admin access to all API paths + methods
 apiVersion: security.istio.io/v1beta1
@@ -386,7 +385,7 @@ spec:
         requestPrincipals: ["https://securetoken.google.com/${PROJECT_ID}/*"]
     to:
     - operation:
-        paths: ["/api*", "/users*"]
+        paths: ["/api*"]
     when:
     - key: request.auth.claims[role]
       values: ["admin"]
