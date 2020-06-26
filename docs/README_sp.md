@@ -49,7 +49,7 @@ El shell script:
 * Le permite crear un subdominio personalizado o usar uno existente.
 * Crea subdominios personalizados y zonas administradas listas para usar usando los pasos en
   [cloud-tutorial.dev][].
-* Asegura que todos los dominios personalizados estén asociados con una [Cloud DNS Managed Zone][]
+* Asegura que todos los dominios personalizados estén asociados con una [zona administrada de Cloud DNS][Cloud DNS Managed Zone]
   en el mismo proyecto que está desplegando para esta aplicación.
 * Para los dominios personalizados proporcionados, enlaces a la documentación para
   [actualizar name server records][] para apuntar a su zona administrada.
