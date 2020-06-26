@@ -110,7 +110,11 @@ steps:
   args:
   - -c
   - |
-    test ! -e e2e-failed
+    if [ -e e2e-failed ]
+    then
+      echo "Build failed!"
+      exit 1
+    fi
 timeout: 1200s
 substitutions:
   _BUILD_ID_SHORT: ${BUILD_ID:0:6}
