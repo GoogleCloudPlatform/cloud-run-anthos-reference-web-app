@@ -16,18 +16,37 @@
 
 <mat-card>
   <mat-card-title>Users</mat-card-title>
-  <mat-card-content>
-    Users page for admins
 
-    <table mat-table [dataSource]="dataSource">
-      <mat-text-column name="uid"></mat-text-column>
-      <mat-text-column name="displayName"></mat-text-column>
-      <mat-text-column name="email"></mat-text-column>
-      <mat-text-column name="role"></mat-text-column>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-    </table>
-
+  <mat-card-content *ngIf="loading; else contentBlock">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
   </mat-card-content>
+
+  <ng-template #contentBlock>
+    <mat-card-content>
+      <table mat-table [dataSource]="dataSource">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let user">
+            <a routerLink="/users/{{user.uid}}" class="user-link" >{{user.displayName}}</a>
+          </td>
+        </ng-container>
+        <mat-text-column name="email"></mat-text-column>
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Role</th>
+          <td mat-cell *matCellDef="let user">
+            <mat-select [(value)]="userRoles[user.uid]" (selectionChange)="onRoleChange(user)" *appAllowed="['admin']">
+              <mat-option *ngFor="let r of roleList" [value]="r">
+                {{r}}
+              </mat-option>
+            </mat-select>
+            <span *appAllowed="['','worker']">{{userRoles[user.uid]}}</span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </mat-card-content>
+  </ng-template>
+
 </mat-card>

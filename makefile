@@ -49,6 +49,11 @@ INVENTORY_BALANCE_MONITOR_SERVICE_SUBS = $(CLUSTER_ARGS) \
 BACKEND_TEST_SUBS = _GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
 
+USER_SVC_SUBS = $(CLUSTER_ARGS) \
+	_USER_SVC_IMAGE=$(USER_SVC_IMAGE_NAME) \
+	_USER_SVC_KSA=$(USER_SVC_KSA) \
+	_USER_SVC_NAME=$(USER_SVC_NAME) \
+
 FRONTEND_E2E_SUBS = _DOMAIN=$(DOMAIN)
 
 # cloudbuild.yaml
@@ -56,6 +61,9 @@ INFRA_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 	_BACKEND_GSA=$(BACKEND_GSA) \
 	_BACKEND_KSA=$(BACKEND_KSA) \
 	_BACKEND_SERVICE_HOST_NAME=$(BACKEND_SERVICE_HOST_NAME) \
+	_USER_SVC_KSA=$(USER_SVC_KSA) \
+	_USER_SVC_GSA=$(USER_SVC_GSA) \
+	_USER_SVC_HOST_NAME=$(USER_SVC_HOST_NAME) \
 	_DOMAIN=$(DOMAIN) \
 	_MANAGED_ZONE_NAME=$(MANAGED_ZONE_NAME) \
 	_SSL_CERT_NAME=$(SSL_CERT_NAME)
@@ -83,6 +91,7 @@ OPENAPI_GEN_JAR=openapi-generator-cli-4.3.0.jar
 OPENAPI_GEN_URL="https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/4.3.0/$(OPENAPI_GEN_JAR)"
 OPENAPI_GEN_SERVER_ARGS=-g go-server -i openapi.yaml -o backend/api-service --api-name-suffix= --git-user-id=$(GIT_USER_ID) --git-repo-id=$(GIT_REPO_ID)/api-service --package-name=service -t $(CUSTOM_TEMPLATES) --additional-properties=sourceFolder=src
 OPENAPI_GEN_TYPESCRIPT_CLIENT_ARGS=-g typescript-angular -i openapi.yaml -o webui/api-client
+OPENAPI_GEN_TYPESCRIPT_USER_CLIENT_ARGS=-g typescript-angular -i backend/user-service/user-api.yaml -o webui/user-svc-client
 OPENAPI_GEN_GO_CLIENT_ARGS=-g go -i openapi.yaml -o backend/api-client --package-name=client
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
@@ -103,6 +112,9 @@ clean:
 
 webui/api-client: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml
 	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_TYPESCRIPT_CLIENT_ARGS)
+
+webui/user-svc-client: /tmp/$(OPENAPI_GEN_JAR) backend/user-service/user-api.yaml
+	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_TYPESCRIPT_USER_CLIENT_ARGS)
 
 webui/node_modules:
 	cd webui && npm ci
@@ -193,10 +205,13 @@ test-webui:
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml
 
 test-webui-e2e:
-	$(GCLOUD_BUILD) --config ./webui/e2e/cloudbuild.yaml --substitutions $(call join_subs,$(FRONTEND_E2E_SUBS))
+	$(GCLOUD_BUILD) --config ./webui/cypress/cloudbuild.yaml --substitutions $(call join_subs,$(FRONTEND_E2E_SUBS))
 
 build-backend: cluster
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild.yaml --substitutions $(call join_subs,$(BACKEND_SUBS))
+
+build-userservice: cluster
+	$(GCLOUD_BUILD) --config ./backend/user-service/cloudbuild.yaml --substitutions $(call join_subs,$(USER_SVC_SUBS))
 
 build-inventory-state-service: cluster
 	$(GCLOUD_BUILD) --config ./backend/inventory-state-service/cloudbuild.yaml --substitutions $(call join_subs,$(INVENTORY_STATE_SERVICE_SUBS))
@@ -229,6 +244,8 @@ endif
 build-infrastructure: cluster
 	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(call join_subs,$(INFRA_SUBS))
 
-build-all: build-infrastructure build-webui build-backend build-eventing
+build-infra: build-infrastructure
+
+build-all: build-infrastructure build-backend build-userservice build-webui build-eventing
 
 test: test-backend test-webui test-eventing

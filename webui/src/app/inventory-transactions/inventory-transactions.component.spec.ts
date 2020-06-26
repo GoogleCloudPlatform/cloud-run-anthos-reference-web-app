@@ -25,6 +25,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MockAllowedDirective } from '../allowed.directive.mock';
 
 describe('InventoryTransactionsComponent', () => {
   let component: InventoryTransactionsComponent;
@@ -32,7 +33,7 @@ describe('InventoryTransactionsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InventoryTransactionsComponent ],
+      declarations: [ InventoryTransactionsComponent, MockAllowedDirective ],
       imports: [
         HttpClientTestingModule,
         MatButtonModule,

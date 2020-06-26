@@ -22,6 +22,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MockAllowedDirective } from '../allowed.directive.mock';
 
 describe('LocationsComponent', () => {
   let component: LocationsComponent;
@@ -29,7 +30,7 @@ describe('LocationsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ LocationsComponent ],
+      declarations: [ LocationsComponent, MockAllowedDirective ],
       imports: [
         HttpClientTestingModule,
         MatCardModule,

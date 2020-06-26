@@ -29,7 +29,7 @@
     <mat-form-field appearance="fill">
       <mat-label>Location</mat-label>
       <mat-select formControlName="location_id" required>
-        <mat-option *ngFor="let location of locations" [(value)]="location.id">
+        <mat-option *ngFor="let location of locations" [value]="location.id">
           {{location.name}}
         </mat-option>
       </mat-select>

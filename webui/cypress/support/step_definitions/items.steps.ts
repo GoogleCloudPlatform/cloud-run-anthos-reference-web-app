@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Then, Given, When } from 'cypress-cucumber-preprocessor/steps';
+import { Then, When } from 'cypress-cucumber-preprocessor/steps';
 import { ItemsPage } from '../../pages/items.po';
 
 const page = new ItemsPage();
@@ -25,20 +25,6 @@ Then('I should see Item named {string}', async (name) => {
 
 Then('I should see Item description as {string}', async (description) => {
   page.getItemDescription().should('contain.text', description);
-});
-
-Given('There is an item named {string}', async (name) => {
-  page.navigateToPath('items');
-  cy.wait('@itemList');
-  page.getLinkByName(name).then(elm => {
-    if (elm.length === 0) {
-      page.getButton('Create').click();
-      page.getFormField('name').type(name);
-      page.getFormField('description').type(`test item ${name}`);
-      page.getButton('Submit').click();
-      cy.wait('@itemCreate');
-    }
-  });
 });
 
 When('I go to items page', () => {

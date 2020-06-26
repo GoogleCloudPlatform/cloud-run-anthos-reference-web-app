@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AuthProcessService } from 'ngx-auth-firebaseui';
@@ -24,13 +24,27 @@ import { AuthProcessService } from 'ngx-auth-firebaseui';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'CRfA Canonical Web App';
+
+  private photoUrl: string | null = null;
 
   constructor(
     public afAuth: AngularFireAuth,
     public authProcess: AuthProcessService,
   ) {
+  }
+
+  ngOnInit(): void {
+    this.afAuth.onAuthStateChanged((u: firebase.User | null) => {
+      if (u) {
+        this.photoUrl = u.photoURL;
+      }
+    });
+  }
+
+  public get avatarImageUrl(): string | null {
+    return this.photoUrl;
   }
 
   signOut() {

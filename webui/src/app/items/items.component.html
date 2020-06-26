@@ -38,6 +38,6 @@
   </ng-template>
 
   <mat-card-actions>
-    <button mat-button class="create-btn" color="primary" routerLink="/items/new" routerLinkActive="active">Create</button>
+    <button  *appAllowed="['admin']" mat-button class="create-btn" color="primary" routerLink="/items/new" routerLinkActive="active">Create</button>
   </mat-card-actions>
 </mat-card>

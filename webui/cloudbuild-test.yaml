@@ -15,11 +15,21 @@
 ## The steps in this Cloud Build script lint and test the frontend
 
 steps:
+- name: alpine
+  id: Initialize Firebase Config
+  waitFor: ['-']
+  entrypoint: /bin/cp
+  args: ['./webui/firebaseConfig.sample.ts', './webui/firebaseConfig.ts']
 # generate OpenAPI client
 - name: openapitools/openapi-generator-cli:v4.2.3
   id: Generate Client
   waitFor: ['-']
   args: ['generate', '-g','typescript-angular','-i','openapi.yaml','-o','webui/api-client']
+# generate User Service client
+- name: openapitools/openapi-generator-cli:v4.2.3
+  id: Generate User Service Client
+  waitFor: ['-']
+  args: ['generate', '-g','typescript-angular','-i','backend/user-service/user-api.yaml','-o','webui/user-svc-client']
 # build and test the Angular frontend
 - name: node:12.16
   id: Prepare
@@ -35,7 +45,27 @@ steps:
   args: ['run', 'lint']
 - name: trion/ng-cli-karma:latest
   id: Test
-  waitFor: ['Prepare']
+  waitFor: ['Prepare', 'Generate Client', 'Generate User Service Client', 'Initialize Firebase Config']
   dir: 'webui'
   entrypoint: ng
-  args: ['test', '--watch','false']
+  args: ['test', '--watch=false', '--code-coverage']
+- name: gcr.io/cloud-builders/gcloud
+  id: Get codecov token
+  waitFor: ['-']
+  entrypoint: 'bash'
+  args: [ '-c', 'gcloud secrets versions access latest --secret=codecov-token > /workspace/codecov-token.txt' ]
+- name: node:12.16
+  id: Upload coverage report
+  waitFor: ['Test', 'Get codecov token']
+  dir: 'webui'
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    TOKEN=$$(</workspace/codecov-token.txt)
+    npm run report-coverage -- \
+      --disable=detect \
+      --commit=${COMMIT_SHA} \
+      --branch=${BRANCH_NAME} \
+      --token=$${TOKEN} \
+      --yml=/workspace/.github/infra/codecov.yml

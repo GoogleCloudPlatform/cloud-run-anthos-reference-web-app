@@ -9,7 +9,14 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "cypress run",
-    "cypress": "cypress open"
+    "pree2e": "npm run prepare-e2e",
+    "poste2e": "npm run cleanup",
+    "cypress": "cypress open",
+    "precypress": "npm run prepare-e2e",
+    "postcypress": "npm run cleanup",
+    "prepare-e2e": "cypress/scripts/pass-gen.sh && ts-node cypress/scripts/prepareData.ts",
+    "cleanup": "ts-node cypress/scripts/cleanup.ts",
+    "report-coverage": "codecov"
   },
   "private": true,
   "dependencies": {
@@ -27,6 +34,7 @@
     "@angular/platform-browser-dynamic": "~9.1.0",
     "@angular/router": "~9.1.0",
     "firebase": "^7.13.2",
+    "material-design-icons": "^3.0.1",
     "moment": "^2.24.0",
     "ngx-auth-firebaseui": "^4.2.1",
     "rxjs": "^6.5.5",
@@ -41,9 +49,11 @@
     "@types/cypress-cucumber-preprocessor": "^1.14.1",
     "@types/jasmine": "~3.3.8",
     "@types/node": "^12.11.1",
+    "codecov": "^3.7.0",
     "codelyzer": "^5.1.2",
     "cypress": "^4.5.0",
     "cypress-cucumber-preprocessor": "^2.3.1",
+    "firebase-admin": "^8.12.1",
     "jasmine-core": "^3.5.0",
     "karma": "^5.0.2",
     "karma-chrome-launcher": "~2.2.0",
@@ -52,6 +62,7 @@
     "karma-jasmine-html-reporter": "^1.5.1",
     "npm-force-resolutions": "0.0.3",
     "ts-loader": "^7.0.4",
+    "ts-node": "^8.10.2",
     "tslint": "~5.15.0",
     "typescript": "~3.8.3",
     "webpack": "^4.43.0"

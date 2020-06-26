@@ -22,7 +22,7 @@
   </mat-card-content>
 
   <ng-template #contentBlock>
-    <button mat-fab class="add-button" (click)="addTransaction()">
+    <button *appAllowed="['admin', 'worker']" mat-fab class="add-button" (click)="addTransaction()">
       <mat-icon>add</mat-icon>
     </button>
     <table mat-table [dataSource]="dataSource" data-testid="transactions">

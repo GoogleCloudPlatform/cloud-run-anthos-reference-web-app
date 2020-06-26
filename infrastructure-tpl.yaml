@@ -100,11 +100,16 @@ spec:
         backendBucketRef:
           name: web-app-backend-bucket
       pathRule:
-        # API requests go to the backend instead
+        # Paths to the API service
         - paths: ["/api", "/api/*"]
           service:
             backendServiceRef:
-              name: web-app-backend-service
+              name: web-app-backend-api-service
+        # Paths to the User service
+        - paths: ["/api/users", "/api/users/*"]
+          service:
+            backendServiceRef:
+              name: web-app-backend-user-service
   hostRule:
     - hosts: ["*"]
       pathMatcher: allpaths
@@ -228,6 +233,68 @@ spec:
     apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
     kind: Project
     external: projects/${PROJECT_ID}
+---
+# The Google Cloud IAM service account to be used by the user service
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMServiceAccount
+metadata:
+  name: ${USER_SVC_GSA}
+  namespace: ${NAMESPACE}
+spec:
+  displayName: ${USER_SVC_GSA}
+---
+# The Kubernetes service account to be used by the user service
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ${USER_SVC_KSA}
+  namespace: ${NAMESPACE}
+  annotations:
+    iam.gke.io/gcp-service-account: ${USER_SVC_GSA}@${PROJECT_ID}.iam.gserviceaccount.com
+---
+# The Workload Identity binding that ties the Kubernetes service account to the IAM service account
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicy
+metadata:
+  name: iampolicy-workload-identity-usersvc
+  namespace: ${NAMESPACE}
+spec:
+  resourceRef:
+    apiVersion: iam.cnrm.cloud.google.com/v1beta1
+    kind: IAMServiceAccount
+    name: ${USER_SVC_GSA}
+  bindings:
+    - role: roles/iam.workloadIdentityUser
+      members:
+        - serviceAccount:${PROJECT_ID}.svc.id.goog[${NAMESPACE}/${USER_SVC_KSA}]
+---
+# IAM role bindings for the user service account to firebase admin
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: iampolicymember-firebaseauth-usersvc
+  namespace: ${NAMESPACE}
+spec:
+  member: serviceAccount:${USER_SVC_GSA}@${PROJECT_ID}.iam.gserviceaccount.com
+  role: roles/firebaseauth.admin
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: projects/${PROJECT_ID}
+---
+  # IAM role bindings for the user service account for writing metrics
+  apiVersion: iam.cnrm.cloud.google.com/v1beta1
+  kind: IAMPolicyMember
+  metadata:
+    name: iampolicymember-metrics-usersvc
+    namespace: ${NAMESPACE}
+  spec:
+    member: serviceAccount:${USER_SVC_GSA}@${PROJECT_ID}.iam.gserviceaccount.com
+    role: roles/monitoring.metricWriter
+    resourceRef:
+      apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+      kind: Project
+      external: projects/${PROJECT_ID}
 ---
 # Istio backend authentication policy
 # See: https://cloud.google.com/solutions/authenticating-cloud-run-on-gke-end-users-using-istio-and-identity-platform

@@ -48,6 +48,7 @@ const routes: Routes = [
     path: 'items/new',
     component: ItemEditorComponent,
     canActivate: [LoginGuard],
+    data: {roles: ['admin']},
   },
   {
     path: 'items/:id',
@@ -58,6 +59,7 @@ const routes: Routes = [
     path: 'items/:id/edit',
     component: ItemEditorComponent,
     canActivate: [LoginGuard],
+    data: {roles: ['admin']},
   },
   {
     path: 'locations',
@@ -68,6 +70,7 @@ const routes: Routes = [
     path: 'locations/new',
     component: LocationEditorComponent,
     canActivate: [LoginGuard],
+    data: {roles: ['admin']},
   },
   {
     path: 'locations/:id',
@@ -78,6 +81,7 @@ const routes: Routes = [
     path: 'locations/:id/edit',
     component: LocationEditorComponent,
     canActivate: [LoginGuard],
+    data: {roles: ['admin']},
   },
   {
     path: 'users',
@@ -85,10 +89,15 @@ const routes: Routes = [
     canActivate: [LoginGuard],
   },
   {
+    path: 'users/:id',
+    component: UsersComponent,
+    canActivate: [LoginGuard],
+  },
+  {
     path: 'alerts',
     component: AlertsComponent,
     canActivate: [LoginGuard],
-  }
+  },
 ];
 
 @NgModule({

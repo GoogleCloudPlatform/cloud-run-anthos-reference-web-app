@@ -15,8 +15,8 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { FirestoreService } from 'src/app/firestore/firestore.service';
 import { MatTableDataSource } from '@angular/material/table';
+import { UserService, User } from 'user-svc-client';
 
 @Component({
   selector: 'app-users',
@@ -24,17 +24,57 @@ import { MatTableDataSource } from '@angular/material/table';
   styleUrls: ['./users.component.scss']
 })
 export class UsersComponent implements OnInit {
-  displayedColumns: string[] = ['uid', 'displayName', 'email', 'role'];
+  displayedColumns: string[] = ['name', 'email', 'role'];
   roleList: string[] = ['', 'worker', 'admin'];
   dataSource = new MatTableDataSource<any>();
-  constructor(private fs: FirestoreService) {
-    this.fs.getUsers().valueChanges().subscribe(
+  userRoles: {[name: string]: string} = {};
+  loading = false;
+
+  constructor(private userService: UserService) {
+  }
+
+  ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.loading = true;
+    this.userService.listUsers().subscribe(
       data => {
-        console.log(data);
+        this.loading = false;
         this.dataSource.data = data;
+        this.initUserRoles();
+      },
+      (e) => {
+        this.loading = false;
       }
     );
   }
+  initUserRoles() {
+    this.dataSource.data.forEach(user => {
+      if (!user.uid) {
+        return;
+      }
+      if (user.customClaims && user.customClaims.role) {
+        this.userRoles[user.uid] = user.customClaims.role;
+      } else {
+        this.userRoles[user.uid] = '';
+      }
+    });
+  }
 
-  ngOnInit() {}
+  onRoleChange(user: User) {
+    if (user.uid) {
+      const newRole = this.userRoles[user.uid];
+      if (newRole === '' || newRole === 'worker' || newRole === 'admin') {
+        this.userService.updateUser(user.uid, newRole).subscribe(
+          () => this.loadData(),
+          () => this.initUserRoles(),
+        );
+        return;
+      }
+    }
+    // reset userRoles on failure to wipe temporary values.
+    this.initUserRoles();
+  }
 }

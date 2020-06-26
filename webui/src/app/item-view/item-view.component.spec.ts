@@ -26,6 +26,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MockAllowedDirective } from '../allowed.directive.mock';
 
 describe('ItemViewComponent', () => {
   let component: ItemViewComponent;
@@ -33,7 +34,7 @@ describe('ItemViewComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ItemViewComponent, InventoryTransactionsComponent ],
+      declarations: [ ItemViewComponent, InventoryTransactionsComponent, MockAllowedDirective ],
       imports: [
         HttpClientTestingModule,
         MatButtonModule,

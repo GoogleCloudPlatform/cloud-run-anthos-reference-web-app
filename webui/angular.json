@@ -30,6 +30,7 @@
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
+              "./node_modules/material-design-icons/iconfont/material-icons.css",
               "src/styles.css"
             ],
             "scripts": []
@@ -110,7 +111,8 @@
             ],
             "exclude": [
               "**/node_modules/**",
-              "api-client/**"
+              "api-client/**",
+              "user-svc-client/**"
             ]
           }
         }
