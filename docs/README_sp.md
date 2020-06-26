@@ -134,7 +134,7 @@ Ejecutar `make cluster`
 
 ### 4. Agregar un propietario verificado para el dominio
 
-Agregue la siguiente cuenta de servicio como [additional verified owner][]:
+Agregue la siguiente cuenta de servicio como un [propietario verificado adicional][additional verified owner]:
 
 `cnrm-system@${PROJECT_ID}.iam.gserviceaccount.com`
 
