@@ -88,8 +88,8 @@ El shell script:
    * Información adicional
      [aquí](https://support.google.com/cloud/answer/6158849?hl=en#userconsent).
 1. Configurar `webui/firebaseConfig.js`.
-   * Identifique su Web API Key navigando a la configuración de proyecto en la consola de Firebase:
-     <https://console.firebase.google.com/project/$PROJECT_ID/settings/general>
+   * Identifique su **Clave de API de la web** navegando a la configuración de proyecto en la consola de Firebase:
+     <https://console.firebase.google.com/project/$PROJECT_ID/settings/general?hl=es>
    * Ejecute [firebase-config-setup.sh][] para crear `webui/firebaseConfig.js`:
 
    ```bash
