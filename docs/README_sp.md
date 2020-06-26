@@ -104,8 +104,8 @@ El shell script:
    * Use la ubicación predeterminada o personalícela como desee, luego haga clic en **Done**
 
 1. Configurar las reglas de seguridad de Firestore:
-   * Navegue a Develop > Database > Rules en la consola de Firebase:
-     <https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules>.
+   * Navegue a Desarollo > Database > Reglas en la consola de Firebase:
+     <https://console.firebase.google.com/project/$PROJECT_ID/database/firestore/rules?hl=es>.
    * Asegurese que **Cloud Firestore** esté seleccionado en el menú desplegable de la parte de arriba.
      ![firestore rules page screenshot][]
    * Establezca las reglas de seguridad a las que se encuentran en [`firestore/firestore.rules`][].
