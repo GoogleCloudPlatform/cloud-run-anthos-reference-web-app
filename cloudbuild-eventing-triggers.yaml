@@ -27,6 +27,7 @@ steps:
       gcloud config set run/platform gke
       gcloud config set run/cluster_location ${_CLUSTER_LOCATION}
       gcloud config set run/cluster ${_CLUSTER_NAME}
+      gcloud config set run/namespace ${_NAMESPACE}
 
 # TODO(#7): Remove "alpha" before launch.
 - name: 'gcr.io/cloud-builders/gcloud'
@@ -36,10 +37,8 @@ steps:
   args:
   - '-c'
   - |
-      # Checks if the trigger exists and creates it if it does not.
-      # An expected error will be printed if the trigger does not already exist.
-      if ! gcloud alpha events triggers describe transaction-to-invstate-trigger --namespace=${_NAMESPACE} 2>&1 > /dev/null; then \
-        echo 'Trigger does not exist - creating it. The above error is expected when the trigger does not exist.'
+      if [ -z "$(gcloud alpha events triggers list --filter="transaction-to-invstate-trigger" --format=list)" ]
+      then
         gcloud alpha events triggers create transaction-to-invstate-trigger \
         --namespace=${_NAMESPACE} \
         --target-service=${_INVENTORY_STATE_SERVICE_NAME} \
@@ -47,3 +46,52 @@ steps:
         --custom-type; \
       fi
 
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Create transaction-to-invblcmonitor-trigger
+  waitFor: ['Setup gcloud config']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+      if [ -z "$(gcloud alpha events triggers list --filter="transaction-to-invblcmonitor-trigger" --format=list)" ]
+      then
+        gcloud alpha events triggers create transaction-to-invblcmonitor-trigger \
+        --namespace=${_NAMESPACE} \
+        --target-service=${_INVENTORY_BALANCE_MONITOR_SERVICE_NAME} \
+        --type=service.InventoryTransaction \
+        --custom-type; \
+      fi
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Create high-state-to-invlvlmonitor-trigger
+  waitFor: ['Setup gcloud config']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+      if [ -z "$(gcloud alpha events triggers list --filter="high-state-to-invlvlmonitor-trigger" --format=list)" ]
+      then
+        gcloud alpha events triggers create high-state-to-invlvlmonitor-trigger \
+        --namespace=${_NAMESPACE} \
+        --target-service=${_INVENTORY_LEVEL_MONITOR_IMAGE_NAME} \
+        --trigger-filters=iteminventoryclassification=High \
+        --type=state.ItemInventoryState \
+        --custom-type; \
+      fi
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Create low-state-to-invlvlmonitor-trigger
+  waitFor: ['Setup gcloud config']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+      if [ -z "$(gcloud alpha events triggers list --filter="low-state-to-invlvlmonitor-trigger" --format=list)" ]
+      then
+        gcloud alpha events triggers create low-state-to-invlvlmonitor-trigger \
+        --namespace=${_NAMESPACE} \
+        --target-service=${_INVENTORY_LEVEL_MONITOR_IMAGE_NAME} \
+        --trigger-filters=iteminventoryclassification=Low \
+        --type=state.ItemInventoryState \
+        --custom-type; \
+      fi
