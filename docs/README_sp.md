@@ -76,7 +76,7 @@ El shell script:
    * Haga clic en **Save**.
 1. Agregar **Google** como proveedor de identidades en Identity Platform:
    * En la consola de GCP, navegue a [Identity Platform -> Proveedores][Identity Platform -> Providers].
-   * Haga clic en **Add a provider**.
+   * [Agregue un proveedor][].
    * Seleccione **Google** de la lista.
    * Complete los campos **Web Client ID** y **Web Client Secret** con
      el OAuth 2.0 Client ID creado en el paso anterior.
