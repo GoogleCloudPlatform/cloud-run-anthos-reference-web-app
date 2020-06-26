@@ -38,10 +38,10 @@ on subsequent requests and gets [validated by the Istio ingress][].
 operations are only accessible by certain users. Namely, there are policies to
 ensure:
 
- - Access is denied to users without a token
- - All roles are authorized to issue `GET` requests to the `/api` endpoint
- - Workers are authorized to create inventory transactions
- - Admins are authorized to all operations, including the creation and deletion
+- Access is denied to users without a token
+- All roles are authorized to issue `GET` requests to the `/api` endpoint
+- Workers are authorized to create inventory transactions
+- Admins are authorized to all operations, including the creation and deletion
  of items, locations, etc.
 
 ## Build & Infrastructure
