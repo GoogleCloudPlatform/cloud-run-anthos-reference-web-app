@@ -19,6 +19,7 @@ steps:
 - name: 'google/cloud-sdk:slim'
   id: Configure build triggers
   entrypoint: /bin/bash
+  # TODO(#98): Use Deployment Manager to configure the triggers
   args:
   - -c
   - |
