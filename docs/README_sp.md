@@ -130,7 +130,7 @@ Dirijase a los comentarios de TODO en la parte superior de `env.mk` y asegurese 
 
 ### 3. Crear un clúster de GKE
 
-Ejecutar `make cluster`
+Ejecute `make cluster`
 
 ### 4. Agregar un propietario verificado para el dominio
 
