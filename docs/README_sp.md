@@ -147,7 +147,7 @@ Ejecute `make build-all`.
 ## Probar la Aplicación
 
 Una vez que se despliega su aplicación, puede probarla navegando a `https://$DOMAIN`,
-donde `$DOMAIN` es el dominio personalizado que configuró `env.mk`.
+donde `$DOMAIN` es el dominio personalizado que configuró en `env.mk`.
 
 ## Actualizar la Aplicación
 
