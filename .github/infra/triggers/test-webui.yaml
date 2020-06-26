@@ -1,0 +1,28 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+## Resource: https://cloud.google.com/cloud-build/docs/api/reference/rest/v1/projects.triggers#BuildTrigger
+
+name: test-webui
+description: Test the UI components of the reference app on pull request
+filename: webui/cloudbuild-test.yaml
+includedFiles:
+- webui/**
+- .github/infra/**
+github:
+    owner: GoogleCloudPlatform
+    name: cloud-run-anthos-reference-web-app
+    pullRequest:
+        branch: "^master$"
+        commentControl: "COMMENTS_ENABLED"
