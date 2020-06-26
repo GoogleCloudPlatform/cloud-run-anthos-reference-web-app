@@ -31,7 +31,7 @@ El único requerimiento para ejecutar este ejemplo como se muestra en este repos
 
 #### Configuración Local
 
-Siga los pasos para [configurar gcloud][] en su entorno local,
+Siga los pasos para [configurar gcloud][set up gcloud] en su entorno local,
 luego clone este repositorio usando `git clone`.
 
 ### Dominio Personalizado
