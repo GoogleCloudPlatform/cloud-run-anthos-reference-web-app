@@ -75,7 +75,7 @@ El shell script:
    * En **Authorized JavaScript origins**, agregue su dominio personalizado con el prefijo `https://`.
    * Haga clic en **Save**.
 1. Agregar **Google** como proveedor de identidades en Identity Platform:
-   * En la consola de GCP, navegue a [Identity Platform -> Providers][].
+   * En la consola de GCP, navegue a [Identity Platform -> Proveedores][Identity Platform -> Providers].
    * Haga clic en **Add a provider**.
    * Seleccione **Google** de la lista.
    * Complete los campos **Web Client ID** y **Web Client Secret** con
