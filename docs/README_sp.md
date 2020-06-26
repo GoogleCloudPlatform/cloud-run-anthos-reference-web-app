@@ -112,7 +112,7 @@ El shell script:
 
 ## Desplegando la Aplicación por Primera Vez
 
-Este proyecto utiliza [Cloud Build][] y [Config Connector][] para automatizar el código y las implementaciones de infraestructura. Las instrucciones a continuación describen cómo implementar la aplicación.
+Este proyecto utiliza [Cloud Build][] y [Config Connector][] para automatizar las implementaciones del código y infraestructura. Las instrucciones a continuación describen cómo desplegar la aplicación.
 
 ### 1. Configurar el proyecto de GCP
 
