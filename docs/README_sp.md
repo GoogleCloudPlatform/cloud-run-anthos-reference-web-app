@@ -126,7 +126,7 @@ Este paso además crea un archivo llamado `env.mk` basado en [env.mk.sample](env
 
 ### 2. Completar las secciones TODO en `env.mk`
 
-Dirijase a los comentarios de TODOen la parte superior de `env.mk` y asegurese que los valores sean corrector.
+Dirijase a los comentarios de TODO en la parte superior de `env.mk` y asegurese que los valores sean corrector.
 
 ### 3. Crear un clúster de GKE
 
