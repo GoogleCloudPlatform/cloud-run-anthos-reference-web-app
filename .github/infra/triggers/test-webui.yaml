@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+## Resource: https://cloud.google.com/cloud-build/docs/api/reference/rest/v1/projects.triggers#BuildTrigger
+
 name: test-webui
 description: Test the UI components of the reference app on pull request
 filename: webui/cloudbuild-test.yaml

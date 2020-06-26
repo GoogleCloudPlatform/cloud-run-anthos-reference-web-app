@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+## Resource: https://cloud.google.com/cloud-build/docs/api/reference/rest/v1/projects.triggers#BuildTrigger
+
 name: configure-cloud-build-triggers
 description: Configure Cloud Build triggers based on source control
 filename: .github/infra/cloudbuild-configure-triggers.yaml
