@@ -102,7 +102,7 @@ steps:
   args:
   - -c
   - |
-    make delete-cluster
+    make delete-cluster || true
 - name: 'alpine'
   id: Set build status
   waitFor: ["Cleanup"]
