@@ -55,6 +55,9 @@ PROVISION_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 # webui/cloudbuild.yaml
 WEBUI_SUBS = _DOMAIN=$(DOMAIN)
 
+ISTIO_AUTH_TEST_SUBS = _API_KEY=$(shell grep apiKey webui/firebaseConfig.ts | cut -d "'" -f2) \
+	_ISTIO_INGRESS_IP=$(shell kubectl -n $(ISTIO_INGRESS_NAMESPACE) get service $(ISTIO_INGRESS_SERVICE) -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
 # Comma separate substitution args
 comma := ,
 empty :=
@@ -114,6 +117,24 @@ test-backend-local: backend/api-service/src/api/openapi.yaml
 	cd backend/api-service/src && FIRESTORE_EMULATOR_HOST=localhost:9090 go test -tags=emulator -v
 	docker stop firestore-emulator
 
+test-istio-auth-local:
+	gcloud iam service-accounts keys create \
+		/tmp/istio-auth-test-key.json \
+		--iam-account=$$(gcloud --project=$(PROJECT_ID) iam service-accounts list \
+							--filter="displayName=firebase-adminsdk" \
+							--format="value(email)")
+	cd istio-auth && API_KEY=$$(grep apiKey ../webui/firebaseConfig.ts | cut -d "'" -f2) \
+		HOST_IP=$$(kubectl -n $(ISTIO_INGRESS_NAMESPACE) get service $(ISTIO_INGRESS_SERVICE) -o jsonpath='{.status.loadBalancer.ingress[0].ip}') \
+		GOOGLE_APPLICATION_CREDENTIALS=/tmp/istio-auth-test-key.json \
+		go test -v || touch /tmp/istio-auth-test.failed
+	gcloud --quiet iam service-accounts keys delete \
+		$$(jq -r .private_key_id /tmp/istio-auth-test-key.json) \
+		--iam-account=$$(gcloud --project=$(PROJECT_ID) iam service-accounts list \
+							--filter="displayName=firebase-adminsdk" \
+							--format="value(email)")
+	rm /tmp/istio-auth-test-key.json
+	! rm /tmp/istio-auth-test.failed 2>/dev/null
+
 test-webui-local: webui/api-client webui/node_modules
 	cd webui && npm run test -- --watch=false --browsers=ChromeHeadless
 
@@ -141,6 +162,9 @@ build-webui: cluster
 
 test-backend:
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild-test.yaml --substitutions $(call join_subs,$(BACKEND_TEST_SUBS))
+
+test-istio-auth:
+	$(GCLOUD_BUILD) --config ./istio-auth/cloudbuild-test.yaml --substitutions $(call join_subs,$(ISTIO_AUTH_TEST_SUBS))
 
 test-webui:
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml
