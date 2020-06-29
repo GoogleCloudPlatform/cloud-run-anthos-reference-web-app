@@ -55,7 +55,9 @@ PROVISION_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 # webui/cloudbuild.yaml
 WEBUI_SUBS = _DOMAIN=$(DOMAIN)
 
-ISTIO_AUTH_TEST_SUBS = _ISTIO_INGRESS_IP=$(shell kubectl -n $(ISTIO_INGRESS_NAMESPACE) get service $(ISTIO_INGRESS_SERVICE) -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+ISTIO_AUTH_TEST_SUBS = $(ISTIO_ARGS) \
+	_CLUSTER_LOCATION=$(CLUSTER_LOCATION) \
+	_CLUSTER_NAME=$(CLUSTER_NAME)
 
 # Comma separate substitution args
 comma := ,
@@ -116,21 +118,16 @@ test-backend-local: backend/api-service/src/api/openapi.yaml
 	cd backend/api-service/src && FIRESTORE_EMULATOR_HOST=localhost:9090 go test -tags=emulator -v
 	docker stop firestore-emulator
 
+FIREBASE_SA=$(shell gcloud --project=$(PROJECT_ID) iam service-accounts list --filter="displayName=firebase-adminsdk" --format="value(email)")
 test-istio-auth-local:
-	gcloud iam service-accounts keys create \
-		/tmp/istio-auth-test-key.json \
-		--iam-account=$$(gcloud --project=$(PROJECT_ID) iam service-accounts list \
-							--filter="displayName=firebase-adminsdk" \
-							--format="value(email)")
+	gcloud --project=$(PROJECT_ID) iam service-accounts keys create --iam-account=$(FIREBASE_SA) \
+		/tmp/istio-auth-test-key.json
 	cd istio-auth && API_KEY=$$(grep apiKey ../webui/firebaseConfig.ts | cut -d "'" -f2) \
 		HOST_IP=$$(kubectl -n $(ISTIO_INGRESS_NAMESPACE) get service $(ISTIO_INGRESS_SERVICE) -o jsonpath='{.status.loadBalancer.ingress[0].ip}') \
 		GOOGLE_APPLICATION_CREDENTIALS=/tmp/istio-auth-test-key.json \
 		go test -v || touch /tmp/istio-auth-test.failed
-	gcloud --quiet iam service-accounts keys delete \
-		$$(jq -r .private_key_id /tmp/istio-auth-test-key.json) \
-		--iam-account=$$(gcloud --project=$(PROJECT_ID) iam service-accounts list \
-							--filter="displayName=firebase-adminsdk" \
-							--format="value(email)")
+	gcloud --project=$(PROJECT_ID) -q iam service-accounts keys delete --iam-account=$(FIREBASE_SA) \
+		$$(jq -r .private_key_id /tmp/istio-auth-test-key.json)
 	rm /tmp/istio-auth-test-key.json
 	! rm /tmp/istio-auth-test.failed 2>/dev/null
 

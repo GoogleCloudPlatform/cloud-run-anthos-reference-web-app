@@ -15,24 +15,44 @@
 ## This Cloud Build script tests against the Istio authorization rules
 
 steps:
+# Get the Istio Ingress IP
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Get Istio Ingress IP
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    gcloud container clusters get-credentials --project="${PROJECT_ID}" --zone="${_CLUSTER_LOCATION}" "${_CLUSTER_NAME}"
+    kubectl -n ${_ISTIO_INGRESS_NAMESPACE} get service ${_ISTIO_INGRESS_SERVICE} \
+      -o jsonpath='{.status.loadBalancer.ingress[0].ip}' > /workspace/istio-ingress-ip.txt
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
 # Get the Firebase service account email
 - name: 'google/cloud-sdk:slim'
   id: Get Firebase Service Account Email
+  waitFor: ['-']
   entrypoint: /bin/bash
   args:
   - -c
   - |
-    gcloud iam service-accounts list --filter="displayName=firebase-adminsdk" --format="value(email)" > /workspace/firebase-sa.txt
+    gcloud iam service-accounts list \
+      --filter="displayName=firebase-adminsdk" \
+      --format="value(email)" > /workspace/firebase-sa.txt
 
 - name: mirror.gcr.io/library/golang
   id: Test
-  waitFor: ['Get Firebase Service Account Email']
+  waitFor: ['Get Firebase Service Account Email', 'Get Istio Ingress IP']
   entrypoint: /bin/bash
   dir: istio-auth
-  env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux', 'HOST_IP=${_ISTIO_INGRESS_IP}']
+  env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux']
   args:
   - -c
   - |
+    cat /workspace/firebase-sa.txt
+    cat /workspace/istio-ingress-ip.txt
     API_KEY=$(grep apiKey ../webui/firebaseConfig.ts | cut -d "'" -f2) \
     FIREBASE_SA=$(cat /workspace/firebase-sa.txt) \
+    HOST_IP=$(cat /workspace/istio-ingress-ip.txt) \
       go test -mod=readonly -v
