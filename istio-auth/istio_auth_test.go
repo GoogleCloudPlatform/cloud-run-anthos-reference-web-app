@@ -178,7 +178,7 @@ func generateIDToken(client *auth.Client, role string) string {
 
 func TestMain(m *testing.M) {
 	var err error
-	app, err = firebase.NewApp(context.Background(), nil)
+	app, err = firebase.NewApp(context.Background(), &firebase.Config{ServiceAccountID: os.Getenv("FIREBASE_SA")})
 	if err != nil {
 		log.Fatalf("error initializing Firebase app: %v", err)
 	}

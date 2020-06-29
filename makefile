@@ -55,8 +55,7 @@ PROVISION_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 # webui/cloudbuild.yaml
 WEBUI_SUBS = _DOMAIN=$(DOMAIN)
 
-ISTIO_AUTH_TEST_SUBS = _API_KEY=$(shell grep apiKey webui/firebaseConfig.ts | cut -d "'" -f2) \
-	_ISTIO_INGRESS_IP=$(shell kubectl -n $(ISTIO_INGRESS_NAMESPACE) get service $(ISTIO_INGRESS_SERVICE) -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+ISTIO_AUTH_TEST_SUBS = _ISTIO_INGRESS_IP=$(shell kubectl -n $(ISTIO_INGRESS_NAMESPACE) get service $(ISTIO_INGRESS_SERVICE) -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
 # Comma separate substitution args
 comma := ,

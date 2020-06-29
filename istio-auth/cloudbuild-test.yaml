@@ -15,52 +15,24 @@
 ## This Cloud Build script tests against the Istio authorization rules
 
 steps:
-# Add a step to delete all keys afterwards, delay failure til later.
+# Get the Firebase service account email
 - name: 'google/cloud-sdk:slim'
-  id: Create Firebase Service Account Key
+  id: Get Firebase Service Account Email
   entrypoint: /bin/bash
   args:
   - -c
   - |
-    FB_ADMIN_SA=$(gcloud iam service-accounts list --filter="displayName=firebase-adminsdk" --format="value(email)")
-    gcloud iam service-accounts keys create sa-key.json --iam-account=$${FB_ADMIN_SA}
+    gcloud iam service-accounts list --filter="displayName=firebase-adminsdk" --format="value(email)" > /workspace/firebase-sa.txt
 
 - name: mirror.gcr.io/library/golang
   id: Test
-  waitFor: ['Create Firebase Service Account Key']
+  waitFor: ['Get Firebase Service Account Email']
   entrypoint: /bin/bash
   dir: istio-auth
-  env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux', 'HOST_IP=${_ISTIO_INGRESS_IP}', 'GOOGLE_APPLICATION_CREDENTIALS=sa-key.json', 'API_KEY=${_API_KEY}']
+  env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux', 'HOST_IP=${_ISTIO_INGRESS_IP}']
   args:
   - -c
   - |
-    go test -mod=readonly -v || touch failed
-
-- name: 'alpine'
-  id: Extract Key ID
-  waitFor: Create Firebase Service Account Key
-  entrypoint: /bin/ash
-  args: 
-  - '-c'
-  - |
-    apk add --update --no-cache jq
-    jq -r .private_key_id sa-key.json > sa-key-id.txt
-
-- name: 'google/cloud-sdk:slim'
-  id: Delete Firebase Service Account Key
-  waitFor: ['Test', 'Extract Key ID']
-  entrypoint: /bin/bash
-  args:
-  - -c
-  - |
-    FB_ADMIN_SA=$(gcloud iam service-accounts list --filter="displayName=firebase-adminsdk" --format="value(email)")
-    gcloud iam service-accounts keys delete $(cat sa-key-id.txt) --iam-account=$${FB_ADMIN_SA}
-
-- name: 'alpine'
-  id: Process Manifest
-  waitFor: ['Delete Firebase Service Account Key']
-  entrypoint: /bin/ash
-  args: 
-  - '-c'
-  - |
-    ! test -f failed
+    API_KEY=$(grep apiKey ../webui/firebaseConfig.ts | cut -d "'" -f2) \
+    FIREBASE_SA=$(cat /workspace/firebase-sa.txt) \
+      go test -mod=readonly -v
