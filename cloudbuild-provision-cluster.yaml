@@ -21,14 +21,6 @@
 steps:
 ## CLUSTER CREATE ##
 
-- name: 'alpine'
-  id: Test failure
-  waitFor: ['-']
-  entrypoint: /bin/ash
-  args:
-  - -c
-  - |
-    exit 1
 # Create a new cluster with the appropriate configuration for this application
 - name: 'gcr.io/cloud-builders/gcloud'
   id: Create Cluster
