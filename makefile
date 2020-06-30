@@ -75,7 +75,7 @@ OPENAPI_GEN_USER_CLIENT_ARGS=-g typescript-angular -i backend/user-service/user-
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
 
-.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local build-webui test-webui build-backend build-infrastructure build-all test cluster
+.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local test-istio-auth-local build-webui test-webui test-istio-auth build-backend build-infrastructure build-all test cluster jq
 
 ## RULES FOR LOCAL DEVELOPMENT
 clean:
@@ -110,6 +110,9 @@ lint-webui: webui/node_modules
 
 lint: lint-webui
 
+jq:
+	@which jq > /dev/null || (echo "'jq' needs to be installed for this target to run. It can be downloaded from https://stedolan.github.io/jq/." && exit 1)
+
 test-backend-local: backend/api-service/src/api/openapi.yaml
 	docker stop firestore-emulator 2>/dev/null || true
 	docker run --detach --rm -p 9090:9090 --name=firestore-emulator google/cloud-sdk:292.0.0 sh -c \
@@ -119,7 +122,7 @@ test-backend-local: backend/api-service/src/api/openapi.yaml
 	docker stop firestore-emulator
 
 FIREBASE_SA=$(shell gcloud --project=$(PROJECT_ID) iam service-accounts list --filter="displayName=firebase-adminsdk" --format="value(email)")
-test-istio-auth-local:
+test-istio-auth-local: jq
 	gcloud --project=$(PROJECT_ID) iam service-accounts keys create --iam-account=$(FIREBASE_SA) \
 		/tmp/istio-auth-test-key.json
 	cd istio-auth && API_KEY=$$(grep apiKey ../webui/firebaseConfig.ts | cut -d "'" -f2) \
