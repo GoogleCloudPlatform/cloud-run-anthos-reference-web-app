@@ -87,7 +87,7 @@ steps:
   - ${PROJECT_ID}
   - ${_WEB_API_KEY}
 - name: 'google/cloud-sdk:latest'
-  id: Run 'make cluster'
+  id: make cluster
   waitFor: ['Set up env.mk', 'Cache cloud-sdk image']
   entrypoint: /bin/bash
   args:
@@ -96,8 +96,17 @@ steps:
     make cluster || touch e2e-failed
     exit 0
 - name: 'google/cloud-sdk:latest'
+  id: make build-infrastructure
+  waitFor: ['make cluster']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    make build-infrastructure || touch e2e-failed
+    exit 0
+- name: 'google/cloud-sdk:latest'
   id: Cleanup
-  waitFor: ["Run 'make cluster'"]
+  waitFor: ['make build-infrastructure']
   entrypoint: /bin/bash
   args:
   - -c
