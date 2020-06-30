@@ -60,7 +60,7 @@ var paths = []string{
 
 func checkResponse(t *testing.T, method, path, token string, want int) {
 	client := http.DefaultClient
-	req, err := http.NewRequest(http.MethodGet, host+path, nil)
+	req, err := http.NewRequest(method, host+path, nil)
 	if err != nil {
 		t.Errorf("error creating request: %v", err)
 		return
@@ -117,16 +117,17 @@ func TestAllowGetPolicy(t *testing.T) {
 
 // Tests api-allow-admin and api-allow-workers policy
 func TestRoleBasedPolicies(t *testing.T) {
-	want := http.StatusForbidden
 	for _, u := range []string{"admin", "worker", "other"} {
 		token := tokens[u]
+		defaultWant := http.StatusForbidden
 		if u == "admin" {
-			want = http.StatusNotFound
+			defaultWant = http.StatusNotFound
 		}
 		t.Run(u, func(t *testing.T) {
 			for _, m := range []string{http.MethodDelete, http.MethodPost, http.MethodPut} {
 				for _, p := range paths {
-					if p == "/api/inventoryTransactions" && u == "worker" {
+					want := defaultWant
+					if p == "/api/inventoryTransactions" && u == "worker" && m == "POST" {
 						want = http.StatusNotFound
 					}
 					checkResponse(t, m, p, token, want)
