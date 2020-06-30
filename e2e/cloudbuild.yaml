@@ -19,7 +19,7 @@ steps:
   id: Cache cloud-sdk image
   waitFor: ['-']
   args: ['pull', 'google/cloud-sdk:latest']
-  timeout: 60s
+  timeout: 120s
 - name: 'alpine'
   id: Set up env.mk
   waitFor: ['-']
