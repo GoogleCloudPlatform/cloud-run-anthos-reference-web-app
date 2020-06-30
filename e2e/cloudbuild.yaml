@@ -19,6 +19,7 @@ steps:
   id: Cache cloud-sdk image
   waitFor: ['-']
   args: ['pull', 'google/cloud-sdk:latest']
+  timeout: 60s
 - name: 'alpine'
   id: Set up env.mk
   waitFor: ['-']
@@ -35,6 +36,7 @@ steps:
   env:
   - 'PROJECT_ID=${PROJECT_ID}'
   - 'BUILD_ID=${_BUILD_ID_SHORT}'
+  timeout: 60s
 - name: 'google/cloud-sdk:latest'
   id: Create DNS managed zone
   waitFor: ['Cache cloud-sdk image']
@@ -47,6 +49,7 @@ steps:
   - --description="Managed zone for e2e testing commit ${SHORT_SHA}"
   - --dns-name=${_DNS_NAME}
   - --visibility=public
+  timeout: 60s
 - name: 'google/cloud-sdk:latest'
   id: Export zone records
   waitFor: ['Create DNS managed zone', 'Cache cloud-sdk image']
@@ -58,6 +61,7 @@ steps:
   - --zone=${_MANAGED_ZONE_NAME}
   - --zone-file-format
   - ${_MANAGED_ZONE_NAME}.zonefile
+  timeout: 60s
 - name: 'alpine'
   id: Remove SOA record
   waitFor: ['Export zone records']
@@ -68,6 +72,7 @@ steps:
     set -o errexit
     set -o xtrace
     grep -v SOA ${_MANAGED_ZONE_NAME}.zonefile > ${_MANAGED_ZONE_NAME}.zonefile.modified
+  timeout: 60s
 - name: 'google/cloud-sdk:latest'
   id: Import NS records to top level
   waitFor: ['Remove SOA record', 'Cache cloud-sdk image']
@@ -79,6 +84,7 @@ steps:
   - --zone=${_TOP_LEVEL_ZONE_NAME}
   - --zone-file-format
   - ${_MANAGED_ZONE_NAME}.zonefile.modified 
+  timeout: 60s
 - name: 'ubuntu:latest'
   id: Setup Firebase config
   waitFor: ['-']
@@ -86,6 +92,7 @@ steps:
   args:
   - ${PROJECT_ID}
   - ${_WEB_API_KEY}
+  timeout: 60s
 - name: 'google/cloud-sdk:latest'
   id: make cluster
   waitFor: ['Set up env.mk', 'Cache cloud-sdk image']
@@ -95,6 +102,7 @@ steps:
   - |
     make cluster || touch e2e-failed
     exit 0
+  timeout: 600s
 - name: 'google/cloud-sdk:latest'
   id: make build-infrastructure
   waitFor: ['make cluster']
@@ -104,6 +112,7 @@ steps:
   - |
     make build-infrastructure || touch e2e-failed
     exit 0
+  timeout: 1200s
 - name: 'google/cloud-sdk:latest'
   id: Cleanup
   waitFor: ['make build-infrastructure']
@@ -111,7 +120,10 @@ steps:
   args:
   - -c
   - |
-    make delete-cluster || true
+    make delete || touch cleanup-failed
+    make delete-cluster || touch cleanup-failed
+    gcloud compute ssl-certificates delete ${_SSL_CERT_NAME} || touch cleanup-failed
+    gcloud dns managed-zones delete ${_MANAGED_ZONE_NAME} || touch cleanup-failed
 - name: 'alpine'
   id: Set build status
   waitFor: ["Cleanup"]
@@ -124,10 +136,17 @@ steps:
       echo "Build failed!"
       exit 1
     fi
-timeout: 1200s
+
+    if [ -e cleanup-failed ]
+    then
+      echo "Build succeeded but cleanup failed!"
+      exit 1
+    fi
+timeout: 6000s # set an absurdly high timeout and rely on timeouts for individual stages
 substitutions:
   _BUILD_ID_SHORT: ${BUILD_ID:0:6}
   _DNS_NAME: e2e-test-${_BUILD_ID_SHORT}.thisisatest.app
   _MANAGED_ZONE_NAME: e2e-test-${_BUILD_ID_SHORT}-zone
   _TOP_LEVEL_ZONE_NAME: thisisatest-app
   _WEB_API_KEY: AIzaSyAUP41pKXJxtpn77GTX0fX-DR-TgnXAxQA
+  _SSL_CERT_NAME: e2e-test-${_BUILD_ID_SHORT}-ssl-certificate
