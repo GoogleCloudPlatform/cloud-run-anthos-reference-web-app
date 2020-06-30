@@ -26,13 +26,23 @@ A [forwarding rule][] provides the publicly-accessible IP address for incoming r
 The IP address of the forwarding rule is added to a [managed DNS zone][] for the
 desired domain.
 
-### Authentication
+### Authentication & Authorization
 
 ![authentication diagram](./img/authentication-diagram.png)
 
 Authentication is provided by [Identity Platform][], which issues
 a [JSON Web Token (JWT)][] on the frontend that gets passed through
 on subsequent requests and gets [validated by the Istio ingress][].
+
+[Istio Authorization Policies][] enable access control to ensure certain
+operations are only accessible by certain users. Namely, there are policies to
+ensure:
+
+- Access is denied to users without a token
+- All roles are authorized to issue `GET` requests to the `/api` endpoint
+- Workers are authorized to create inventory transactions
+- Admins are authorized to all operations, including the creation and deletion
+ of items, locations, etc.
 
 ## Build & Infrastructure
 
@@ -74,3 +84,4 @@ on the next build.
 [build diagram]: ./build-diagram.svg
 [OpenAPI spec]: ../openapi.yaml
 [By default]: ../infrastructure-tpl.yaml#L93
+[Istio Authorization Policies]: https://archive.istio.io/v1.5/docs/reference/config/security/authorization-policy/

@@ -55,6 +55,10 @@ PROVISION_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 # webui/cloudbuild.yaml
 WEBUI_SUBS = _DOMAIN=$(DOMAIN)
 
+ISTIO_AUTH_TEST_SUBS = $(ISTIO_ARGS) \
+	_CLUSTER_LOCATION=$(CLUSTER_LOCATION) \
+	_CLUSTER_NAME=$(CLUSTER_NAME)
+
 # Comma separate substitution args
 comma := ,
 empty :=
@@ -71,7 +75,7 @@ OPENAPI_GEN_USER_CLIENT_ARGS=-g typescript-angular -i backend/user-service/user-
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
 
-.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local build-webui test-webui build-backend build-infrastructure build-all test cluster
+.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local test-istio-auth-local build-webui test-webui test-istio-auth build-backend build-infrastructure build-all test cluster jq
 
 ## RULES FOR LOCAL DEVELOPMENT
 clean:
@@ -106,6 +110,9 @@ lint-webui: webui/node_modules
 
 lint: lint-webui
 
+jq:
+	@which jq > /dev/null || (echo "'jq' needs to be installed for this target to run. It can be downloaded from https://stedolan.github.io/jq/." && exit 1)
+
 test-backend-local: backend/api-service/src/api/openapi.yaml
 	docker stop firestore-emulator 2>/dev/null || true
 	docker run --detach --rm -p 9090:9090 --name=firestore-emulator google/cloud-sdk:292.0.0 sh -c \
@@ -113,6 +120,19 @@ test-backend-local: backend/api-service/src/api/openapi.yaml
 	docker run --network=host jwilder/dockerize:0.6.1 dockerize -timeout=60s -wait=tcp://localhost:9090
 	cd backend/api-service/src && FIRESTORE_EMULATOR_HOST=localhost:9090 go test -tags=emulator -v
 	docker stop firestore-emulator
+
+FIREBASE_SA=$(shell gcloud --project=$(PROJECT_ID) iam service-accounts list --filter="displayName=firebase-adminsdk" --format="value(email)")
+test-istio-auth-local: jq
+	gcloud --project=$(PROJECT_ID) iam service-accounts keys create --iam-account=$(FIREBASE_SA) \
+		/tmp/istio-auth-test-key.json
+	cd istio-auth && API_KEY=$$(grep apiKey ../webui/firebaseConfig.ts | cut -d "'" -f2) \
+		HOST_IP=$$(kubectl -n $(ISTIO_INGRESS_NAMESPACE) get service $(ISTIO_INGRESS_SERVICE) -o jsonpath='{.status.loadBalancer.ingress[0].ip}') \
+		GOOGLE_APPLICATION_CREDENTIALS=/tmp/istio-auth-test-key.json \
+		go test -v || touch /tmp/istio-auth-test.failed
+	gcloud --project=$(PROJECT_ID) -q iam service-accounts keys delete --iam-account=$(FIREBASE_SA) \
+		$$(jq -r .private_key_id /tmp/istio-auth-test-key.json)
+	rm /tmp/istio-auth-test-key.json
+	! rm /tmp/istio-auth-test.failed 2>/dev/null
 
 test-webui-local: webui/api-client webui/node_modules
 	cd webui && npm run test -- --watch=false --browsers=ChromeHeadless
@@ -141,6 +161,9 @@ build-webui: cluster
 
 test-backend:
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild-test.yaml --substitutions $(call join_subs,$(BACKEND_TEST_SUBS))
+
+test-istio-auth:
+	$(GCLOUD_BUILD) --config ./istio-auth/cloudbuild-test.yaml --substitutions $(call join_subs,$(ISTIO_AUTH_TEST_SUBS))
 
 test-webui:
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml
