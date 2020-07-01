@@ -112,8 +112,35 @@ steps:
     make build-infrastructure || touch e2e-failed
   timeout: 1500s
 - name: 'google/cloud-sdk:latest'
-  id: Cleanup
+  id: make build-backend
   waitFor: ['make build-infrastructure']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    make build-backend || touch e2e-failed
+  timeout: 300s
+- name: 'google/cloud-sdk:latest'
+  id: make build-webui
+  waitFor: ['make build-infrastructure']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    make build-webui || touch e2e-failed
+  timeout: 300s
+- name: 'google/cloud-sdk:latest'
+  id: make build-userservice
+  waitFor: ['make build-infrastructure']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    make build-userservice || touch e2e-failed
+  timeout: 300s
+- name: 'google/cloud-sdk:latest'
+  id: Cleanup
+  waitFor: ['make build-backend', 'make build-webui', 'make build-userservice']
   entrypoint: /bin/bash
   args:
   - -c
