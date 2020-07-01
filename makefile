@@ -157,7 +157,7 @@ delete-cluster:
 	gcloud --project=$(PROJECT_ID) container clusters delete $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) --quiet
 
 delete:
-	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(call join_subs,$(INFRA_SUBS))
+	$(GCLOUD_BUILD) --config cloudbuild.yaml --timeout=6000 --substitutions _APPLY_OR_DELETE=delete,$(call join_subs,$(INFRA_SUBS))
 
 build-webui: cluster
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild.yaml --substitutions $(call join_subs,$(WEBUI_SUBS))
