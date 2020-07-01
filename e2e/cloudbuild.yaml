@@ -101,7 +101,6 @@ steps:
   - -c
   - |
     make cluster || touch e2e-failed
-    exit 0
   timeout: 600s
 - name: 'google/cloud-sdk:latest'
   id: make build-infrastructure
@@ -111,8 +110,7 @@ steps:
   - -c
   - |
     make build-infrastructure || touch e2e-failed
-    exit 0
-  timeout: 1200s
+  timeout: 1500s
 - name: 'google/cloud-sdk:latest'
   id: Cleanup
   waitFor: ['make build-infrastructure']
@@ -120,10 +118,11 @@ steps:
   args:
   - -c
   - |
+    set -o xtrace
     make delete || touch cleanup-failed
     make delete-cluster || touch cleanup-failed
-    gcloud compute ssl-certificates delete ${_SSL_CERT_NAME} || touch cleanup-failed
-    gcloud dns managed-zones delete ${_MANAGED_ZONE_NAME} || touch cleanup-failed
+    gcloud compute ssl-certificates delete --quiet ${_SSL_CERT_NAME} || touch cleanup-failed
+    gcloud dns managed-zones delete --quiet ${_MANAGED_ZONE_NAME} || touch cleanup-failed
 - name: 'alpine'
   id: Set build status
   waitFor: ["Cleanup"]
