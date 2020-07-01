@@ -27,7 +27,7 @@ metadata:
   annotations:
     cnrm.cloud.google.com/force-destroy: "true"
 spec:
-  bucketPolicyOnly: false
+  bucketPolicyOnly: true
   website:
     mainPageSuffix: index.html
     # Configure notFound to also redirect to index.html to facilitate Angular routing
