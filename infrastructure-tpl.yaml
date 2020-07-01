@@ -38,7 +38,7 @@ spec:
 apiVersion: storage.cnrm.cloud.google.com/v1beta1
 kind: StorageBucketAccessControl
 metadata:
-  name: ${DOMAIN}-bucket-access-control-1
+  name: ${CLUSTER_NAME}-bucket-access-control-1
   namespace: ${NAMESPACE}
 spec:
   bucketRef:
@@ -50,7 +50,7 @@ spec:
 apiVersion: storage.cnrm.cloud.google.com/v1beta1
 kind: StorageDefaultObjectAccessControl
 metadata:
-  name: ${DOMAIN}-bucket-default-access-control
+  name: ${CLUSTER_NAME}-bucket-default-access-control
   namespace: ${NAMESPACE}
 spec:
   bucketRef:
@@ -64,7 +64,7 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeBackendBucket
 metadata:
-  name: ${DOMAIN}-backend-bucket
+  name: ${CLUSTER_NAME}-backend-bucket
   namespace: ${NAMESPACE}
 spec:
   bucketRef:
@@ -75,7 +75,7 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeHealthCheck
 metadata:
-  name: ${DOMAIN}-health-check
+  name: ${CLUSTER_NAME}-health-check
   namespace: ${NAMESPACE}
 spec:
   checkIntervalSec: 5
@@ -87,30 +87,30 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeURLMap
 metadata:
-  name: ${DOMAIN}-url-map
+  name: ${CLUSTER_NAME}-url-map
   namespace: ${NAMESPACE}
 spec:
   location: global
   defaultService:
     backendBucketRef:
-      name: ${DOMAIN}-backend-bucket
+      name: ${CLUSTER_NAME}-backend-bucket
   pathMatcher:
     - name: allpaths
       # Default all requests to the GCS bucket
       defaultService:
         backendBucketRef:
-          name: ${DOMAIN}-backend-bucket
+          name: ${CLUSTER_NAME}-backend-bucket
       pathRule:
         # Paths to the API service
         - paths: ["/api", "/api/*"]
           service:
             backendServiceRef:
-              name: ${DOMAIN}-backend-api-service
+              name: ${CLUSTER_NAME}-backend-api-service
         # Paths to the User service
         - paths: ["/api/users", "/api/users/*"]
           service:
             backendServiceRef:
-              name: ${DOMAIN}-backend-user-service
+              name: ${CLUSTER_NAME}-backend-user-service
   hostRule:
     - hosts: ["*"]
       pathMatcher: allpaths
@@ -119,14 +119,14 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeTargetHTTPSProxy
 metadata:
-  name: ${DOMAIN}-target-proxy-https
+  name: ${CLUSTER_NAME}-target-proxy-https
   namespace: ${NAMESPACE}
 spec:
   description: ""
   urlMapRef:
-    name: ${DOMAIN}-url-map
+    name: ${CLUSTER_NAME}-url-map
   sslPolicyRef:
-    name: ${DOMAIN}-ssl-policy
+    name: ${CLUSTER_NAME}-ssl-policy
   sslCertificates:
     - external: ${SSL_CERT_NAME}
   location: global
@@ -135,7 +135,7 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeSSLPolicy
 metadata:
-  name: ${DOMAIN}-ssl-policy
+  name: ${CLUSTER_NAME}-ssl-policy
   namespace: ${NAMESPACE}
 spec:
   description: SSL policy for the web app
@@ -144,13 +144,13 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeForwardingRule
 metadata:
-  name: ${DOMAIN}-forwarding-rule
+  name: ${CLUSTER_NAME}-forwarding-rule
   namespace: ${NAMESPACE}
 spec:
   description: "A global forwarding rule"
   target:
     targetHTTPSProxyRef:
-      name: ${DOMAIN}-target-proxy-https
+      name: ${CLUSTER_NAME}-target-proxy-https
   portRange: "443"
   ipProtocol: "TCP"
   ipVersion: "IPV4"
@@ -160,7 +160,7 @@ spec:
 apiVersion: dns.cnrm.cloud.google.com/v1beta1
 kind: DNSRecordSet
 metadata:
-  name: ${DOMAIN}-dns-caa-record
+  name: ${CLUSTER_NAME}-dns-caa-record
   namespace: ${NAMESPACE}
 spec:
   name: "${DOMAIN}."

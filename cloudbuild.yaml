@@ -41,6 +41,7 @@ steps:
     - 'NAMESPACE=${_NAMESPACE}'
     - 'PROJECT_ID=${PROJECT_ID}'
     - 'SSL_CERT_NAME=${_SSL_CERT_NAME}'
+    - 'CLUSTER_NAME=${_CLUSTER_NAME}'
 
 # create an SSL certificate if one does not already exist
 # (when running a delete, this stage does nothing)
@@ -112,8 +113,8 @@ steps:
     apk add --update --no-cache jq
     jq -f backend-service-template.jq neg-status.json | \
     sed "s/$\[PROJECT_ID\]/${PROJECT_ID}/g" | \
-    sed "s/$\[BACKEND_RESOURCE_NAME\]/${_DOMAIN}-backend-api-service/g" | \
-    sed "s/$\[HEALTH_CHECK_NAME\]/${_DOMAIN}-health-check/g" | \
+    sed "s/$\[BACKEND_RESOURCE_NAME\]/${_CLUSTER_NAME}-backend-api-service/g" | \
+    sed "s/$\[HEALTH_CHECK_NAME\]/${_CLUSTER_NAME}-health-check/g" | \
     sed "s/$\[BACKEND_HOST_NAME\]/${_BACKEND_SERVICE_HOST_NAME}/g" > backend-api-service-hydrated.json
 
 # Apply/delete backend api service definition
@@ -140,8 +141,8 @@ steps:
     apk add --update --no-cache jq
     jq -f backend-service-template.jq neg-status.json | \
     sed "s/$\[PROJECT_ID\]/${PROJECT_ID}/g" | \
-    sed "s/$\[BACKEND_RESOURCE_NAME\]/${_DOMAIN}-backend-user-service/g" | \
-    sed "s/$\[HEALTH_CHECK_NAME\]/${_DOMAIN}-health-check/g" | \
+    sed "s/$\[BACKEND_RESOURCE_NAME\]/${_CLUSTER_NAME}-backend-user-service/g" | \
+    sed "s/$\[HEALTH_CHECK_NAME\]/${_CLUSTER_NAME}-health-check/g" | \
     sed "s/$\[BACKEND_HOST_NAME\]/${_USER_SVC_HOST_NAME}/g" > backend-user-service-hydrated.json
 
 # Apply/delete backend user service definition
@@ -166,7 +167,7 @@ steps:
   args:
   - '-c'
   - |
-    [ "${_APPLY_OR_DELETE}" = "delete" ] || /builder/kubectl.bash wait computeforwardingrule/${_DOMAIN}-forwarding-rule --namespace=${_NAMESPACE} --for=condition=Ready --timeout=15m
+    [ "${_APPLY_OR_DELETE}" = "delete" ] || /builder/kubectl.bash wait computeforwardingrule/${_CLUSTER_NAME}-forwarding-rule --namespace=${_NAMESPACE} --for=condition=Ready --timeout=15m
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
@@ -179,10 +180,11 @@ steps:
   args:
   - '-c'
   - |
-    export _EXTERNAL_IP_ADDRESS=$(kubectl get computeforwardingrule/${_DOMAIN}-forwarding-rule --namespace=${_NAMESPACE} -o jsonpath="{$.spec.ipAddress.addressRef.external}")
+    export _EXTERNAL_IP_ADDRESS=$(kubectl get computeforwardingrule/${_CLUSTER_NAME}-forwarding-rule --namespace=${_NAMESPACE} -o jsonpath="{$.spec.ipAddress.addressRef.external}")
     sed "s/$\[EXTERNAL_IP_ADDRESS\]/$$_EXTERNAL_IP_ADDRESS/g" dns-tpl.yaml | \
     sed "s/$\[DOMAIN\]/${_DOMAIN}/g" | \
     sed "s/$\[MANAGED_ZONE_NAME\]/${_MANAGED_ZONE_NAME}/g" | \
+    sed "s/$\[CLUSTER_NAME\]/${_CLUSTER_NAME}/g" | \
     /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f - || [ "${_APPLY_OR_DELETE}" = "delete" ]
   timeout: 120s
   env:
