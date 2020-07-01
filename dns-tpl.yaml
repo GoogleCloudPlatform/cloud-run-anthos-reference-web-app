@@ -20,7 +20,7 @@
 apiVersion: dns.cnrm.cloud.google.com/v1beta1
 kind: DNSRecordSet
 metadata:
-  name: web-app-dns-a-record
+  name: ${DOMAIN}-dns-a-record
 spec:
   name: "$[DOMAIN]."
   type: "A"

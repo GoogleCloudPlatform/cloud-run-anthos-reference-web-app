@@ -17,7 +17,7 @@
         "healthChecks": [
             {
                 "healthCheckRef": {
-                    "name": "web-app-health-check"
+                    "name": "$[HEALTH_CHECK_NAME]"
                 }
             }
         ],
