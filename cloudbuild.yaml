@@ -181,7 +181,7 @@ steps:
     sed "s/$\[EXTERNAL_IP_ADDRESS\]/$$_EXTERNAL_IP_ADDRESS/g" dns-tpl.yaml | \
     sed "s/$\[DOMAIN\]/${_DOMAIN}/g" | \
     sed "s/$\[MANAGED_ZONE_NAME\]/${_MANAGED_ZONE_NAME}/g" | \
-    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f - || [ "${_APPLY_OR_DELETE}" = "delete" ]
+    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -o yaml -f - || [ "${_APPLY_OR_DELETE}" = "delete" ]
   timeout: 120s
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
