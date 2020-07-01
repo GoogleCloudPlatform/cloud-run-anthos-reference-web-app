@@ -112,8 +112,8 @@ steps:
     apk add --update --no-cache jq
     jq -f backend-service-template.jq neg-status.json | \
     sed "s/$\[PROJECT_ID\]/${PROJECT_ID}/g" | \
-    sed "s/$\[BACKEND_RESOURCE_NAME\]/${DOMAIN}-backend-api-service/g" | \
-    sed "s/$\[HEALTH_CHECK_NAME\]/${DOMAIN}-health-check/g" | \
+    sed "s/$\[BACKEND_RESOURCE_NAME\]/${_DOMAIN}-backend-api-service/g" | \
+    sed "s/$\[HEALTH_CHECK_NAME\]/${_DOMAIN}-health-check/g" | \
     sed "s/$\[BACKEND_HOST_NAME\]/${_BACKEND_SERVICE_HOST_NAME}/g" > backend-api-service-hydrated.json
 
 # Apply/delete backend api service definition
@@ -140,8 +140,8 @@ steps:
     apk add --update --no-cache jq
     jq -f backend-service-template.jq neg-status.json | \
     sed "s/$\[PROJECT_ID\]/${PROJECT_ID}/g" | \
-    sed "s/$\[BACKEND_RESOURCE_NAME\]/${DOMAIN}-backend-user-service/g" | \
-    sed "s/$\[HEALTH_CHECK_NAME\]/${DOMAIN}-health-check/g" | \
+    sed "s/$\[BACKEND_RESOURCE_NAME\]/${_DOMAIN}-backend-user-service/g" | \
+    sed "s/$\[HEALTH_CHECK_NAME\]/${_DOMAIN}-health-check/g" | \
     sed "s/$\[BACKEND_HOST_NAME\]/${_USER_SVC_HOST_NAME}/g" > backend-user-service-hydrated.json
 
 # Apply/delete backend user service definition
@@ -166,7 +166,7 @@ steps:
   args:
   - '-c'
   - |
-    [ "${_APPLY_OR_DELETE}" = "delete" ] || /builder/kubectl.bash wait computeforwardingrule/${DOMAIN}-forwarding-rule --namespace=${_NAMESPACE} --for=condition=Ready --timeout=15m
+    [ "${_APPLY_OR_DELETE}" = "delete" ] || /builder/kubectl.bash wait computeforwardingrule/${_DOMAIN}-forwarding-rule --namespace=${_NAMESPACE} --for=condition=Ready --timeout=15m
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
@@ -179,7 +179,7 @@ steps:
   args:
   - '-c'
   - |
-    export _EXTERNAL_IP_ADDRESS=$(kubectl get computeforwardingrule/${DOMAIN}-forwarding-rule --namespace=${_NAMESPACE} -o jsonpath="{$.spec.ipAddress.addressRef.external}")
+    export _EXTERNAL_IP_ADDRESS=$(kubectl get computeforwardingrule/${_DOMAIN}-forwarding-rule --namespace=${_NAMESPACE} -o jsonpath="{$.spec.ipAddress.addressRef.external}")
     sed "s/$\[EXTERNAL_IP_ADDRESS\]/$$_EXTERNAL_IP_ADDRESS/g" dns-tpl.yaml | \
     sed "s/$\[DOMAIN\]/${_DOMAIN}/g" | \
     sed "s/$\[MANAGED_ZONE_NAME\]/${_MANAGED_ZONE_NAME}/g" | \
