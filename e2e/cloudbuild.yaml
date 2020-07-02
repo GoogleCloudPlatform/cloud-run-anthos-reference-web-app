@@ -129,9 +129,14 @@ steps:
   - -c
   - |
     make build-userservice || touch e2e-failed
+- name: 'launcher.gcr.io/google/ubuntu1604'
+  id: DEBUG curl the application
+  waitFor: ['make build-backend', 'make build-webui', 'make build-userservice']
+  entrypoint: 'curl'
+  args: ['-v','https://${_DOMAIN}']
 - name: 'google/cloud-sdk:latest'
   id: Cleanup
-  waitFor: ['make build-backend', 'make build-webui', 'make build-userservice']
+  waitFor: ['DEBUG curl the application']
   entrypoint: /bin/bash
   args:
   - -c
