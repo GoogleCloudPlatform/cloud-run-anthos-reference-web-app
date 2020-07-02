@@ -57,32 +57,25 @@ steps:
   args:
   - '-c'
   - |
-    if [[ "${_APPLY_OR_DELETE}" = "apply" ]]
-    then
-      gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} || \
-      gcloud beta compute ssl-certificates create ${_SSL_CERT_NAME} \
-        --description="Generated SSL certificate for cloud run web app" \
-        --domains=${_DOMAIN} \
-        --global
-      echo "Waiting for ${_SSL_CERT_NAME} to become ACTIVE"
-      STATUS=$(gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} --format="get(managed.status)")
-      while [[ "$${STATUS}" != "ACTIVE" ]]; do
-        echo "Status of ${_SSL_CERT_NAME} is $${STATUS}"
-        sleep 30
-        STATUS=$(gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} --format="get(managed.status)")
-      done
+    gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} || \
+    gcloud beta compute ssl-certificates create ${_SSL_CERT_NAME} \
+      --description="Generated SSL certificate for cloud run web app" \
+      --domains=${_DOMAIN} \
+      --global
+    echo "Waiting for ${_SSL_CERT_NAME} to become ACTIVE"
+    STATUS=$(gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} --format="get(managed.status)")
+    while [[ "$${STATUS}" != "ACTIVE" ]]; do
       echo "Status of ${_SSL_CERT_NAME} is $${STATUS}"
-    fi
+      sleep 30
+      STATUS=$(gcloud compute ssl-certificates describe --global ${_SSL_CERT_NAME} --format="get(managed.status)")
+    done
+    echo "Status of ${_SSL_CERT_NAME} is $${STATUS}"
 
 # apply/delete infrastructure
 - name: 'gcr.io/cloud-builders/kubectl'
   id: Infrastructure Resources
   waitFor: ['Infrastructure YAML']
-  entrypoint: /bin/bash
-  args:
-  - '-c'
-  - |
-    /builder/kubectl.bash ${_APPLY_OR_DELETE} -f infrastructure.yaml || [ "${_APPLY_OR_DELETE}" = "delete" ]
+  args: ['apply','-f','infrastructure.yaml']
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
@@ -113,6 +106,7 @@ steps:
     apk add --update --no-cache jq
     jq -f backend-service-template.jq neg-status.json | \
     sed "s/$\[PROJECT_ID\]/${PROJECT_ID}/g" | \
+    sed "s/$\[NAMESPACE\]/${_NAMESPACE}/g" | \
     sed "s/$\[BACKEND_RESOURCE_NAME\]/${_CLUSTER_NAME}-backend-api-service/g" | \
     sed "s/$\[HEALTH_CHECK_NAME\]/${_CLUSTER_NAME}-health-check/g" | \
     sed "s/$\[BACKEND_HOST_NAME\]/${_BACKEND_SERVICE_HOST_NAME}/g" > backend-api-service-hydrated.json
@@ -121,11 +115,7 @@ steps:
 - name: 'gcr.io/cloud-builders/kubectl'
   id: Create Backend API Service
   waitFor: ['Generate Backend API Service Definition', 'Infrastructure Resources']
-  entrypoint: /bin/bash
-  args:
-  - '-c'
-  - |
-    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f backend-api-service-hydrated.json || [ "${_APPLY_OR_DELETE}" = "delete" ]
+  args: ['apply','--namespace=${_NAMESPACE}','-f','backend-api-service-hydrated.json']
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
@@ -141,6 +131,7 @@ steps:
     apk add --update --no-cache jq
     jq -f backend-service-template.jq neg-status.json | \
     sed "s/$\[PROJECT_ID\]/${PROJECT_ID}/g" | \
+    sed "s/$\[NAMESPACE\]/${_NAMESPACE}/g" | \
     sed "s/$\[BACKEND_RESOURCE_NAME\]/${_CLUSTER_NAME}-backend-user-service/g" | \
     sed "s/$\[HEALTH_CHECK_NAME\]/${_CLUSTER_NAME}-health-check/g" | \
     sed "s/$\[BACKEND_HOST_NAME\]/${_USER_SVC_HOST_NAME}/g" > backend-user-service-hydrated.json
@@ -149,11 +140,7 @@ steps:
 - name: 'gcr.io/cloud-builders/kubectl'
   id: Create Backend User Service
   waitFor: ['Generate Backend User Service Definition', 'Infrastructure Resources']
-  entrypoint: /bin/bash
-  args:
-  - '-c'
-  - |
-    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f backend-user-service-hydrated.json || [ "${_APPLY_OR_DELETE}" = "delete" ]
+  args: ['apply','--namespace=${_NAMESPACE}','-f','backend-user-service-hydrated.json']
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
@@ -163,11 +150,7 @@ steps:
 - name: 'gcr.io/cloud-builders/kubectl'
   id: Wait for external IP address
   waitFor: ['Infrastructure Resources']
-  entrypoint: /bin/bash
-  args:
-  - '-c'
-  - |
-    [ "${_APPLY_OR_DELETE}" = "delete" ] || /builder/kubectl.bash wait computeforwardingrule/${_CLUSTER_NAME}-forwarding-rule --namespace=${_NAMESPACE} --for=condition=Ready --timeout=15m
+  args: ['wait','computeforwardingrule/${_CLUSTER_NAME}-forwarding-rule','--namespace=${_NAMESPACE}','--for=condition=Ready','--timeout=15m']
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
@@ -183,9 +166,10 @@ steps:
     export _EXTERNAL_IP_ADDRESS=$(kubectl get computeforwardingrule/${_CLUSTER_NAME}-forwarding-rule --namespace=${_NAMESPACE} -o jsonpath="{$.spec.ipAddress.addressRef.external}")
     sed "s/$\[EXTERNAL_IP_ADDRESS\]/$$_EXTERNAL_IP_ADDRESS/g" dns-tpl.yaml | \
     sed "s/$\[DOMAIN\]/${_DOMAIN}/g" | \
+    sed "s/$\[NAMESPACE\]/${_NAMESPACE}/g" | \
     sed "s/$\[MANAGED_ZONE_NAME\]/${_MANAGED_ZONE_NAME}/g" | \
     sed "s/$\[CLUSTER_NAME\]/${_CLUSTER_NAME}/g" | \
-    /builder/kubectl.bash ${_APPLY_OR_DELETE} --namespace=${_NAMESPACE} -f - || [ "${_APPLY_OR_DELETE}" = "delete" ]
+    /builder/kubectl.bash apply --namespace=${_NAMESPACE} -f -
   timeout: 120s
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'

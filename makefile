@@ -157,7 +157,7 @@ delete-cluster:
 	gcloud --project=$(PROJECT_ID) container clusters delete $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) --quiet
 
 delete:
-	$(GCLOUD_BUILD) --config cloudbuild.yaml --timeout=2400 --substitutions _APPLY_OR_DELETE=delete,$(call join_subs,$(INFRA_SUBS))
+	kubectl delete ns/$(NAMESPACE) --cascade=true
 
 build-webui: cluster
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild.yaml --substitutions $(call join_subs,$(WEBUI_SUBS))
@@ -181,7 +181,7 @@ build-userservice: cluster
 	$(GCLOUD_BUILD) --config ./backend/user-service/cloudbuild.yaml --substitutions $(call join_subs,$(USER_SVC_SUBS))
 
 build-infrastructure: cluster
-	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(call join_subs,$(INFRA_SUBS))
+	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions $(call join_subs,$(INFRA_SUBS))
 
 build-infra: build-infrastructure
 

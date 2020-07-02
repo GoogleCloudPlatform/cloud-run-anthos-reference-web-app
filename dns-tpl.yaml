@@ -21,6 +21,7 @@ apiVersion: dns.cnrm.cloud.google.com/v1beta1
 kind: DNSRecordSet
 metadata:
   name: $[CLUSTER_NAME]-dns-a-record
+  namespace: $[NAMESPACE]
 spec:
   name: "$[DOMAIN]."
   type: "A"
