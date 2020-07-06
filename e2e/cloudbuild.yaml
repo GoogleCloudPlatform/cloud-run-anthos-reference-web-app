@@ -132,8 +132,11 @@ steps:
 - name: 'launcher.gcr.io/google/ubuntu1604'
   id: DEBUG curl the application
   waitFor: ['make build-backend', 'make build-webui', 'make build-userservice']
-  entrypoint: 'curl'
-  args: ['-v','https://${_DOMAIN}']
+  entrypoint: '/bin/bash'
+  args:
+  - -c
+  - |
+    curl -sv https://${_DNS_NAME} || touch e2e_failed
 - name: 'google/cloud-sdk:latest'
   id: Cleanup
   waitFor: ['DEBUG curl the application']
