@@ -137,7 +137,7 @@ steps:
   - -c
   - |
     set -o xtrace
-    curl -sv https://${_DNS_NAME}
+    curl -svf https://${_DNS_NAME}
 - name: 'google/cloud-sdk:latest'
   id: Cleanup
   waitFor: ['DEBUG curl the application']
