@@ -136,7 +136,8 @@ steps:
   args:
   - -c
   - |
-    curl -sv https://${_DNS_NAME} || touch e2e_failed
+    set -o xtrace
+    curl -sv https://${_DNS_NAME}
 - name: 'google/cloud-sdk:latest'
   id: Cleanup
   waitFor: ['DEBUG curl the application']
