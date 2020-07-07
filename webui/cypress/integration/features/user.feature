@@ -1,3 +1,4 @@
+@core
 Feature: User Management
 
   Scenario: Manage User

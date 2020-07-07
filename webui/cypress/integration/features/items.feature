@@ -1,3 +1,4 @@
+@core
 Feature: Item Management
   # Scenarios on this feature need to be run in the defined order.
 

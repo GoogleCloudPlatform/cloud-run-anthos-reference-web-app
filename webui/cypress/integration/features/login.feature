@@ -1,3 +1,4 @@
+@core
 Feature: Avatar Photo
     The main page of the application will display an avatar photo when the user is
     logged in.

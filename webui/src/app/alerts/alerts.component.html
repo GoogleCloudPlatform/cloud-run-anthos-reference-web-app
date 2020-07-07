@@ -26,7 +26,7 @@
   </mat-card-content>
 
   <ng-template #contentBlock>
-    <table mat-table [dataSource]="dataSource">
+    <table mat-table [dataSource]="dataSource" data-testid="alerts">
 
       <ng-container matColumnDef="actions">
        <th mat-header-cell *matHeaderCellDef></th>

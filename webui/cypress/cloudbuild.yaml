@@ -14,6 +14,8 @@
 
 ## The steps in this Cloud Build script run the frontend e2e test
 
+# Increase timeout to 13 mins (from 10 min default)
+timeout: 780s
 steps:
   # Generate API Service client
   - name: openapitools/openapi-generator-cli:v4.2.3
@@ -34,5 +36,5 @@ steps:
     waitFor: ['Prepare', 'Generate Client', 'Generate User Service Client']
     id: Test
     entrypoint: npm
-    args: ['run', 'e2e', '--', '--config', 'baseUrl=https://${_DOMAIN}']
+    args: ['run', 'e2e', '--', '--config', 'baseUrl=https://${_DOMAIN}', '-e', 'TAGS=${_WEBUI_E2E_TEST_TAGS}']
     dir: 'webui'

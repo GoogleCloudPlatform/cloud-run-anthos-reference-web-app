@@ -33,6 +33,8 @@ Before(async () => {
   cy.route('POST', '/api/locations').as('locationCreate');
   cy.route('PUT', '/api/locations/**').as('locationUpdate');
   cy.route('DELETE', '/api/locations/**').as('locationDelete');
+  cy.route('GET', '/api/alerts').as('alertList');
+  cy.route('DELETE', '/api/alerts/**').as('alertDelete');
   cy.route('POST', '/api/inventoryTransactions').as('invTransCreate');
   cy.route('GET', '/api/*/*/inventoryTransactions').as('invTransList');
   cy.route('POST', 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword*').as('verifyPassword');
@@ -71,8 +73,6 @@ When ('I click on link {string}', async (name) => {
 
 When ('I click on the plus icon button and wait', async () => {
   cy.get('button mat-icon').click();
-  cy.wait('@itemList');
-  cy.wait('@locationList');
 });
 
 When ('I submit the inventory transaction', () => {
@@ -129,4 +129,8 @@ When ('I select test item', async () => {
 
 When ('I select test location', async () => {
   selectValue(testLocation.Name, 'location_id');
+});
+
+When('I wait {int} seconds', async (seconds) =>  {
+  cy.wait(seconds * 1000)
 });

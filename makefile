@@ -7,6 +7,12 @@ ifdef CB_MACHINE_TYPE
 	MACHINE_TYPE=--machine-type=$(CB_MACHINE_TYPE)
 endif
 
+ifeq ($(EVENTING_ENABLED),true)
+WEBUI_E2E_TEST_TAGS="@core or @alerts"
+else
+WEBUI_E2E_TEST_TAGS="@core"
+endif
+
 # Shared cluster substitution args
 CLUSTER_ARGS = \
 	_CLUSTER_LOCATION=$(CLUSTER_LOCATION) \
@@ -170,10 +176,10 @@ test-webui-local: webui/api-client webui/node_modules
 	cd webui && npm run test -- --watch=false --browsers=ChromeHeadless
 
 test-webui-e2e-local: webui/api-client webui/node_modules
-	cd webui && npm run e2e
+	cd webui && npm run e2e -e TAGS=$(WEBUI_E2E_TEST_TAGS)
 
 test-webui-e2e-prod: webui/api-client webui/node_modules
-	cd webui && npm run e2e -- --headless --config baseUrl=https://${DOMAIN}
+	cd webui && npm run e2e -- --headless --config baseUrl=https://${DOMAIN} -e TAGS=$(WEBUI_E2E_TEST_TAGS)
 
 ## RULES FOR CLOUD DEVELOPMENT
 GCLOUD_BUILD=gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --verbosity=info .
@@ -207,7 +213,7 @@ test-webui:
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml
 
 test-webui-e2e:
-	$(GCLOUD_BUILD) --config ./webui/cypress/cloudbuild.yaml --substitutions $(call join_subs,$(FRONTEND_E2E_SUBS))
+	$(GCLOUD_BUILD) --config ./webui/cypress/cloudbuild.yaml --substitutions $(call join_subs,$(FRONTEND_E2E_SUBS)),_WEBUI_E2E_TEST_TAGS=$(WEBUI_E2E_TEST_TAGS)
 
 build-backend: cluster
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild.yaml --substitutions $(call join_subs,$(BACKEND_SUBS))
