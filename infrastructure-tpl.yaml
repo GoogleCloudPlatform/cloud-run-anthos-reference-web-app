@@ -34,29 +34,19 @@ spec:
     notFoundPage: index.html
   location: US
 ---
-# Storage Bucket ACL
-apiVersion: storage.cnrm.cloud.google.com/v1beta1
-kind: StorageBucketAccessControl
+# Make the storage bucket publicly viewable
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
 metadata:
-  name: ${CLUSTER_NAME}-bucket-access-control-1
+  name: iampolicymember-storagebucket-readaccess
   namespace: ${NAMESPACE}
 spec:
-  bucketRef:
+  member: allUsers
+  role: roles/viewer
+  resourceRef:
+    apiVersion: storage.cnrm.cloud.google.com/v1beta1
+    kind: StorageBucket
     name: ${DOMAIN}
-  entity: allUsers
-  role: READER
----
-# GCS Object ACL
-apiVersion: storage.cnrm.cloud.google.com/v1beta1
-kind: StorageDefaultObjectAccessControl
-metadata:
-  name: ${CLUSTER_NAME}-bucket-default-access-control
-  namespace: ${NAMESPACE}
-spec:
-  bucketRef:
-    name: ${DOMAIN}
-  entity: allUsers
-  role: READER
 ---
 ## Load Balancing
 
