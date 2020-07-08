@@ -68,6 +68,7 @@
     "webpack": "^4.43.0"
   },
   "resolutions": {
+    "lodash": "^4.17.17",
     "yargs-parser": "^18.1.3"
   }
 }
