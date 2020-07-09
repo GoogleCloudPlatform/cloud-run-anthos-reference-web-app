@@ -137,7 +137,18 @@ steps:
   - -c
   - |
     set -o xtrace
-    curl --retry 10 -svf https://${_DNS_NAME}
+    ATTEMPTS=1
+    curl -svf https://${_DNS_NAME}
+    while [ $? -ne 0 ]
+    do
+      echo Attempt #$$ATTEMPTS
+      if [ $$ATTEMPTS -gt 10 ]
+      then
+        exit 1
+      fi
+      ATTEMPTS=$$ATTEMPTS + 1
+      curl -svf https://${_DNS_NAME}
+    done
 - name: 'google/cloud-sdk:latest'
   id: Cleanup
   waitFor: ['DEBUG curl the application']
