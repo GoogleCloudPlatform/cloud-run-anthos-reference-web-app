@@ -38,11 +38,24 @@ spec:
 apiVersion: iam.cnrm.cloud.google.com/v1beta1
 kind: IAMPolicyMember
 metadata:
-  name: iampolicy-storagebucket
+  name: iampolicymember-storagebucketreader
   namespace: ${NAMESPACE}
 spec:
   member: allUsers
-  role: roles/viewer
+  role: roles/storage.legacyBucketReader
+  resourceRef:
+    apiVersion: storage.cnrm.cloud.google.com/v1beta1
+    kind: StorageBucket
+    name: ${DOMAIN}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: iampolicy-storageobjectreader
+  namespace: ${NAMESPACE}
+spec:
+  member: allUsers
+  role: roles/storage.legacyObjectReader
   resourceRef:
     apiVersion: storage.cnrm.cloud.google.com/v1beta1
     kind: StorageBucket
