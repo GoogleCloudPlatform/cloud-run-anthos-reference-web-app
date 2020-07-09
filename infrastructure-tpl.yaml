@@ -36,22 +36,17 @@ spec:
 ---
 # Make the storage bucket publicly viewable
 apiVersion: iam.cnrm.cloud.google.com/v1beta1
-kind: IAMPolicy
+kind: IAMPolicyMember
 metadata:
   name: iampolicy-storagebucket
   namespace: ${NAMESPACE}
 spec:
+  member: allUsers
+  role: roles/viewer
   resourceRef:
     apiVersion: storage.cnrm.cloud.google.com/v1beta1
     kind: StorageBucket
     name: ${DOMAIN}
-  bindings:
-  - role: roles/storage.legacyBucketReader
-    members:
-    - allUsers
-  - role: roles/storage.legacyObjectReader
-    members:
-    - allUsers
 ---
 ## Load Balancing
 
