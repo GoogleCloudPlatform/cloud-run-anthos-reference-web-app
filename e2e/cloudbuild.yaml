@@ -130,7 +130,7 @@ steps:
   - |
     make build-userservice || touch e2e-failed
 - name: 'launcher.gcr.io/google/ubuntu1604'
-  id: DEBUG curl the application
+  id: Wait for application to be reachable
   waitFor: ['make build-backend', 'make build-webui', 'make build-userservice']
   entrypoint: '/bin/bash'
   args:
@@ -144,14 +144,25 @@ steps:
       echo Attempt #$$ATTEMPTS
       if [ $$ATTEMPTS -gt 10 ]
       then
-        exit 1
+        echo "ERROR: Could not load https://${_DNS_NAME} after $$ATTEMPTS attempts"
+        touch e2e-failed
       fi
+      sleep 10s
       ATTEMPTS=$$ATTEMPTS + 1
       curl -svf https://${_DNS_NAME}
     done
 - name: 'google/cloud-sdk:latest'
+  id: Run e2e tests
+  waitFor: ['Wait for application to be reachable']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    set -o xtrace
+    [ -e e2e_failed ] || make test-webui-e2e || touch e2e-failed
+- name: 'google/cloud-sdk:latest'
   id: Cleanup
-  waitFor: ['DEBUG curl the application']
+  waitFor: ['Run e2e tests']
   entrypoint: /bin/bash
   args:
   - -c
