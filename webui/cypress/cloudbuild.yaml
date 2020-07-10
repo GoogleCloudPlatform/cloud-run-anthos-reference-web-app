@@ -36,3 +36,9 @@ steps:
     entrypoint: npm
     args: ['run', 'e2e', '--', '--config', 'baseUrl=https://${_DOMAIN}']
     dir: 'webui'
+artifacts:
+  objects:
+    location: 'gs://${_ARTIFACTS_LOCATION}'
+    paths:
+    - 'webui/cypress/screenshots/*'
+    - 'webui/cypress/videos/*'
