@@ -37,7 +37,7 @@ steps:
     args:
     - -c
     - |
-      npm run e2e -- --config baseUrl=https://${_DOMAIN} || touch e2e-failed
+      npm run e2e -- --config baseUrl=https://${_DOMAIN} || touch ../e2e-failed
     dir: 'webui'
   - name: 'google/cloud-sdk:latest'
     waitFor: ['Test']
