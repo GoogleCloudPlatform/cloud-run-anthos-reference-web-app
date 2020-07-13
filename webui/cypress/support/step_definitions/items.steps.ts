@@ -35,4 +35,6 @@ When('I go to items page', () => {
 When('wait for item to load', () => {
   cy.wait('@itemGet');
   cy.wait('@invTransList');
+  cy.wait('@itemList');
+  cy.wait('@locationList');
 });
