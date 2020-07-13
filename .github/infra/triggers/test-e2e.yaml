@@ -20,5 +20,6 @@ filename: e2e/cloudbuild.yaml
 github:
     owner: GoogleCloudPlatform
     name: cloud-run-anthos-reference-web-app
-    push:
-        branch: "^ssmall/cloudbuild-e2e$"
+    pullRequest:
+        branch: "^master$"
+        commentControl: "COMMENTS_ENABLED"
