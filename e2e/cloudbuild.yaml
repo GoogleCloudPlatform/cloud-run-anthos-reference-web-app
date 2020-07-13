@@ -149,7 +149,7 @@ steps:
       fi
       sleep 10s
       ATTEMPTS=$((ATTEMPTS + 1))
-      curl -svf https://${_DNS_NAME}
+      curl -svf -m 30 https://${_DNS_NAME}
     done
 - name: 'google/cloud-sdk:latest'
   id: Run e2e tests
