@@ -46,8 +46,8 @@ steps:
     args:
     - -c
     - |
-      gsutil cp -r videos/* gs://${_ARTIFACTS_LOCATION}/${BUILD_ID}
-      gsutil cp -r screenshots/* gs://${_ARTIFACTS_LOCATION}/${BUILD_ID}
+      gsutil cp -m -r videos/* gs://${_ARTIFACTS_LOCATION}/${BUILD_ID} || true
+      gsutil cp -m -r screenshots/* gs://${_ARTIFACTS_LOCATION}/${BUILD_ID} || true
     dir: 'webui/cypress'
   - name: 'alpine'
     id: Set build status
