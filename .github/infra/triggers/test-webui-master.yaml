@@ -16,7 +16,7 @@
 
 name: test-webui-master
 description: Test the UI components of the reference app on push to master
-filename: webui/cloudbuild-test.yaml
+filename: .github/infra/test-webui.yaml
 includedFiles:
 - webui/**
 - .github/infra/**
