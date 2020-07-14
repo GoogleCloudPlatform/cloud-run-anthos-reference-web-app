@@ -16,7 +16,7 @@
 ## the coverage report to codecov
 
 steps:
-- name: 'google/cloud-sdk:latest'
+- name: gcr.io/cloud-builders/gcloud
   id: Test
   waitFor: ['-']
   entrypoint: /bin/bash
