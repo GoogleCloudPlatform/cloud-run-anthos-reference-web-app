@@ -34,7 +34,8 @@ USER_SVC_SUBS = $(CLUSTER_ARGS) \
 	_USER_SVC_KSA=$(USER_SVC_KSA) \
 	_USER_SVC_NAME=$(USER_SVC_NAME) \
 
-FRONTEND_E2E_SUBS = _DOMAIN=$(DOMAIN)
+FRONTEND_E2E_SUBS = _DOMAIN=$(DOMAIN) \
+	_ARTIFACTS_LOCATION=$(TEST_ARTIFACTS_LOCATION)
 
 # cloudbuild.yaml
 INFRA_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
@@ -75,7 +76,7 @@ OPENAPI_GEN_USER_CLIENT_ARGS=-g typescript-angular -i backend/user-service/user-
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
 
-.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local test-istio-auth-local build-webui test-webui test-istio-auth build-backend build-infrastructure build-all test cluster jq
+.PHONY: clean delete delete-cluster run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local test-istio-auth-local build-webui test-webui test-istio-auth build-backend build-infrastructure build-all test cluster jq
 
 ## RULES FOR LOCAL DEVELOPMENT
 clean:
@@ -153,8 +154,11 @@ cluster:
 	  gcloud --project=$(PROJECT_ID) container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION); \
 	fi
 
+delete-cluster:
+	gcloud --project=$(PROJECT_ID) container clusters delete $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) --quiet
+
 delete:
-	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(call join_subs,$(INFRA_SUBS))
+	kubectl delete ns/$(NAMESPACE) --cascade=true
 
 build-webui: cluster
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild.yaml --substitutions $(call join_subs,$(WEBUI_SUBS))
@@ -178,7 +182,7 @@ build-userservice: cluster
 	$(GCLOUD_BUILD) --config ./backend/user-service/cloudbuild.yaml --substitutions $(call join_subs,$(USER_SVC_SUBS))
 
 build-infrastructure: cluster
-	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(call join_subs,$(INFRA_SUBS))
+	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions $(call join_subs,$(INFRA_SUBS))
 
 build-infra: build-infrastructure
 

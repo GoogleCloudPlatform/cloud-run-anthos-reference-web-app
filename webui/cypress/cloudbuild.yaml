@@ -33,6 +33,31 @@ steps:
   - name: cypress/base
     waitFor: ['Prepare', 'Generate Client', 'Generate User Service Client']
     id: Test
-    entrypoint: npm
-    args: ['run', 'e2e', '--', '--config', 'baseUrl=https://${_DOMAIN}']
+    entrypoint: /bin/bash
+    args:
+    - -c
+    - |
+      npm run e2e -- --config baseUrl=https://${_DOMAIN} || { touch ../e2e-failed && npm run cleanup; }
     dir: 'webui'
+  - name: 'google/cloud-sdk:latest'
+    waitFor: ['Test']
+    id: Upload artifacts
+    entrypoint: /bin/bash
+    args:
+    - -c
+    - |
+      gsutil -m cp -r videos/* gs://${_ARTIFACTS_LOCATION}/${BUILD_ID} || true
+      gsutil -m cp -r screenshots/* gs://${_ARTIFACTS_LOCATION}/${BUILD_ID} || true
+    dir: 'webui/cypress'
+  - name: 'alpine'
+    id: Set build status
+    waitFor: ["Upload artifacts"]
+    entrypoint: /bin/ash
+    args:
+    - -c
+    - |
+      if [ -e e2e-failed ]
+      then
+        echo "Tests failed!"
+        exit 1
+      fi

@@ -27,35 +27,39 @@ metadata:
   annotations:
     cnrm.cloud.google.com/force-destroy: "true"
 spec:
+  bucketPolicyOnly: true
   website:
     mainPageSuffix: index.html
     # Configure notFound to also redirect to index.html to facilitate Angular routing
     notFoundPage: index.html
   location: US
 ---
-# Storage Bucket ACL
-apiVersion: storage.cnrm.cloud.google.com/v1beta1
-kind: StorageBucketAccessControl
+# Make the storage bucket publicly viewable
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
 metadata:
-  name: web-app-storage-bucket-access-control-1
+  name: iampolicymember-storagebucketreader
   namespace: ${NAMESPACE}
 spec:
-  bucketRef:
+  member: allUsers
+  role: roles/storage.legacyBucketReader
+  resourceRef:
+    apiVersion: storage.cnrm.cloud.google.com/v1beta1
+    kind: StorageBucket
     name: ${DOMAIN}
-  entity: allUsers
-  role: READER
 ---
-# GCS Object ACL
-apiVersion: storage.cnrm.cloud.google.com/v1beta1
-kind: StorageDefaultObjectAccessControl
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
 metadata:
-  name: web-app-storage-bucket-default-access-control
+  name: iampolicy-storageobjectreader
   namespace: ${NAMESPACE}
 spec:
-  bucketRef:
+  member: allUsers
+  role: roles/storage.legacyObjectReader
+  resourceRef:
+    apiVersion: storage.cnrm.cloud.google.com/v1beta1
+    kind: StorageBucket
     name: ${DOMAIN}
-  entity: allUsers
-  role: READER
 ---
 ## Load Balancing
 
@@ -63,7 +67,7 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeBackendBucket
 metadata:
-  name: web-app-backend-bucket
+  name: ${CLUSTER_NAME}-backend-bucket
   namespace: ${NAMESPACE}
 spec:
   bucketRef:
@@ -74,7 +78,7 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeHealthCheck
 metadata:
-  name: web-app-health-check
+  name: ${CLUSTER_NAME}-health-check
   namespace: ${NAMESPACE}
 spec:
   checkIntervalSec: 5
@@ -86,30 +90,30 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeURLMap
 metadata:
-  name: web-app-url-map
+  name: ${CLUSTER_NAME}-url-map
   namespace: ${NAMESPACE}
 spec:
   location: global
   defaultService:
     backendBucketRef:
-      name: web-app-backend-bucket
+      name: ${CLUSTER_NAME}-backend-bucket
   pathMatcher:
     - name: allpaths
       # Default all requests to the GCS bucket
       defaultService:
         backendBucketRef:
-          name: web-app-backend-bucket
+          name: ${CLUSTER_NAME}-backend-bucket
       pathRule:
         # Paths to the API service
         - paths: ["/api", "/api/*"]
           service:
             backendServiceRef:
-              name: web-app-backend-api-service
+              name: ${CLUSTER_NAME}-backend-api-service
         # Paths to the User service
         - paths: ["/api/users", "/api/users/*"]
           service:
             backendServiceRef:
-              name: web-app-backend-user-service
+              name: ${CLUSTER_NAME}-backend-user-service
   hostRule:
     - hosts: ["*"]
       pathMatcher: allpaths
@@ -118,14 +122,14 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeTargetHTTPSProxy
 metadata:
-  name: web-app-target-proxy-https
+  name: ${CLUSTER_NAME}-target-proxy-https
   namespace: ${NAMESPACE}
 spec:
   description: ""
   urlMapRef:
-    name: web-app-url-map
+    name: ${CLUSTER_NAME}-url-map
   sslPolicyRef:
-    name: web-app-ssl-policy
+    name: ${CLUSTER_NAME}-ssl-policy
   sslCertificates:
     - external: ${SSL_CERT_NAME}
   location: global
@@ -134,7 +138,7 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeSSLPolicy
 metadata:
-  name: web-app-ssl-policy
+  name: ${CLUSTER_NAME}-ssl-policy
   namespace: ${NAMESPACE}
 spec:
   description: SSL policy for the web app
@@ -143,13 +147,13 @@ spec:
 apiVersion: compute.cnrm.cloud.google.com/v1beta1
 kind: ComputeForwardingRule
 metadata:
-  name: web-app-forwarding-rule
+  name: ${CLUSTER_NAME}-forwarding-rule
   namespace: ${NAMESPACE}
 spec:
   description: "A global forwarding rule"
   target:
     targetHTTPSProxyRef:
-      name: web-app-target-proxy-https
+      name: ${CLUSTER_NAME}-target-proxy-https
   portRange: "443"
   ipProtocol: "TCP"
   ipVersion: "IPV4"
@@ -159,7 +163,7 @@ spec:
 apiVersion: dns.cnrm.cloud.google.com/v1beta1
 kind: DNSRecordSet
 metadata:
-  name: web-app-dns-caa-record
+  name: ${CLUSTER_NAME}-dns-caa-record
   namespace: ${NAMESPACE}
 spec:
   name: "${DOMAIN}."
