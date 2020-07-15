@@ -30,7 +30,7 @@ jobs:
     - name: install dependencies
       working-directory: ./webui
       run: npm ci
-    - uses: oke-py/npm-audit-action@v1.5.0
+    - uses: oke-py/npm-audit-action@v1.5.1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         dedupe_issues: true
