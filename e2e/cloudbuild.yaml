@@ -142,7 +142,7 @@ steps:
     while [ $? -ne 0 ]
     do
       echo Attempt #$$ATTEMPTS
-      if [ $$ATTEMPTS -gt 10 ]
+      if [ "$$ATTEMPTS" -gt "10" ]
       then
         echo "ERROR: Could not load https://${_DNS_NAME} after $$ATTEMPTS attempts"
         touch e2e-failed
