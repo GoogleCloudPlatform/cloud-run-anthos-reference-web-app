@@ -104,7 +104,7 @@ steps:
   args:
   - -c
   - |
-    make build-infrastructure || touch e2e-failed
+    [ -e e2e_failed ] || make build-infrastructure || touch e2e-failed
 - name: 'google/cloud-sdk:latest'
   id: make build-backend
   waitFor: ['make build-infrastructure']
@@ -112,7 +112,7 @@ steps:
   args:
   - -c
   - |
-    make build-backend || touch e2e-failed
+    [ -e e2e_failed ] || make build-backend || touch e2e-failed
 - name: 'google/cloud-sdk:latest'
   id: make build-webui
   waitFor: ['make build-infrastructure']
@@ -120,7 +120,7 @@ steps:
   args:
   - -c
   - |
-    make build-webui || touch e2e-failed
+    [ -e e2e_failed ] || make build-webui || touch e2e-failed
 - name: 'google/cloud-sdk:latest'
   id: make build-userservice
   waitFor: ['make build-infrastructure']
@@ -128,7 +128,7 @@ steps:
   args:
   - -c
   - |
-    make build-userservice || touch e2e-failed
+    [ -e e2e_failed ] || make build-userservice || touch e2e-failed
 - name: 'launcher.gcr.io/google/ubuntu1604'
   id: Wait for application to be reachable
   waitFor: ['make build-backend', 'make build-webui', 'make build-userservice']
@@ -137,12 +137,13 @@ steps:
   - -c
   - |
     set -o xtrace
+    [ ! -e e2e_failed ] || exit 0
     ATTEMPTS=1
     curl -svf https://${_DNS_NAME}
     while [ $? -ne 0 ]
     do
       echo Attempt #$$ATTEMPTS
-      if [ $$ATTEMPTS -gt 10 ]
+      if [ "$$ATTEMPTS" -gt "10" ]
       then
         echo "ERROR: Could not load https://${_DNS_NAME} after $$ATTEMPTS attempts"
         touch e2e-failed

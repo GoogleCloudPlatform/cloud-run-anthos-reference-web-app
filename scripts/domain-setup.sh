@@ -77,7 +77,7 @@ echo "Using domain: [${DOMAIN}]."
 echo
 
 # Ensure a corresponding managed zone exists
-zone=$(gcloud --project "${PROJECT_ID}" dns managed-zones list --format="csv[no-heading](name)" --filter="dnsName:${DOMAIN}")
+zone=$(gcloud --project "${PROJECT_ID}" dns managed-zones list --format="csv[no-heading](name)" --filter="dnsName=${DOMAIN}.")
 if [[ -z "${zone}" ]]; then
   echo "No Cloud DNS Managed Zone corresponding to ${DOMAIN} found in ${PROJECT_ID}."
   echo "Please ensure your custom domain is associated with a Cloud DNS Managed Zone"
