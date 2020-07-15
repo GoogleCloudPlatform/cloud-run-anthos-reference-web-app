@@ -56,6 +56,9 @@ PROVISION_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 # webui/cloudbuild.yaml
 WEBUI_SUBS = _DOMAIN=$(DOMAIN)
 
+# webui/cloudbuild-test.yaml
+TEST_WEBUI_SUBS = _ARTIFACTS_LOCATION=$(TEST_ARTIFACTS_LOCATION)
+
 ISTIO_AUTH_TEST_SUBS = $(ISTIO_ARGS) \
 	_CLUSTER_LOCATION=$(CLUSTER_LOCATION) \
 	_CLUSTER_NAME=$(CLUSTER_NAME)
@@ -135,13 +138,13 @@ test-istio-auth-local: jq
 	rm /tmp/istio-auth-test-key.json
 	! rm /tmp/istio-auth-test.failed 2>/dev/null
 
-test-webui-local: webui/api-client webui/node_modules
+test-webui-local: webui/api-client webui/user-svc-client webui/node_modules
 	cd webui && npm run test -- --watch=false --browsers=ChromeHeadless
 
-test-webui-e2e-local: webui/api-client webui/node_modules
+test-webui-e2e-local: webui/api-client webui/user-svc-client webui/node_modules
 	cd webui && npm run e2e
 
-test-webui-e2e-prod: webui/api-client webui/node_modules
+test-webui-e2e-prod: webui/api-client webui/user-svc-client webui/node_modules
 	cd webui && npm run e2e -- --headless --config baseUrl=https://${DOMAIN}
 
 ## RULES FOR CLOUD DEVELOPMENT
@@ -170,7 +173,7 @@ test-istio-auth:
 	$(GCLOUD_BUILD) --config ./istio-auth/cloudbuild-test.yaml --substitutions $(call join_subs,$(ISTIO_AUTH_TEST_SUBS))
 
 test-webui:
-	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml
+	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml --substitutions $(call join_subs,$(TEST_WEBUI_SUBS))
 
 test-webui-e2e:
 	$(GCLOUD_BUILD) --config ./webui/cypress/cloudbuild.yaml --substitutions $(call join_subs,$(FRONTEND_E2E_SUBS))
