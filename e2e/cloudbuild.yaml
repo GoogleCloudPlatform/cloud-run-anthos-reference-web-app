@@ -104,7 +104,7 @@ steps:
   args:
   - -c
   - |
-  [ -e e2e_failed ] || make build-infrastructure || touch e2e-failed
+    [ -e e2e_failed ] || make build-infrastructure || touch e2e-failed
 - name: 'google/cloud-sdk:latest'
   id: make build-backend
   waitFor: ['make build-infrastructure']
@@ -112,7 +112,7 @@ steps:
   args:
   - -c
   - |
-  [ -e e2e_failed ] || make build-backend || touch e2e-failed
+    [ -e e2e_failed ] || make build-backend || touch e2e-failed
 - name: 'google/cloud-sdk:latest'
   id: make build-webui
   waitFor: ['make build-infrastructure']
@@ -120,7 +120,7 @@ steps:
   args:
   - -c
   - |
-  [ -e e2e_failed ] || make build-webui || touch e2e-failed
+    [ -e e2e_failed ] || make build-webui || touch e2e-failed
 - name: 'google/cloud-sdk:latest'
   id: make build-userservice
   waitFor: ['make build-infrastructure']
@@ -128,7 +128,7 @@ steps:
   args:
   - -c
   - |
-  [ -e e2e_failed ] || make build-userservice || touch e2e-failed
+    [ -e e2e_failed ] || make build-userservice || touch e2e-failed
 - name: 'launcher.gcr.io/google/ubuntu1604'
   id: Wait for application to be reachable
   waitFor: ['make build-backend', 'make build-webui', 'make build-userservice']
