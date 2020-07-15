@@ -1,7 +1,4 @@
-<p align="center">
-  <span>English</span> |
-  <a href="architecture_sp.md">Español</a> |
-</p>
+**English** | [Español](architecture_sp.md)
 
 # Architecture
 
@@ -66,12 +63,10 @@ generated off of the [OpenAPI spec][]. This way, changes to the API
 surface are automatically picked up by both the client and server
 on the next build.
 
-[high level architecture]: ./high-level-diagram.svg
 [Angular]: https://angular.io/
 [hosted in Google Cloud Storage]: https://cloud.google.com/storage/docs/hosting-static-website
 [Cloud Run]: https://cloud.google.com/run/docs/gke/setup
 [Cloud Firestore]: https://cloud.google.com/firestore
-[networking diagram]: ./networking-diagram.svg
 [Cloud Config Connector]: https://cloud.google.com/config-connector/docs/overview
 [infrastructure-tpl.yaml]: ../infrastructure-tpl.yaml
 [backend-service-template.jq]: ../backend-service-template.jq
@@ -82,11 +77,9 @@ on the next build.
 [forwarding rule]: https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts
 [managed DNS zone]: https://cloud.google.com/dns/docs/overview#dns-managed-zones
 [generated automatically]: https://cloud.google.com/load-balancing/docs/ssl-certificates/google-managed-certs
-[authentication diagram]: ./authentication-diagram.svg
 [Identity Platform]: https://cloud.google.com/identity-platform
 [JSON Web Token (JWT)]: https://tools.ietf.org/html/rfc7519
 [validated by the Istio ingress]: https://cloud.google.com/solutions/authenticating-cloud-run-on-gke-end-users-using-istio-and-identity-platform
-[build diagram]: ./build-diagram.svg
 [OpenAPI spec]: ../openapi.yaml
 [By default]: ../infrastructure-tpl.yaml#L93
 [Istio Authorization Policies]: https://archive.istio.io/v1.5/docs/reference/config/security/authorization-policy/
