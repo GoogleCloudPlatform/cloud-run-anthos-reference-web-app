@@ -36,8 +36,14 @@ steps:
   entrypoint: 'bash'
   args: [ '-c', 'gcloud secrets versions access latest --secret=codecov-token > /workspace/codecov-token.txt' ]
 - name: node:12.16
+  id: npm ci
+  waitFor: ['-']
+  dir: 'webui'
+  entrypoint: npm
+  args: ['ci']
+- name: node:12.16
   id: Upload coverage report
-  waitFor: ['Download coverage report', 'Get codecov token']
+  waitFor: ['Download coverage report', 'Get codecov token', 'npm ci']
   dir: 'webui'
   entrypoint: /bin/bash
   args:
