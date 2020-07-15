@@ -19,20 +19,17 @@ steps:
 - name: gcr.io/cloud-builders/gcloud
   id: Test
   waitFor: ['-']
-  entrypoint: /bin/bash
   args:
-  - -c
-  - |
-    gcloud builds submit \
-      --machine-type=n1-highcpu-32 \
-      --verbosity=info \
-      --config ./webui/cloudbuild-test.yaml \
-      --substitutions _ARTIFACTS_LOCATION=${_ARTIFACTS_LOCATION}
-- name: gcr.io/cloud-builders/gcloud
+  - builds
+  - submit
+  - --machine-type=n1-highcpu-32
+  - --verbosity=info
+  - --config=./webui/cloudbuild-test.yaml
+  - --substitutions=_ARTIFACTS_LOCATION=${_ARTIFACTS_LOCATION}
+- name: gcr.io/cloud-builders/gsutil
   id: Download coverage report
   waitFor: ['Test']
-  entrypoint: 'gsutil'
-  args: ['gsutil','cp','${_ARTIFACTS_LOCATION}/lcov.info','.']
+  args: ['cp','${_ARTIFACTS_LOCATION}/lcov.info','.']
 - name: gcr.io/cloud-builders/gcloud
   id: Get codecov token
   waitFor: ['-']
