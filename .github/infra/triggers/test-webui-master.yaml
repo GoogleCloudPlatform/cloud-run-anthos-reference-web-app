@@ -14,8 +14,8 @@
 
 ## Resource: https://cloud.google.com/cloud-build/docs/api/reference/rest/v1/projects.triggers#BuildTrigger
 
-name: test-webui-master
-description: Test the UI components of the reference app on push to master
+name: test-webui-main
+description: Test the UI components of the reference app on push to main
 filename: .github/infra/test-webui.yaml
 includedFiles:
 - webui/**
@@ -24,4 +24,4 @@ github:
     owner: GoogleCloudPlatform
     name: cloud-run-anthos-reference-web-app
     push:
-        branch: "^master$"
+        branch: "^main$"

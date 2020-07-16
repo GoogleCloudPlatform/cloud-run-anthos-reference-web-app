@@ -23,4 +23,4 @@ github:
     owner: GoogleCloudPlatform
     name: cloud-run-anthos-reference-web-app
     push:
-        branch: "^master$"
+        branch: "^main$"
