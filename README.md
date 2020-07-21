@@ -166,7 +166,7 @@ where `$DOMAIN` is the custom domain you configured in `env.mk`.
 
 After you login at least once to the app, you can use this script to make your
 account an `admin`. Afterwards you'll be able to use the Users page to manage
-other accounts. To use this script you will need to follow the guide of
+other accounts. To use this script you will need to
 [Initialize the Firebase Admin SDK][] and setup
 `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
