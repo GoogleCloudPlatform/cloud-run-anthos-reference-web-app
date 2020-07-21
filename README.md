@@ -163,6 +163,15 @@ Once your application is deployed, you can try it out by navigating to `https://
 where `$DOMAIN` is the custom domain
 you configured in `env.mk`.
 
+### Setup first admin user
+
+After you login at least once to the app, you can use this script to update your account to `admin`. Afterwards you can use Users page to manage other accounts. To use this script you will need to follow the guide of [Initialize the firebase Admin SDK][] and setup `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+
+```
+cd webui
+npm run init-admin <email>
+```
+
 ## Update the Application
 
 Running `make build-all` will rebuild and deploy the app, including any changes
@@ -212,3 +221,4 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [domain-setup.sh]: scripts/domain-setup.sh
 [firestore rules page screenshot]: docs/img/firestore_rules_page.png
 [`firestore/firestore.rules`]: firestore/firestore.rules
+[Initialize the firebase Admin SDK]: https://firebase.google.com/docs/admin/setup#initialize-sdk
