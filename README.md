@@ -167,7 +167,7 @@ you configured in `env.mk`.
 
 After you login at least once to the app, you can use this script to update your account to `admin`. Afterwards you can use Users page to manage other accounts. To use this script you will need to follow the guide of [Initialize the firebase Admin SDK][] and setup `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
-```
+```shell
 cd webui
 npm run init-admin <email>
 ```
