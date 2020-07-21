@@ -160,12 +160,13 @@ Run `make build-all`.
 ## Try Out the Application
 
 Once your application is deployed, you can try it out by navigating to `https://$DOMAIN`,
-where `$DOMAIN` is the custom domain
-you configured in `env.mk`.
+where `$DOMAIN` is the custom domain you configured in `env.mk`.
 
 ### Setup first admin user
 
-After you login at least once to the app, you can use this script to update your account to `admin`. Afterwards you can use Users page to manage other accounts. To use this script you will need to follow the guide of [Initialize the firebase Admin SDK][] and setup `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+After you login at least once to the app, you can use this script to update your account to `admin`.
+Afterwards you can use Users page to manage other accounts. To use this script you will need to follow the
+guide of [Initialize the firebase Admin SDK][] and setup `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
 ```shell
 cd webui
