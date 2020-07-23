@@ -17,7 +17,7 @@
     "prepare-e2e": "cypress/scripts/pass-gen.sh && ts-node cypress/scripts/prepareData.ts",
     "cleanup": "ts-node cypress/scripts/cleanup.ts",
     "report-coverage": "codecov",
-    "init-admin": "ts-node cypress/scripts/init-admin.ts"
+    "init-admin": "cypress/scripts/pass-gen.sh && ts-node cypress/scripts/init-admin.ts"
   },
   "private": true,
   "dependencies": {
