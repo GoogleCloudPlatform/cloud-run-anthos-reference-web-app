@@ -70,7 +70,5 @@ export const cleanupUsers = async () => {
 
 export const setUserRole = async (email: string, role: string) => {
   const userRecord = await admin.auth().getUserByEmail(email);
-  if (userRecord.customClaims && userRecord.customClaims.role !== role) {
-    return updateUserRoleClaim(userRecord.uid, role);
-  }
+  return updateUserRoleClaim(userRecord.uid, role);
 };

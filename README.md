@@ -172,6 +172,7 @@ other accounts. To use this script you will need to
 
 ```shell
 cd webui
+npm install
 npm run init-admin <email>
 ```
 
