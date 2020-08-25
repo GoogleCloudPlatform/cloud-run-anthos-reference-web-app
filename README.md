@@ -199,7 +199,7 @@ make build-webui
 
 Running `make delete` will delete the Config Connector resources from your cluster,
 which will cause Config Connector to delete the associated GCP resources.
-However, you must manually delete your Cloud Run service and GKE Cluster.
+However, you must manually delete your Cloud Run for Anthos service and GKE Cluster.
 
 [APIs & Services > Credentials]: https://console.cloud.google.com/apis/credentials
 [Cloud Build]: https://cloud.google.com/cloud-build/docs
