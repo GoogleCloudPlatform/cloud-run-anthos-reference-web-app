@@ -68,3 +68,7 @@ export const cleanupUsers = async () => {
   await deleteUserByEmail(workerEmail);
 };
 
+export const setUserRole = async (email: string, role: string) => {
+  const userRecord = await admin.auth().getUserByEmail(email);
+  return updateUserRoleClaim(userRecord.uid, role);
+};

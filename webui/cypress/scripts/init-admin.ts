@@ -14,3 +14,31 @@
  * limitations under the License.
  */
 
+
+import * as admin from 'firebase-admin' ;
+import {setUserRole} from './user';
+
+const usage = `
+USAGE: ts-node npm run init-admin <email>
+`;
+
+const main = async () => {
+  try {
+    const args = process.argv.slice(2);
+
+    if (args.length !== 1) {
+      throw new Error('wrong number of arguments');
+    }
+
+    const email = args[0];
+
+    admin.initializeApp();
+    await setUserRole(email, 'admin');
+    process.exit();
+  } catch (e) {
+    console.log(usage);
+    console.error(e);
+    process.exit(1);
+  }
+};
+main();

@@ -28,7 +28,7 @@ to complete setup of the application.*
 
 This example can be run directly from Cloud Shell!
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FGoogleCloudPlatform%2Fcloud-run-anthos-reference-web-app&cloudshell_git_branch=master)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FGoogleCloudPlatform%2Fcloud-run-anthos-reference-web-app&cloudshell_git_branch=main)
 
 #### Local Setup
 
@@ -160,8 +160,21 @@ Run `make build-all`.
 ## Try Out the Application
 
 Once your application is deployed, you can try it out by navigating to `https://$DOMAIN`,
-where `$DOMAIN` is the custom domain
-you configured in `env.mk`.
+where `$DOMAIN` is the custom domain you configured in `env.mk`.
+
+### Setup first admin user
+
+After you login at least once to the app, you can use this script to make your
+account an `admin`. Afterwards you'll be able to use the Users page to manage
+other accounts. To use this script you will need to
+[Initialize the Firebase Admin SDK][] and setup
+`GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+
+```shell
+cd webui
+npm install
+npm run init-admin <email>
+```
 
 ## Update the Application
 
@@ -212,3 +225,4 @@ However, you must manually delete your Cloud Run service and GKE Cluster.
 [domain-setup.sh]: scripts/domain-setup.sh
 [firestore rules page screenshot]: docs/img/firestore_rules_page.png
 [`firestore/firestore.rules`]: firestore/firestore.rules
+[Initialize the Firebase Admin SDK]: https://firebase.google.com/docs/admin/setup#initialize-sdk
