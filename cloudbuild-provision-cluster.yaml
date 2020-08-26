@@ -26,13 +26,13 @@ steps:
   id: Create Cluster
   waitFor: ['-']
   args: [
-    'beta', 'container', 'clusters', 'create', '${_CLUSTER_NAME}',
+    'container', 'clusters', 'create', '${_CLUSTER_NAME}',
     '--addons', 'HorizontalPodAutoscaling,HttpLoadBalancing,CloudRun',
     '--machine-type', 'e2-standard-4',
     '--num-nodes', '3',
     '--cluster-version', '${_CLUSTER_GKE_VERSION}',
     '--enable-stackdriver-kubernetes',
-    '--identity-namespace', '${PROJECT_ID}.svc.id.goog',
+    '--workload-pool', '${PROJECT_ID}.svc.id.goog',
     '--enable-ip-alias',
     '--zone', '${_CLUSTER_LOCATION}'
   ]
