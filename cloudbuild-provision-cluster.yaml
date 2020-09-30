@@ -183,3 +183,22 @@ steps:
       do \
         gcloud compute firewall-rules update "$firewall" --source-ranges=35.191.0.0/16,130.211.0.0/22; \
       done;
+
+# Setup cluster for cloud run eventings
+# https://cloud.google.com/run/docs/events/anthos/quickstart
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Initializing Events
+  waitFor: ['Create Cluster']
+  entrypoint: /bin/bash
+  args: 
+    - '-c'
+    - |
+        if [ "${_EVENTING_ENABLED}" = true ]
+        then
+          gcloud beta events init --quiet --platform gke \
+          --cluster ${_CLUSTER_NAME} --cluster-location ${_CLUSTER_LOCATION};
+          gcloud beta events namespaces init --copy-default-secret --platform gke \
+          --cluster ${_CLUSTER_NAME} --cluster-location ${_CLUSTER_LOCATION};
+          gcloud beta events brokers create default --platform gke \
+          --cluster ${_CLUSTER_NAME} --cluster-location ${_CLUSTER_LOCATION};
+        fi
