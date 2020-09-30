@@ -8,7 +8,7 @@ Feature: Inventory Transactions
     When I go to items page
     And I click on test item
     And wait for item to load
-    When I click on the plus icon button and wait
+    When I click on the plus icon button
     And I select test item
     And I select test location
     And I check radio button <action>

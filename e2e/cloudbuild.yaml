@@ -1,0 +1,201 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+## This Cloud Build script is used to run the automated e2e test workflow
+
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: Cache cloud-sdk image
+  waitFor: ['-']
+  args: ['pull', 'google/cloud-sdk:latest']
+  timeout: 120s
+- name: 'alpine'
+  id: Set up env.mk
+  waitFor: ['-']
+  entrypoint: /bin/ash
+  args:
+  - '-c'
+  - |
+      set -o errexit
+      set -o xtrace
+      set 
+      apk add gettext
+      cat e2e/env.mk.template | \
+      envsubst > env.mk
+  env:
+  - 'PROJECT_ID=${PROJECT_ID}'
+  - 'BUILD_ID=${_BUILD_ID_SHORT}'
+  timeout: 60s
+- name: 'google/cloud-sdk:latest'
+  id: Create DNS managed zone
+  waitFor: ['Cache cloud-sdk image']
+  args:
+  - gcloud
+  - dns
+  - managed-zones
+  - create
+  - ${_MANAGED_ZONE_NAME}
+  - --description="Managed zone for e2e testing commit ${SHORT_SHA}"
+  - --dns-name=${_DNS_NAME}
+  - --visibility=public
+  timeout: 60s
+- name: 'google/cloud-sdk:latest'
+  id: Export zone records
+  waitFor: ['Create DNS managed zone', 'Cache cloud-sdk image']
+  args:
+  - gcloud
+  - dns
+  - record-sets
+  - export
+  - --zone=${_MANAGED_ZONE_NAME}
+  - --zone-file-format
+  - ${_MANAGED_ZONE_NAME}.zonefile
+- name: 'alpine'
+  id: Remove SOA record
+  waitFor: ['Export zone records']
+  entrypoint: /bin/ash
+  args:
+  - '-c'
+  - |
+    set -o errexit
+    set -o xtrace
+    grep -v SOA ${_MANAGED_ZONE_NAME}.zonefile > ${_MANAGED_ZONE_NAME}.zonefile.modified
+- name: 'google/cloud-sdk:latest'
+  id: Import NS records to top level
+  waitFor: ['Remove SOA record', 'Cache cloud-sdk image']
+  args:
+  - gcloud
+  - dns
+  - record-sets
+  - import
+  - --zone=${_TOP_LEVEL_ZONE_NAME}
+  - --zone-file-format
+  - ${_MANAGED_ZONE_NAME}.zonefile.modified
+- name: 'ubuntu:latest'
+  id: Setup Firebase config
+  waitFor: ['-']
+  entrypoint: /workspace/scripts/firebase-config-setup.sh
+  args:
+  - ${PROJECT_ID}
+  - ${_WEB_API_KEY}
+- name: 'google/cloud-sdk:latest'
+  id: make cluster
+  waitFor: ['Set up env.mk', 'Cache cloud-sdk image']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    make cluster || touch e2e-failed
+- name: 'google/cloud-sdk:latest'
+  id: make build-infrastructure
+  waitFor: ['make cluster']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    [ -e e2e_failed ] || make build-infrastructure || touch e2e-failed
+- name: 'google/cloud-sdk:latest'
+  id: make build-backend
+  waitFor: ['make build-infrastructure']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    [ -e e2e_failed ] || make build-backend || touch e2e-failed
+- name: 'google/cloud-sdk:latest'
+  id: make build-webui
+  waitFor: ['make build-infrastructure']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    [ -e e2e_failed ] || make build-webui || touch e2e-failed
+- name: 'google/cloud-sdk:latest'
+  id: make build-userservice
+  waitFor: ['make build-infrastructure']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    [ -e e2e_failed ] || make build-userservice || touch e2e-failed
+- name: 'launcher.gcr.io/google/ubuntu1604'
+  id: Wait for application to be reachable
+  waitFor: ['make build-backend', 'make build-webui', 'make build-userservice']
+  entrypoint: '/bin/bash'
+  args:
+  - -c
+  - |
+    set -o xtrace
+    [ ! -e e2e_failed ] || exit 0
+    ATTEMPTS=1
+    curl -svf https://${_DNS_NAME}
+    while [ $? -ne 0 ]
+    do
+      echo Attempt #$$ATTEMPTS
+      if [ "$$ATTEMPTS" -gt "10" ]
+      then
+        echo "ERROR: Could not load https://${_DNS_NAME} after $$ATTEMPTS attempts"
+        touch e2e-failed
+      fi
+      sleep 10s
+      ATTEMPTS=$((ATTEMPTS + 1))
+      curl -svf -m 30 https://${_DNS_NAME}
+    done
+- name: 'google/cloud-sdk:latest'
+  id: Run e2e tests
+  waitFor: ['Wait for application to be reachable']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    set -o xtrace
+    [ -e e2e_failed ] || make test-webui-e2e || touch e2e-failed
+- name: 'google/cloud-sdk:latest'
+  id: Cleanup
+  waitFor: ['Run e2e tests']
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    set -o xtrace
+    make delete || touch cleanup-failed
+    make delete-cluster || touch cleanup-failed
+    gcloud compute ssl-certificates delete --quiet ${_SSL_CERT_NAME} || touch cleanup-failed
+    gcloud dns managed-zones delete --quiet ${_MANAGED_ZONE_NAME} || touch cleanup-failed
+- name: 'alpine'
+  id: Set build status
+  waitFor: ["Cleanup"]
+  entrypoint: /bin/ash
+  args:
+  - -c
+  - |
+    if [ -e e2e-failed ]
+    then
+      echo "Build failed!"
+      exit 1
+    fi
+
+    if [ -e cleanup-failed ]
+    then
+      echo "Build succeeded but cleanup failed!"
+      exit 1
+    fi
+timeout: 6000s # set an absurdly high timeout and rely on timeouts for individual stages
+substitutions:
+  _BUILD_ID_SHORT: ${BUILD_ID:0:6}
+  _DNS_NAME: e2e-test-${_BUILD_ID_SHORT}.thisisatest.app
+  _MANAGED_ZONE_NAME: e2e-test-${_BUILD_ID_SHORT}-zone
+  _TOP_LEVEL_ZONE_NAME: thisisatest-app
+  _WEB_API_KEY: AIzaSyAUP41pKXJxtpn77GTX0fX-DR-TgnXAxQA
+  _SSL_CERT_NAME: e2e-test-${_BUILD_ID_SHORT}-ssl-certificate

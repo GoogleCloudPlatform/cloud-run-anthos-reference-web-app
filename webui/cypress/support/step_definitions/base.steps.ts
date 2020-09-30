@@ -71,7 +71,7 @@ When ('I click on link {string}', async (name) => {
 });
 
 
-When ('I click on the plus icon button and wait', async () => {
+When ('I click on the plus icon button', async () => {
   cy.get('button mat-icon').click();
 });
 

@@ -26,13 +26,13 @@ steps:
   id: Create Cluster
   waitFor: ['-']
   args: [
-    'beta', 'container', 'clusters', 'create', '${_CLUSTER_NAME}',
+    'container', 'clusters', 'create', '${_CLUSTER_NAME}',
     '--addons', 'HorizontalPodAutoscaling,HttpLoadBalancing,CloudRun',
     '--machine-type', 'e2-standard-4',
     '--num-nodes', '3',
     '--cluster-version', '${_CLUSTER_GKE_VERSION}',
     '--enable-stackdriver-kubernetes',
-    '--identity-namespace', '${PROJECT_ID}.svc.id.goog',
+    '--workload-pool', '${PROJECT_ID}.svc.id.goog',
     '--enable-ip-alias',
     '--zone', '${_CLUSTER_LOCATION}'
   ]
@@ -133,11 +133,27 @@ steps:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
     - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
 
+# Install Istio 1.5 on the cluster so we can use Istio Authorization Policies.
+# TODO(#97): Remove this step once CRfA comes bundled with Istio 1.5+
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: Install Istio 1.5
+  waitFor: ['Create Cluster','Process Manifest']
+  entrypoint: /bin/bash
+  args:
+  - '-c'
+  - |
+    kubectl apply -f https://raw.githubusercontent.com/knative/serving/release-0.15/third_party/istio-1.5.4/istio-crds.yaml
+    kubectl apply -f https://raw.githubusercontent.com/knative/serving/release-0.15/third_party/istio-1.5.4/istio-ci-mesh.yaml
+    kubectl wait -n istio-system pod --all --for=condition=Ready --timeout=5m
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
+
 # Add a Standalone NEG to the cluster ingress
 # See: https://cloud.google.com/kubernetes-engine/docs/how-to/standalone-neg
 - name: 'gcr.io/cloud-builders/kubectl'
   id: Create NEG
-  waitFor: ['Create Cluster']
+  waitFor: ['Create Cluster', 'Install Istio 1.5']
   args: ['annotate', '--overwrite', '--namespace=${_ISTIO_INGRESS_NAMESPACE}', 'service', '${_ISTIO_INGRESS_SERVICE}', 'cloud.google.com/neg={"exposed_ports": {"80":{}}}']
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=${_CLUSTER_LOCATION}'

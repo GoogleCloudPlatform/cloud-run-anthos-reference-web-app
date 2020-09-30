@@ -2,7 +2,8 @@
     "apiVersion": "compute.cnrm.cloud.google.com/v1beta1",
     "kind": "ComputeBackendService",
     "metadata": {
-        "name": "$[BACKEND_RESOURCE_NAME]"
+        "name": "$[BACKEND_RESOURCE_NAME]",
+        "namespace": "$[NAMESPACE]"
     },
     "spec": {
         "backend": [
@@ -17,7 +18,7 @@
         "healthChecks": [
             {
                 "healthCheckRef": {
-                    "name": "web-app-health-check"
+                    "name": "$[HEALTH_CHECK_NAME]"
                 }
             }
         ],

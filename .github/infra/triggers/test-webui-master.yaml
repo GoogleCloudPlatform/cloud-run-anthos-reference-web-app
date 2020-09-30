@@ -12,28 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "npm-audit-periodic"
+## Resource: https://cloud.google.com/cloud-build/docs/api/reference/rest/v1/projects.triggers#BuildTrigger
 
-on:
-  schedule:
-      - cron: '0 16 * * 1-5'
-jobs:
-
-  npm-audit-periodic:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
-      with:
-        node-version: '12.16.2'
-    - name: install dependencies
-      working-directory: ./webui
-      run: npm ci
-    - uses: oke-py/npm-audit-action@v1.5.1
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        dedupe_issues: true
-        working_directory: webui
-        issue_labels: vulnerability,p0
-        issue_assignees: adamdkane
+name: test-webui-main
+description: Test the UI components of the reference app on push to main
+filename: .github/infra/test-webui.yaml
+includedFiles:
+- webui/**
+- .github/infra/**
+github:
+    owner: GoogleCloudPlatform
+    name: cloud-run-anthos-reference-web-app
+    push:
+        branch: "^main$"

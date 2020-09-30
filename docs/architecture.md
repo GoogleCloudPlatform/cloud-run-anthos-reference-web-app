@@ -1,3 +1,5 @@
+**English** | [Español](architecture_sp.md)
+
 # Architecture
 
 ![high level architecture](./img/architecture-diagram.png)
@@ -26,13 +28,23 @@ A [forwarding rule][] provides the publicly-accessible IP address for incoming r
 The IP address of the forwarding rule is added to a [managed DNS zone][] for the
 desired domain.
 
-### Authentication
+### Authentication & Authorization
 
 ![authentication diagram](./img/authentication-diagram.png)
 
 Authentication is provided by [Identity Platform][], which issues
 a [JSON Web Token (JWT)][] on the frontend that gets passed through
 on subsequent requests and gets [validated by the Istio ingress][].
+
+[Istio Authorization Policies][] enable access control to ensure certain
+operations are only accessible by certain users. Namely, there are policies to
+ensure:
+
+- Access is denied to users without a token
+- All roles are authorized to issue `GET` requests to the `/api` endpoint
+- Workers are authorized to create inventory transactions
+- Admins are authorized to all operations, including the creation and deletion
+ of items, locations, etc.
 
 ## Build & Infrastructure
 
@@ -51,12 +63,10 @@ generated off of the [OpenAPI spec][]. This way, changes to the API
 surface are automatically picked up by both the client and server
 on the next build.
 
-[high level architecture]: ./high-level-diagram.svg
 [Angular]: https://angular.io/
 [hosted in Google Cloud Storage]: https://cloud.google.com/storage/docs/hosting-static-website
 [Cloud Run]: https://cloud.google.com/run/docs/gke/setup
 [Cloud Firestore]: https://cloud.google.com/firestore
-[networking diagram]: ./networking-diagram.svg
 [Cloud Config Connector]: https://cloud.google.com/config-connector/docs/overview
 [infrastructure-tpl.yaml]: ../infrastructure-tpl.yaml
 [backend-service-template.jq]: ../backend-service-template.jq
@@ -67,10 +77,9 @@ on the next build.
 [forwarding rule]: https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts
 [managed DNS zone]: https://cloud.google.com/dns/docs/overview#dns-managed-zones
 [generated automatically]: https://cloud.google.com/load-balancing/docs/ssl-certificates/google-managed-certs
-[authentication diagram]: ./authentication-diagram.svg
 [Identity Platform]: https://cloud.google.com/identity-platform
 [JSON Web Token (JWT)]: https://tools.ietf.org/html/rfc7519
 [validated by the Istio ingress]: https://cloud.google.com/solutions/authenticating-cloud-run-on-gke-end-users-using-istio-and-identity-platform
-[build diagram]: ./build-diagram.svg
 [OpenAPI spec]: ../openapi.yaml
 [By default]: ../infrastructure-tpl.yaml#L93
+[Istio Authorization Policies]: https://archive.istio.io/v1.5/docs/reference/config/security/authorization-policy/

@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "start": "node dist/index.js",
     "check": "gts check",
     "clean": "gts clean",
@@ -27,9 +28,13 @@
     "@types/multer": "^1.4.3",
     "@types/swagger-ui-express": "^4.1.2",
     "@types/yamljs": "^0.2.31",
+    "npm-force-resolutions": "0.0.3",
     "tslint": "^6.1.2",
     "typescript": "^3.8.3",
     "gts": "^2.0.2",
     "@types/node": "^13.11.1"
+  },
+  "resolutions": {
+    "node-forge": ">=0.10.0"
   }
 }

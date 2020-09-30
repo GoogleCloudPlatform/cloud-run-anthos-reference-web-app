@@ -1,0 +1,62 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+## This Cloud Build script is used to run the webui unit tests and upload
+## the coverage report to codecov
+
+steps:
+- name: gcr.io/cloud-builders/gcloud
+  id: Test
+  waitFor: ['-']
+  args:
+  - builds
+  - submit
+  - --machine-type=n1-highcpu-32
+  - --verbosity=info
+  - --config=./webui/cloudbuild-test.yaml
+  - --substitutions=_ARTIFACTS_LOCATION=${_ARTIFACTS_LOCATION}
+- name: gcr.io/cloud-builders/gsutil
+  id: Download coverage report
+  waitFor: ['Test']
+  args: ['cp','${_ARTIFACTS_LOCATION}/lcov.info','.']
+- name: gcr.io/cloud-builders/gcloud
+  id: Get codecov token
+  waitFor: ['-']
+  entrypoint: 'bash'
+  args: [ '-c', 'gcloud secrets versions access latest --secret=codecov-token > /workspace/codecov-token.txt' ]
+- name: node:12.16
+  id: npm ci
+  waitFor: ['-']
+  dir: 'webui'
+  entrypoint: npm
+  args: ['ci']
+- name: node:12.16
+  id: Upload coverage report
+  waitFor: ['Download coverage report', 'Get codecov token', 'npm ci']
+  dir: 'webui'
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - |
+    TOKEN=$$(</workspace/codecov-token.txt)
+    npm run report-coverage -- \
+      --disable=detect \
+      --commit=${COMMIT_SHA} \
+      --branch=${BRANCH_NAME} \
+      --token=$${TOKEN} \
+      --yml=/workspace/.github/infra/codecov.yml \
+      --file=/workspace/lcov.info
+substitutions:
+  _BUILD_ID_SHORT: ${BUILD_ID:0:6}
+  _ARTIFACTS_LOCATION: gs://crfa-reference-web-app-infra-test-artifacts/${BUILD_ID}

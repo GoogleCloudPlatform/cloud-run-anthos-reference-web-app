@@ -60,7 +60,8 @@ USER_SVC_SUBS = $(CLUSTER_ARGS) \
 	_USER_SVC_KSA=$(USER_SVC_KSA) \
 	_USER_SVC_NAME=$(USER_SVC_NAME) \
 
-FRONTEND_E2E_SUBS = _DOMAIN=$(DOMAIN)
+FRONTEND_E2E_SUBS = _DOMAIN=$(DOMAIN) \
+	_ARTIFACTS_LOCATION=$(TEST_ARTIFACTS_LOCATION)
 
 # cloudbuild.yaml
 INFRA_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
@@ -87,6 +88,13 @@ EVENTING_TRIGGERS_SUBS = $(CLUSTER_ARGS) \
 # webui/cloudbuild.yaml
 WEBUI_SUBS = _DOMAIN=$(DOMAIN)
 
+# webui/cloudbuild-test.yaml
+TEST_WEBUI_SUBS = _ARTIFACTS_LOCATION=$(TEST_ARTIFACTS_LOCATION)
+
+ISTIO_AUTH_TEST_SUBS = $(ISTIO_ARGS) \
+	_CLUSTER_LOCATION=$(CLUSTER_LOCATION) \
+	_CLUSTER_NAME=$(CLUSTER_NAME)
+
 # Comma separate substitution args
 comma := ,
 empty :=
@@ -104,7 +112,7 @@ OPENAPI_GEN_GO_CLIENT_ARGS=-g go -i openapi.yaml -o backend/api-client --package
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
 
-.PHONY: clean delete run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local build-webui test-webui build-backend build-infrastructure build-all test cluster
+.PHONY: clean delete delete-cluster run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local test-istio-auth-local build-webui test-webui test-istio-auth build-backend build-infrastructure build-all test cluster jq
 # Build eventing
 .PHONY: build-eventing build-eventing-triggers run-local-inventory-state-service run-local-inventory-level-monitor-service run-local-inventory-balance-monitor-service build-inventory-state-service build-inventory-level-monitor-service build-inventory-balance-monitor-service
 # Test eventing
@@ -155,6 +163,9 @@ lint-webui: webui/node_modules
 
 lint: lint-webui
 
+jq:
+	@which jq > /dev/null || (echo "'jq' needs to be installed for this target to run. It can be downloaded from https://stedolan.github.io/jq/." && exit 1)
+
 test-backend-local: backend/api-service/src/api/openapi.yaml
 	docker stop firestore-emulator 2>/dev/null || true
 	docker run --detach --rm -p 9090:9090 --name=firestore-emulator google/cloud-sdk:292.0.0 sh -c \
@@ -172,14 +183,27 @@ test-inventory-level-monitor-service-local: backend/api-client/openapi.yaml
 test-inventory-balance-monitor-service-local: backend/api-client/openapi.yaml
 	cd backend/inventory-balance-monitor-service/src && go test -v
 
-test-webui-local: webui/api-client webui/node_modules
+FIREBASE_SA=$(shell gcloud --project=$(PROJECT_ID) iam service-accounts list --filter="displayName=firebase-adminsdk" --format="value(email)")
+test-istio-auth-local: jq
+	gcloud --project=$(PROJECT_ID) iam service-accounts keys create --iam-account=$(FIREBASE_SA) \
+		/tmp/istio-auth-test-key.json
+	cd istio-auth && API_KEY=$$(grep apiKey ../webui/firebaseConfig.ts | cut -d "'" -f2) \
+		HOST_IP=$$(kubectl -n $(ISTIO_INGRESS_NAMESPACE) get service $(ISTIO_INGRESS_SERVICE) -o jsonpath='{.status.loadBalancer.ingress[0].ip}') \
+		GOOGLE_APPLICATION_CREDENTIALS=/tmp/istio-auth-test-key.json \
+		go test -v || touch /tmp/istio-auth-test.failed
+	gcloud --project=$(PROJECT_ID) -q iam service-accounts keys delete --iam-account=$(FIREBASE_SA) \
+		$$(jq -r .private_key_id /tmp/istio-auth-test-key.json)
+	rm /tmp/istio-auth-test-key.json
+	! rm /tmp/istio-auth-test.failed 2>/dev/null
+
+test-webui-local: webui/api-client webui/user-svc-client webui/node_modules
 	cd webui && npm run test -- --watch=false --browsers=ChromeHeadless
 
-test-webui-e2e-local: webui/api-client webui/node_modules
-	cd webui && npm run e2e -e TAGS=$(WEBUI_E2E_TEST_TAGS)
+test-webui-e2e-local: webui/api-client webui/user-svc-client webui/node_modules
+	cd webui && npm run e2e
 
-test-webui-e2e-prod: webui/api-client webui/node_modules
-	cd webui && npm run e2e -- --headless --config baseUrl=https://${DOMAIN} -e TAGS=$(WEBUI_E2E_TEST_TAGS)
+test-webui-e2e-prod: webui/api-client webui/user-svc-client webui/node_modules
+	cd webui && npm run e2e -- --headless --config baseUrl=https://${DOMAIN}
 
 ## RULES FOR CLOUD DEVELOPMENT
 GCLOUD_BUILD=gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --verbosity=info .
@@ -191,8 +215,11 @@ cluster:
 	  gcloud --project=$(PROJECT_ID) container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION); \
 	fi
 
+delete-cluster:
+	gcloud --project=$(PROJECT_ID) container clusters delete $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) --quiet
+
 delete:
-	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=delete,$(call join_subs,$(INFRA_SUBS))
+	kubectl delete ns/$(NAMESPACE) --cascade=true
 
 build-webui: cluster
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild.yaml --substitutions $(call join_subs,$(WEBUI_SUBS))
@@ -209,8 +236,11 @@ test-inventory-level-monitor-service:
 test-inventory-balance-monitor-service:
 	$(GCLOUD_BUILD) --config ./backend/inventory-balance-monitor-service/cloudbuild-test.yaml
 
+test-istio-auth:
+	$(GCLOUD_BUILD) --config ./istio-auth/cloudbuild-test.yaml --substitutions $(call join_subs,$(ISTIO_AUTH_TEST_SUBS))
+
 test-webui:
-	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml
+	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml --substitutions $(call join_subs,$(TEST_WEBUI_SUBS))
 
 test-webui-e2e:
 	$(GCLOUD_BUILD) --config ./webui/cypress/cloudbuild.yaml --substitutions $(call join_subs,$(FRONTEND_E2E_SUBS)),_WEBUI_E2E_TEST_TAGS=$(WEBUI_E2E_TEST_TAGS)
@@ -250,7 +280,7 @@ test-eventing:
 endif
 
 build-infrastructure: cluster
-	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions _APPLY_OR_DELETE=apply,$(call join_subs,$(INFRA_SUBS))
+	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions $(call join_subs,$(INFRA_SUBS))
 
 build-infra: build-infrastructure
 
