@@ -16,7 +16,7 @@
 
 import { Then, When } from 'cypress-cucumber-preprocessor/steps';
 import { BasePage } from '../../pages/base.po';
-import { testItem, testLocation } from '../../data.config';
+import { testItem } from '../../data.config';
 
 const page = new BasePage();
 
@@ -33,7 +33,7 @@ Then('I should see the latest alert is for test item contains {string}', async (
 
 When('I dismiss the latest alert', async (alertText) => {
   const firstRowSelector = 'table[data-testid="alerts"] tbody tr:first-child';
-  cy.get(firstRowSelector + ' td.mat-column-actions button').click()
+  cy.get(firstRowSelector + ' td.mat-column-actions button').click();
   cy.wait('@alertDelete');
 });
 

@@ -132,5 +132,5 @@ When ('I select test location', async () => {
 });
 
 When('I wait {int} seconds', async (seconds) =>  {
-  cy.wait(seconds * 1000)
+  cy.wait(seconds * 1000);
 });

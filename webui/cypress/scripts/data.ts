@@ -36,8 +36,8 @@ const ensureDocByName = async (collection: string, entry: any, key: string) => {
   } else {
     console.log(`Test data [${entry.Name}] found, checking stale data.`);
     for (const doc of querySnapshot.docs) {
-      await cleanupDoc('inventoryTransactions', key, doc.id)
-      await cleanupDoc('alerts', key, doc.id)
+      await cleanupDoc('inventoryTransactions', key, doc.id);
+      await cleanupDoc('alerts', key, doc.id);
     }
   }
 };
@@ -45,10 +45,10 @@ const ensureDocByName = async (collection: string, entry: any, key: string) => {
 const cleanupDocByName = async (collection: string, entry: any, key: string) => {
   const querySnapshot = await admin.firestore().collection(collection).where('Name', '==', entry.Name).get();
   if (!querySnapshot.empty) {
-    console.log(`Test data [${entry.Name}] found, checking stale data.`)
+    console.log(`Test data [${entry.Name}] found, checking stale data.`);
     for (const doc of querySnapshot.docs) {
-      await cleanupDoc('inventoryTransactions', key, doc.id)
-      await cleanupDoc('alerts', key, doc.id)
+      await cleanupDoc('inventoryTransactions', key, doc.id);
+      await cleanupDoc('alerts', key, doc.id);
       await doc.ref.delete();
     }
   }
@@ -59,7 +59,7 @@ const cleanupDoc = async (collection: string, filterKey: string, filterValue: st
   if (!qs.empty) {
     console.log(`Found ${qs.docs.length} entries in ${collection}, cleaning up.`);
     for (const doc of qs.docs) {
-      await doc.ref.delete()
+      await doc.ref.delete();
     }
   }
 };
