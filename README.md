@@ -63,7 +63,7 @@ This script:
    * This will create an OAuth 2.0 Client ID that can be used by the web application.
    * This additionally creates a Firebase project where Cloud Firestore can be used.
 
-1. Whitelist your custom domain in Identity Platform.
+1. Authorize your custom domain in Identity Platform.
    * In the GCP console, navigate to [Identity Platform > Settings][].
    * Click on the **Security** tab.
    * Add your custom domain under **Authorized Domains**.
