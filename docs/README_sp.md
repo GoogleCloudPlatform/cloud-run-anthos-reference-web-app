@@ -71,7 +71,7 @@ El shell script:
    * Adicionalmente, creará un proyecto de Firebase donde Cloud Firestore puede
      ser utilizado.
 
-1. Incluir en el Whitelist su dominio personalizado en Identity Platform.
+1. Autorizar su dominio personalizado en Identity Platform.
    * En la consola de GCP, navegue a
      [Identity Platform > Ajustes][Identity Platform > Settings].
    * Haga clic en la pestaña de **Seguridad**.
