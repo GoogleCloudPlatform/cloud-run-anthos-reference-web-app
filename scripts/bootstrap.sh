@@ -60,12 +60,18 @@ gcloud --project "${PROJECT_ID}" services enable {cloudbuild,container,cloudreso
 # Firebase Auth Admin, roles/firebaseauth.admin
 
 echo "Granting Cloud Build service account permissions ..."
-for role in iam.serviceAccount{Admin,TokenCreator,User} container.admin resourcemanager.projectIamAdmin compute.{loadBalancer,network,security}Admin firebaseauth.admin datastore.user; do
+for role in run.admin iam.serviceAccount{Admin,TokenCreator,User} container.admin resourcemanager.projectIamAdmin compute.{loadBalancer,network,security}Admin firebaseauth.admin datastore.user; do
   gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
   --member serviceAccount:"${PROJECT_NUMBER}"@cloudbuild.gserviceaccount.com \
   --role roles/"${role}" \
   > /dev/null & progress_indicator $!
 done
+
+# Grant the IAM Service Account User role to the Cloud Build service account on the Cloud Run runtime service account
+gcloud iam service-accounts add-iam-policy-binding \
+  ${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
+  --member serviceAccount:"${PROJECT_NUMBER}"@cloudbuild.gserviceaccount.com \
+  --role "roles/iam.serviceAccountUser"
 
 # Create env.mk if not present
 if [[ ! -f "${ENV_MK}" ]]; then

@@ -13,18 +13,22 @@ CLUSTER_ARGS = \
 	_CLUSTER_NAME=$(CLUSTER_NAME) \
 	_NAMESPACE=$(NAMESPACE)
 
+CR_ARGS = \
+	_CR_REGION=$(CR_REGION)
+
+
 # Shared istio substitution args
 ISTIO_ARGS = \
 	_ISTIO_INGRESS_NAMESPACE=$(ISTIO_INGRESS_NAMESPACE) \
 	_ISTIO_INGRESS_SERVICE=$(ISTIO_INGRESS_SERVICE)
 
 # backend/cloudbuild.yaml
-BACKEND_SUBS = $(CLUSTER_ARGS) \
+BACKEND_SUBS = $(CR_ARGS) \
 	_BACKEND_IMAGE_NAME=$(BACKEND_IMAGE_NAME) \
-	_BACKEND_KSA=$(BACKEND_KSA) \
 	_BACKEND_SERVICE_NAME=$(BACKEND_SERVICE_NAME) \
 	_GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
+	# _BACKEND_KSA=$(BACKEND_KSA) \
 
 BACKEND_TEST_SUBS = _GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
@@ -150,21 +154,21 @@ test-webui-e2e-prod: webui/api-client webui/user-svc-client webui/node_modules
 ## RULES FOR CLOUD DEVELOPMENT
 GCLOUD_BUILD=gcloud --project=$(PROJECT_ID) builds submit $(MACHINE_TYPE) --verbosity=info .
 
-cluster:
-	if ! gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; then \
-	  echo creating cluster $(CLUSTER_NAME); \
-	  $(GCLOUD_BUILD) --config cloudbuild-provision-cluster.yaml --substitutions $(call join_subs,$(PROVISION_SUBS)) && \
-	  gcloud --project=$(PROJECT_ID) container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION); \
-	fi
+# cluster:
+# 	if ! gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; then \
+# 	  echo creating cluster $(CLUSTER_NAME); \
+# 	  $(GCLOUD_BUILD) --config cloudbuild-provision-cluster.yaml --substitutions $(call join_subs,$(PROVISION_SUBS)) && \
+# 	  gcloud --project=$(PROJECT_ID) container clusters get-credentials $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION); \
+# 	fi
 
-delete-cluster:
-	gcloud --project=$(PROJECT_ID) container clusters delete $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) --quiet
+# delete-cluster:
+# 	gcloud --project=$(PROJECT_ID) container clusters delete $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) --quiet
 
 delete:
 	kubectl delete ns/$(NAMESPACE) --cascade=true
 
-build-webui: cluster
-	$(GCLOUD_BUILD) --config ./webui/cloudbuild.yaml --substitutions $(call join_subs,$(WEBUI_SUBS))
+build-webui: #cluster
+	$(GCLOUD_BUILD) --config ./webui/cloudbuild.yaml --substitutions $(call join_subs,$(WEBUI_SUBS)) --timeout=30m
 
 test-backend:
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild-test.yaml --substitutions $(call join_subs,$(BACKEND_TEST_SUBS))
@@ -178,14 +182,14 @@ test-webui:
 test-webui-e2e:
 	$(GCLOUD_BUILD) --config ./webui/cypress/cloudbuild.yaml --substitutions $(call join_subs,$(FRONTEND_E2E_SUBS))
 
-build-backend: cluster
+build-backend: #cluster
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild.yaml --substitutions $(call join_subs,$(BACKEND_SUBS))
 
-build-userservice: cluster
+build-userservice: #cluster
 	$(GCLOUD_BUILD) --config ./backend/user-service/cloudbuild.yaml --substitutions $(call join_subs,$(USER_SVC_SUBS))
 
-build-infrastructure: cluster
-	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions $(call join_subs,$(INFRA_SUBS))
+# build-infrastructure: cluster
+# 	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions $(call join_subs,$(INFRA_SUBS))
 
 build-infra: build-infrastructure
 

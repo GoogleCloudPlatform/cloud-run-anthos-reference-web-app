@@ -45,12 +45,9 @@ steps:
   id: Deploy
   args: ['gcloud', 'alpha', 'run', 'deploy', '${_BACKEND_SERVICE_NAME}',
          '--image', 'gcr.io/$PROJECT_ID/${_BACKEND_IMAGE_NAME}:${BUILD_ID}',
-         '--platform', 'gke',
-         '--cluster', '${_CLUSTER_NAME}',
-         '--cluster-location', '${_CLUSTER_LOCATION}',
-         '--connectivity', 'external',
-         '--namespace', '${_NAMESPACE}',
-         '--service-account', '${_BACKEND_KSA}',
+         '--platform', 'managed',
+         '--region', '${_CR_REGION}',
+        #  '--service-account', '${_BACKEND_KSA}',
          '--set-env-vars=PROJECT_ID=${PROJECT_ID}',
         ]
 images: ['gcr.io/$PROJECT_ID/${_BACKEND_IMAGE_NAME}']
