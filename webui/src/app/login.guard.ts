@@ -41,42 +41,43 @@ export class LoginGuard implements CanActivate {
   }
 
   canActivate( next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-    return (this.afAuth.user.pipe(
-      mergeMap(user => {
-        if (!user) {
-          this.router.navigate(['/login'], { queryParams: { returnUrl: state.url }});
-          this.snackBar.open('Please login first', '', { duration: 2000, });
-          return of(false);
-        }
+    return true;
+    // return (this.afAuth.user.pipe(
+    //   mergeMap(user => {
+    //     if (!user) {
+    //       this.router.navigate(['/login'], { queryParams: { returnUrl: state.url }});
+    //       this.snackBar.open('Please login first', '', { duration: 2000, });
+    //       return of(false);
+    //     }
 
-        return forkJoin({
-          idTokenResult: from(user.getIdTokenResult()),
-          idToken: from(user.getIdToken())
-        }).pipe(
-          map( ({idToken, idTokenResult}) => {
-            if (!idToken) {
-              this.router.navigate(['/login'], { queryParams: { returnUrl: state.url }});
-              this.snackBar.open('Failed to retrieve user token.', '', { duration: 5000, });
-              return false;
-            }
-            if (idTokenResult && idTokenResult.claims.role) {
-              this.userRole = idTokenResult.claims.role;
-            }
-            if (next.data.roles && next.data.roles.indexOf(this.userRole) < 0) {
-              this.snackBar.open(`You don't have permission to go there.`, '', { duration: 5000, });
-              return false;
-            }
-            const headers = new HttpHeaders({
-              Authorization: 'Bearer ' + idToken,
-            });
+    //     return forkJoin({
+    //       idTokenResult: from(user.getIdTokenResult()),
+    //       idToken: from(user.getIdToken())
+    //     }).pipe(
+    //       map( ({idToken, idTokenResult}) => {
+    //         if (!idToken) {
+    //           this.router.navigate(['/login'], { queryParams: { returnUrl: state.url }});
+    //           this.snackBar.open('Failed to retrieve user token.', '', { duration: 5000, });
+    //           return false;
+    //         }
+    //         if (idTokenResult && idTokenResult.claims.role) {
+    //           this.userRole = idTokenResult.claims.role;
+    //         }
+    //         if (next.data.roles && next.data.roles.indexOf(this.userRole) < 0) {
+    //           this.snackBar.open(`You don't have permission to go there.`, '', { duration: 5000, });
+    //           return false;
+    //         }
+    //         const headers = new HttpHeaders({
+    //           Authorization: 'Bearer ' + idToken,
+    //         });
 
-            this.inventoryService.defaultHeaders = headers;
-            this.userService.defaultHeaders = headers;
-            return true;
-          })
-        );
-      })
-    ));
+    //         this.inventoryService.defaultHeaders = headers;
+    //         this.userService.defaultHeaders = headers;
+    //         return true;
+    //       })
+    //     );
+    //   })
+    // ));
   }
 
 }
