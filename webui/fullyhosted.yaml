@@ -1,0 +1,7 @@
+
+# Create GCS Bucket
+# will fail for existing buckets.
+- name: 'gcr.io/cloud-builders/gsutil'
+  id: Download Config Connector
+  waitFor: ['-']
+  args: ['mb', 'gs://${_DOMAIN}']

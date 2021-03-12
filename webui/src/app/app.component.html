@@ -22,7 +22,8 @@
 
   <span class="filler"></span>
 
-  <span *ngIf="afAuth.user | async as user; else showLogin">
+  <button id="googleBtn">Login</button>
+  <!-- <span *ngIf="afAuth.user | async as user; else showLogin">
     <mat-menu #userMenu="matMenu">
       <button mat-menu-item (click)="signOut()">Sign out</button>
     </mat-menu>
@@ -37,6 +38,6 @@
   </span>
   <ng-template #showLogin>
     <ngx-auth-firebaseui-providers layout="row" theme="fab" providers="['google']"></ngx-auth-firebaseui-providers>
-  </ng-template>
+  </ng-template> -->
 </mat-toolbar>
 <router-outlet></router-outlet>

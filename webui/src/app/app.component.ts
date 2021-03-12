@@ -18,7 +18,11 @@ import { Component, OnInit } from '@angular/core';
 
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AuthProcessService } from 'ngx-auth-firebaseui';
+import { InventoryService } from 'api-client';
+import { HttpHeaders } from '@angular/common/http';
+import { firebaseConfig } from '../../firebaseConfig';
 
+declare const gapi: any;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -28,10 +32,12 @@ export class AppComponent implements OnInit {
   title = 'CRfA Canonical Web App';
 
   private photoUrl: string | null = null;
+  public auth2: any;
 
   constructor(
     public afAuth: AngularFireAuth,
     public authProcess: AuthProcessService,
+    private inventoryService: InventoryService,
   ) {
   }
 
@@ -50,5 +56,41 @@ export class AppComponent implements OnInit {
   signOut() {
     this.authProcess.signOut()
       .catch(e => console.error('An error happened while signing out!', e));
+  }
+
+  googleInit() {
+    gapi.load('auth2', () => {
+      this.auth2 = gapi.auth2.init({
+        client_id: firebaseConfig.clientId,
+        cookiepolicy: 'single_host_origin',
+        scope: 'profile email'
+      });
+      this.attachSignin(document.getElementById('googleBtn'));
+    });
+  }
+  attachSignin(element: any) {
+    this.auth2.attachClickHandler(element, {},
+      (googleUser: any) => {
+
+        let profile = googleUser.getBasicProfile();
+        console.log('Token || ' + googleUser.getAuthResponse().id_token);
+        console.log('ID: ' + profile.getId());
+        console.log('Name: ' + profile.getName());
+        console.log('Image URL: ' + profile.getImageUrl());
+        console.log('Email: ' + profile.getEmail());
+        //YOUR CODE HERE
+
+        const headers = new HttpHeaders({
+          Authorization: 'Bearer ' + googleUser.getAuthResponse().id_token,
+        });
+
+        this.inventoryService.defaultHeaders = headers;
+
+      }, (error: any) => {
+        alert(JSON.stringify(error, undefined, 2));
+      });
+  }
+  ngAfterViewInit(){
+    this.googleInit();
   }
 }
