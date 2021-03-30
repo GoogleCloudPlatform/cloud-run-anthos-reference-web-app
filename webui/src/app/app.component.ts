@@ -19,7 +19,7 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AuthProcessService } from 'ngx-auth-firebaseui';
 
-import { User } from `@firebase/auth-types`;
+import { firebase } from `firebase/app`;
 
 @Component({
   selector: 'app-root',
@@ -38,7 +38,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.afAuth.onAuthStateChanged((u: User | null) => {
+    this.afAuth.onAuthStateChanged((u: firebase.User | null) => {
       if (u) {
         this.photoUrl = u.photoURL;
       }
