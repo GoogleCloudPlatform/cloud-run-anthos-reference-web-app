@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ItemViewComponent } from './item-view.component';
 import { InventoryTransactionsComponent } from '../inventory-transactions/inventory-transactions.component';
@@ -32,7 +32,7 @@ describe('ItemViewComponent', () => {
   let component: ItemViewComponent;
   let fixture: ComponentFixture<ItemViewComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ItemViewComponent, InventoryTransactionsComponent, MockAllowedDirective ],
       imports: [

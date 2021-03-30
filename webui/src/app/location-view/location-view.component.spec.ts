@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { LocationViewComponent } from './location-view.component';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -32,7 +32,7 @@ describe('LocationViewComponent', () => {
   let component: LocationViewComponent;
   let fixture: ComponentFixture<LocationViewComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ LocationViewComponent, InventoryTransactionsComponent, MockAllowedDirective ],
       imports: [

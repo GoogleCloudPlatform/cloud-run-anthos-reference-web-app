@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { InventoryTransactionDialogComponent } from './inventory-transaction-dialog.component';
 
@@ -34,7 +34,7 @@ describe('InventoryTransactionDialogComponent', () => {
   let component: InventoryTransactionDialogComponent;
   let fixture: ComponentFixture<InventoryTransactionDialogComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ InventoryTransactionDialogComponent ],
       imports: [
