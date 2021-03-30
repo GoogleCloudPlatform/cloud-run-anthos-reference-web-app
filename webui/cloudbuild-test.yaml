@@ -21,12 +21,12 @@ steps:
   entrypoint: /bin/cp
   args: ['./webui/firebaseConfig.sample.ts', './webui/firebaseConfig.ts']
 # generate OpenAPI client
-- name: openapitools/openapi-generator-cli:v4.2.3
+- name: openapitools/openapi-generator-cli:v5.1.0
   id: Generate Client
   waitFor: ['-']
   args: ['generate', '-g','typescript-angular','-i','openapi.yaml','-o','webui/api-client']
 # generate User Service client
-- name: openapitools/openapi-generator-cli:v4.2.3
+- name: openapitools/openapi-generator-cli:v5.1.0
   id: Generate User Service Client
   waitFor: ['-']
   args: ['generate', '-g','typescript-angular','-i','backend/user-service/user-api.yaml','-o','webui/user-svc-client']

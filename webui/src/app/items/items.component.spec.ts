@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ItemsComponent } from './items.component';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -42,7 +42,7 @@ describe('ItemsComponent', () => {
       => Observable<Array<Item>>
   >;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ItemsComponent, DummyComponent, MockAllowedDirective ],
       imports: [
@@ -114,7 +114,7 @@ describe('ItemsComponent', () => {
     });
   });
 
-  it('should navigate to create page', async(() => {
+  it('should navigate to create page', waitForAsync(() => {
     const button = fixture.debugElement.nativeElement.querySelector('button.create-btn');
     button.click();
 
@@ -123,7 +123,7 @@ describe('ItemsComponent', () => {
     });
   }));
 
-  it('should navigate to item page', async(() => {
+  it('should navigate to item page', waitForAsync(() => {
     listItemSpy = spyOn(inventoryService, 'listItems');
     listItemSpy.and.returnValue(of([{ name: 'test0', id: 'id-0', description: 'desc-0' }]));
     initComponent();

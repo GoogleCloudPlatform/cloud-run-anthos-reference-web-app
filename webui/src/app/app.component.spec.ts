@@ -15,7 +15,7 @@
  */
 
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { AppComponent } from './app.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -46,7 +46,7 @@ describe('AppComponent', () => {
 
   const onAuthStateChangedSpy = jasmine.createSpy('onAuthStateChanged', (cb: (u: any) => any) => {});
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ AppComponent ],
       imports: [
