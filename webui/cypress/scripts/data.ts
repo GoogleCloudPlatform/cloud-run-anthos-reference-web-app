@@ -23,40 +23,44 @@ export const ensureData = async () => {
   await ensureDocByName('locations', testLocation, 'LocationId');
 };
 
-const ensureDocByName = async (collection: string, entry: any, transactionKey: string) => {
+export const cleanupData = async () => {
+  await cleanupDocByName('items', testItem, 'ItemId');
+  await cleanupDocByName('locations', testLocation, 'LocationId');
+};
+
+const ensureDocByName = async (collection: string, entry: any, key: string) => {
   const querySnapshot = await admin.firestore().collection(collection).where('Name', '==', entry.Name).get();
   if (querySnapshot.empty) {
     const newEntry = await admin.firestore().collection(collection).add(entry);
     await newEntry.set({...entry, Id: newEntry.id});
   } else {
     console.log(`Test data [${entry.Name}] found, checking stale data.`);
-    querySnapshot.forEach(async (doc) => {
-      await cleanupTransaction(transactionKey, doc.id);
-    });
+    for (const doc of querySnapshot.docs) {
+      await cleanupDoc('inventoryTransactions', key, doc.id);
+      await cleanupDoc('alerts', key, doc.id);
+    }
   }
 };
 
-const cleanupDocByName = async (collection: string, entry: any, transactionKey: string) => {
+const cleanupDocByName = async (collection: string, entry: any, key: string) => {
   const querySnapshot = await admin.firestore().collection(collection).where('Name', '==', entry.Name).get();
   if (!querySnapshot.empty) {
     console.log(`Test data [${entry.Name}] found, checking stale data.`);
-    return querySnapshot.forEach(async (doc) => {
-      await cleanupTransaction(transactionKey, doc.id);
+    for (const doc of querySnapshot.docs) {
+      await cleanupDoc('inventoryTransactions', key, doc.id);
+      await cleanupDoc('alerts', key, doc.id);
       await doc.ref.delete();
-    });
+    }
   }
 };
 
-const cleanupTransaction = async (transactionKey: string, id: string) => {
-  const qs = await admin.firestore().collection('inventoryTransactions').where(transactionKey, '==', id).get();
+const cleanupDoc = async (collection: string, filterKey: string, filterValue: string) => {
+  const qs = await admin.firestore().collection(collection).where(filterKey, '==', filterValue).get();
   if (!qs.empty) {
-    console.log(`Found ${qs.docs.length} transaction, cleaning up.`);
-    qs.forEach(async (t) => await t.ref.delete());
+    console.log(`Found ${qs.docs.length} entries in ${collection}, cleaning up.`);
+    for (const doc of qs.docs) {
+      await doc.ref.delete();
+    }
   }
-};
-
-export const cleanupData = async () => {
-  await cleanupDocByName('items', testItem, 'ItemId');
-  await cleanupDocByName('locations', testLocation, 'LocationId');
 };
 

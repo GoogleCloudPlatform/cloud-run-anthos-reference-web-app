@@ -19,7 +19,7 @@ import { TestBed, inject } from '@angular/core/testing';
 import { LoginGuard } from './login.guard';
 import { HttpHeaders } from '@angular/common/http';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { InventoryService } from 'api-client';
+import { AlertService, InventoryService } from 'api-client';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -46,6 +46,12 @@ describe('LoginGuard', () => {
     constructor() {}
   }
 
+  class AlertServiceMock {
+    public defaultHeaders = new HttpHeaders();
+
+    constructor() {}
+  }
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -62,6 +68,10 @@ describe('LoginGuard', () => {
         {
           provide: InventoryService,
           useClass: InventoryServiceMock,
+        },
+        {
+          provide: AlertService,
+          useClass: AlertServiceMock,
         }
       ]
     });

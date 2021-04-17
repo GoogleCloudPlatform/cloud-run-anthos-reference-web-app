@@ -55,6 +55,7 @@ import { LocationViewComponent } from './location-view/location-view.component';
 import { InventoryTransactionDialogComponent } from './inventory-transaction-dialog/inventory-transaction-dialog.component';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
+import { AlertsComponent } from './alerts/alerts.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { AllowedDirective } from './allowed.directive';
 
@@ -83,6 +84,7 @@ export function appNameFactory() {
     InventoryTransactionDialogComponent,
     HomeComponent,
     LoginComponent,
+    AlertsComponent,
     AllowedDirective,
   ],
   entryComponents: [

@@ -12,46 +12,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-## The steps in this Cloud Build script build and deploy the backend service
-
+## The steps in this Cloud Build script build and deploy the inventory
+## MONITOR service.
 steps:
-# generate OpenAPI server
+# generate OpenAPI client
 - name: openapitools/openapi-generator-cli:v4.2.3
-  id: Generate Server
+  id: Generate Client
   args: ['generate',
-        '-g','go-server',
+        '-g','go',
         '-i','openapi.yaml',
-        '-o','backend/api-service',
-        '--additional-properties=sourceFolder=src',
-        '--api-name-suffix=',
-        '--git-user-id=${_GIT_USER_ID}',
-        '--git-repo-id=${_GIT_REPO_ID}/api-service',
-        '--package-name=service',
-        '-t', 'backend/templates']
-# build the backend Go service and deploy it to Cloud Run for Anthos
+        '-o','backend/api-client',
+        '--package-name=client']
 - name: 'mirror.gcr.io/library/golang'
   id: Go Build
   dir: 'backend/'
   env: ['GO111MODULE=on', 'CGO_ENABLED=0', 'GOOS=linux']
-  args: ['go','build','-mod=readonly', '-v', '-o', 'api-service/server', './api-service']
+  args: ['go','build','-mod=readonly', '-v', '-o', 'inventory-level-monitor-service/server', './inventory-level-monitor-service']
 - name: 'gcr.io/cloud-builders/docker'
   id: Build Docker Image
-  dir: 'backend/api-service/'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/${_BACKEND_IMAGE_NAME}:${BUILD_ID}', '.']
+  dir: 'backend/inventory-level-monitor-service/'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/${_INVENTORY_LEVEL_MONITOR_IMAGE_NAME}:${BUILD_ID}', '.']
 - name: 'gcr.io/cloud-builders/docker'
   id: Push
-  args: ['push', 'gcr.io/$PROJECT_ID/${_BACKEND_IMAGE_NAME}']
+  args: ['push', 'gcr.io/$PROJECT_ID/${_INVENTORY_LEVEL_MONITOR_IMAGE_NAME}']
 - name: 'google/cloud-sdk:latest'
   id: Deploy
-  args: ['gcloud', 'alpha', 'run', 'deploy', '${_BACKEND_SERVICE_NAME}',
-         '--image', 'gcr.io/$PROJECT_ID/${_BACKEND_IMAGE_NAME}:${BUILD_ID}',
+  args: ['gcloud', 'alpha', 'run', 'deploy', '${_INVENTORY_LEVEL_MONITOR_SERVICE_NAME}',
+         '--image', 'gcr.io/$PROJECT_ID/${_INVENTORY_LEVEL_MONITOR_IMAGE_NAME}:${BUILD_ID}',
          '--platform', 'gke',
          '--cluster', '${_CLUSTER_NAME}',
          '--cluster-location', '${_CLUSTER_LOCATION}',
-         '--connectivity', 'external',
          '--namespace', '${_NAMESPACE}',
-         '--service-account', '${_BACKEND_KSA}',
          '--set-env-vars=PROJECT_ID=${PROJECT_ID}',
-         '--args=-EVENTING_ENABLED=${_EVENTING_ENABLED},-EVENT_BROKER_HOSTNAME=${_EVENT_BROKER_HOSTNAME}'
+         '--args=-backend_cluster_host_name=${_BACKEND_CLUSTER_HOST_NAME}'
         ]
-images: ['gcr.io/$PROJECT_ID/${_BACKEND_IMAGE_NAME}']
+images: ['gcr.io/$PROJECT_ID/${_INVENTORY_LEVEL_MONITOR_IMAGE_NAME}']

@@ -7,6 +7,12 @@ ifdef CB_MACHINE_TYPE
 	MACHINE_TYPE=--machine-type=$(CB_MACHINE_TYPE)
 endif
 
+ifeq ($(EVENTING_ENABLED),true)
+WEBUI_E2E_TEST_TAGS="@core or @alerts"
+else
+WEBUI_E2E_TEST_TAGS="@core"
+endif
+
 # Shared cluster substitution args
 CLUSTER_ARGS = \
 	_CLUSTER_LOCATION=$(CLUSTER_LOCATION) \
@@ -23,8 +29,28 @@ BACKEND_SUBS = $(CLUSTER_ARGS) \
 	_BACKEND_IMAGE_NAME=$(BACKEND_IMAGE_NAME) \
 	_BACKEND_KSA=$(BACKEND_KSA) \
 	_BACKEND_SERVICE_NAME=$(BACKEND_SERVICE_NAME) \
+	_EVENT_BROKER_HOSTNAME=$(EVENT_BROKER_HOSTNAME) \
+	_EVENTING_ENABLED=$(EVENTING_ENABLED) \
 	_GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
+
+# backend/inventory-state-service/cloudbuild.yaml
+INVENTORY_STATE_SERVICE_SUBS = $(CLUSTER_ARGS) \
+	_INVENTORY_STATE_IMAGE_NAME=$(INVENTORY_STATE_IMAGE_NAME) \
+	_INVENTORY_STATE_SERVICE_NAME=$(INVENTORY_STATE_SERVICE_NAME) \
+	_BACKEND_CLUSTER_HOST_NAME=$(BACKEND_CLUSTER_HOST_NAME)
+
+# backend/inventory-level-monitor-service/cloudbuild.yaml
+INVENTORY_LEVEL_MONITOR_SERVICE_SUBS = $(CLUSTER_ARGS) \
+	_INVENTORY_LEVEL_MONITOR_IMAGE_NAME=$(INVENTORY_LEVEL_MONITOR_IMAGE_NAME) \
+	_INVENTORY_LEVEL_MONITOR_SERVICE_NAME=$(INVENTORY_LEVEL_MONITOR_SERVICE_NAME) \
+	_BACKEND_CLUSTER_HOST_NAME=$(BACKEND_CLUSTER_HOST_NAME)
+
+# backend/inventory-balance-monitor-service/cloudbuild.yaml
+INVENTORY_BALANCE_MONITOR_SERVICE_SUBS = $(CLUSTER_ARGS) \
+	_INVENTORY_BALANCE_MONITOR_IMAGE_NAME=$(INVENTORY_BALANCE_MONITOR_IMAGE_NAME) \
+	_INVENTORY_BALANCE_MONITOR_SERVICE_NAME=$(INVENTORY_BALANCE_MONITOR_SERVICE_NAME) \
+	_BACKEND_CLUSTER_HOST_NAME=$(BACKEND_CLUSTER_HOST_NAME)
 
 BACKEND_TEST_SUBS = _GIT_USER_ID=$(GIT_USER_ID) \
 	_GIT_REPO_ID=$(GIT_REPO_ID)
@@ -51,7 +77,14 @@ INFRA_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
 
 # cloudbuild-provision-cluster.yaml
 PROVISION_SUBS = $(CLUSTER_ARGS) $(ISTIO_ARGS) \
-	_CLUSTER_GKE_VERSION=$(CLUSTER_GKE_VERSION)
+	_CLUSTER_GKE_VERSION=$(CLUSTER_GKE_VERSION) \
+	_EVENTING_ENABLED=$(EVENTING_ENABLED) 
+
+# cloudbuild-eventing-triggers.yaml
+EVENTING_TRIGGERS_SUBS = $(CLUSTER_ARGS) \
+	_INVENTORY_STATE_SERVICE_NAME=$(INVENTORY_STATE_SERVICE_NAME) \
+	_INVENTORY_BALANCE_MONITOR_SERVICE_NAME=$(INVENTORY_BALANCE_MONITOR_SERVICE_NAME) \
+	_INVENTORY_LEVEL_MONITOR_IMAGE_NAME=$(INVENTORY_LEVEL_MONITOR_IMAGE_NAME)
 
 # webui/cloudbuild.yaml
 WEBUI_SUBS = _DOMAIN=$(DOMAIN)
@@ -74,12 +107,17 @@ CUSTOM_TEMPLATES=backend/templates
 OPENAPI_GEN_JAR=openapi-generator-cli-4.3.0.jar
 OPENAPI_GEN_URL="https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/4.3.0/$(OPENAPI_GEN_JAR)"
 OPENAPI_GEN_SERVER_ARGS=-g go-server -i openapi.yaml -o backend/api-service --api-name-suffix= --git-user-id=$(GIT_USER_ID) --git-repo-id=$(GIT_REPO_ID)/api-service --package-name=service -t $(CUSTOM_TEMPLATES) --additional-properties=sourceFolder=src
-OPENAPI_GEN_API_CLIENT_ARGS=-g typescript-angular -i openapi.yaml -o webui/api-client
-OPENAPI_GEN_USER_CLIENT_ARGS=-g typescript-angular -i backend/user-service/user-api.yaml -o webui/user-svc-client
+OPENAPI_GEN_TYPESCRIPT_CLIENT_ARGS=-g typescript-angular -i openapi.yaml -o webui/api-client
+OPENAPI_GEN_TYPESCRIPT_USER_CLIENT_ARGS=-g typescript-angular -i backend/user-service/user-api.yaml -o webui/user-svc-client
+OPENAPI_GEN_GO_CLIENT_ARGS=-g go -i openapi.yaml -o backend/api-client --package-name=client
 
 CLUSTER_MISSING=$(shell gcloud --project=$(PROJECT_ID) container clusters describe $(CLUSTER_NAME) --zone $(CLUSTER_LOCATION) 2>&1 > /dev/null; echo $$?)
 
 .PHONY: clean delete delete-cluster run-local-webui run-local-backend lint-webui lint test-webui-local test-backend-local test-istio-auth-local build-webui test-webui test-istio-auth build-backend build-infrastructure build-all test cluster jq
+# Build eventing
+.PHONY: build-eventing build-eventing-triggers run-local-inventory-state-service run-local-inventory-level-monitor-service run-local-inventory-balance-monitor-service build-inventory-state-service build-inventory-level-monitor-service build-inventory-balance-monitor-service
+# Test eventing
+.PHONY: test-eventing test-inventory-state-service-local test-inventory-level-monitor-service-local test-inventory-balance-monitor-service-local test-inventory-state-service test-inventory-level-monitor-service test-inventory-balance-monitor-service
 
 ## RULES FOR LOCAL DEVELOPMENT
 clean:
@@ -90,16 +128,19 @@ clean:
 	wget $(OPENAPI_GEN_URL) -P /tmp/
 
 webui/api-client: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml
-	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_API_CLIENT_ARGS)
+	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_TYPESCRIPT_CLIENT_ARGS)
 
 webui/user-svc-client: /tmp/$(OPENAPI_GEN_JAR) backend/user-service/user-api.yaml
-	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_USER_CLIENT_ARGS)
+	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_TYPESCRIPT_USER_CLIENT_ARGS)
 
 webui/node_modules:
 	cd webui && npm ci
 
 backend/api-service/src/api/openapi.yaml: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml $(CUSTOM_TEMPLATES)/*.mustache
 	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_SERVER_ARGS)
+
+backend/api-client/openapi.yaml: /tmp/$(OPENAPI_GEN_JAR) openapi.yaml
+	java -jar /tmp/$(OPENAPI_GEN_JAR) generate $(OPENAPI_GEN_GO_CLIENT_ARGS)
 
 # Uses port 4200
 run-local-webui: webui/api-client
@@ -108,6 +149,15 @@ run-local-webui: webui/api-client
 # Uses port 8080
 run-local-backend: backend/api-service/src/api/openapi.yaml
 	cd backend/api-service && go run main.go
+
+run-local-inventory-state-service: backend/api-client/openapi.yaml
+	cd backend/inventory-state-service && go run main.go -backend_cluster_host_name=localhost:8080
+
+run-local-inventory-level-monitor-service: backend/api-client/openapi.yaml
+	cd backend/inventory-level-monitor-service && go run main.go -backend_cluster_host_name=localhost:8080
+
+run-local-inventory-balance-monitor-service: backend/api-client/openapi.yaml
+	cd backend/inventory-balance-monitor-service && go run main.go -backend_cluster_host_name=localhost:8080
 
 lint-webui: webui/node_modules
 	cd webui && npm run lint
@@ -124,6 +174,15 @@ test-backend-local: backend/api-service/src/api/openapi.yaml
 	docker run --network=host jwilder/dockerize:0.6.1 dockerize -timeout=60s -wait=tcp://localhost:9090
 	cd backend/api-service/src && FIRESTORE_EMULATOR_HOST=localhost:9090 go test -tags=emulator -v
 	docker stop firestore-emulator
+
+test-inventory-state-service-local: backend/api-client/openapi.yaml
+	cd backend/inventory-state-service && go test -v ./...
+
+test-inventory-level-monitor-service-local: backend/api-client/openapi.yaml
+	cd backend/inventory-level-monitor-service/src && go test -v
+
+test-inventory-balance-monitor-service-local: backend/api-client/openapi.yaml
+	cd backend/inventory-balance-monitor-service/src && go test -v
 
 FIREBASE_SA=$(shell gcloud --project=$(PROJECT_ID) iam service-accounts list --filter="displayName=firebase-adminsdk" --format="value(email)")
 test-istio-auth-local: jq
@@ -169,6 +228,15 @@ build-webui: cluster
 test-backend:
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild-test.yaml --substitutions $(call join_subs,$(BACKEND_TEST_SUBS))
 
+test-inventory-state-service:
+	$(GCLOUD_BUILD) --config ./backend/inventory-state-service/cloudbuild-test.yaml
+
+test-inventory-level-monitor-service:
+	$(GCLOUD_BUILD) --config ./backend/inventory-level-monitor-service/cloudbuild-test.yaml
+
+test-inventory-balance-monitor-service:
+	$(GCLOUD_BUILD) --config ./backend/inventory-balance-monitor-service/cloudbuild-test.yaml
+
 test-istio-auth:
 	$(GCLOUD_BUILD) --config ./istio-auth/cloudbuild-test.yaml --substitutions $(call join_subs,$(ISTIO_AUTH_TEST_SUBS))
 
@@ -176,7 +244,7 @@ test-webui:
 	$(GCLOUD_BUILD) --config ./webui/cloudbuild-test.yaml --substitutions $(call join_subs,$(TEST_WEBUI_SUBS))
 
 test-webui-e2e:
-	$(GCLOUD_BUILD) --config ./webui/cypress/cloudbuild.yaml --substitutions $(call join_subs,$(FRONTEND_E2E_SUBS))
+	$(GCLOUD_BUILD) --config ./webui/cypress/cloudbuild.yaml --substitutions $(call join_subs,$(FRONTEND_E2E_SUBS)),_WEBUI_E2E_TEST_TAGS=$(WEBUI_E2E_TEST_TAGS)
 
 build-backend: cluster
 	$(GCLOUD_BUILD) --config ./backend/api-service/cloudbuild.yaml --substitutions $(call join_subs,$(BACKEND_SUBS))
@@ -184,11 +252,39 @@ build-backend: cluster
 build-userservice: cluster
 	$(GCLOUD_BUILD) --config ./backend/user-service/cloudbuild.yaml --substitutions $(call join_subs,$(USER_SVC_SUBS))
 
+build-inventory-state-service: cluster
+	$(GCLOUD_BUILD) --config ./backend/inventory-state-service/cloudbuild.yaml --substitutions $(call join_subs,$(INVENTORY_STATE_SERVICE_SUBS))
+
+build-inventory-level-monitor-service: cluster
+	$(GCLOUD_BUILD) --config ./backend/inventory-level-monitor-service/cloudbuild.yaml --substitutions $(call join_subs,$(INVENTORY_LEVEL_MONITOR_SERVICE_SUBS))
+  
+build-inventory-balance-monitor-service: cluster
+	$(GCLOUD_BUILD) --config ./backend/inventory-balance-monitor-service/cloudbuild.yaml --substitutions $(call join_subs,$(INVENTORY_BALANCE_MONITOR_SERVICE_SUBS))
+  
+build-eventing-triggers:
+	$(GCLOUD_BUILD) --config cloudbuild-eventing-triggers.yaml --substitutions $(call join_subs,$(EVENTING_TRIGGERS_SUBS))
+
+ifeq ($(EVENTING_ENABLED),true)
+build-eventing: build-inventory-state-service build-inventory-level-monitor-service build-inventory-balance-monitor-service
+	# Eventing triggers have to be set up after the eventing services which they trigger.
+	$(MAKE) build-eventing-triggers
+else
+build-eventing:
+	@echo Eventing is disabled. To enable eventing set the EVENTING_ENABLED flag to true in env.mk.
+endif
+
+ifeq ($(EVENTING_ENABLED),true)
+test-eventing: test-inventory-state-service test-inventory-level-monitor-service test-inventory-balance-monitor-service
+else
+test-eventing:
+	@echo Eventing is disabled. To test eventing set the EVENTING_ENABLED flag to true in env.mk.
+endif
+
 build-infrastructure: cluster
 	$(GCLOUD_BUILD) --config cloudbuild.yaml --substitutions $(call join_subs,$(INFRA_SUBS))
 
 build-infra: build-infrastructure
 
-build-all: build-infrastructure build-backend build-userservice build-webui
+build-all: build-infrastructure build-backend build-userservice build-webui build-eventing
 
-test: test-backend test-webui
+test: test-backend test-webui test-eventing

@@ -1,3 +1,4 @@
+@core
 Feature: Inventory Transactions
 
   Background: Item and Location is ready

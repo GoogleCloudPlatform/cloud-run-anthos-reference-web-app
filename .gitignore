@@ -1,4 +1,7 @@
 env.mk
+backend/api-client/
+backend/api-client/.openapi-generator/
+!backend/api-client/.openapi-generator-ignore
 backend/api-service/.openapi-generator/
 backend/api-service/api/
 backend/api-service/src/api*.go
