@@ -29,7 +29,7 @@ steps:
   - |
       set -o errexit
       set -o xtrace
-      set 
+      set
       apk add gettext
       cat e2e/env.mk.template | \
       envsubst > env.mk
@@ -147,6 +147,7 @@ steps:
       then
         echo "ERROR: Could not load https://${_DNS_NAME} after $$ATTEMPTS attempts"
         touch e2e-failed
+        exit 0
       fi
       sleep 10s
       ATTEMPTS=$((ATTEMPTS + 1))
