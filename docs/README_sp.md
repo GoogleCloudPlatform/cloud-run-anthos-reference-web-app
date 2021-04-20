@@ -2,6 +2,8 @@
 
 [English](../README.md) | **Español**
 
+<span style="color: red; font-size: xx-large">**Este proyecto ha sido archivado y no mantiene actualmente**</span>
+
 # Aplicación Web de referencia para Cloud Run for Anthos
 
 Este repositorio, que incluye todos los flujos de trabajo y automatizaciones asociados,

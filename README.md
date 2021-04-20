@@ -2,6 +2,8 @@
 
 **English** | [Español](docs/README_sp.md)
 
+<span style="color: red; font-size: xx-large">**This project is archived and is not being actively maintained**</span>
+
 # Cloud Run for Anthos Reference Web App
 
 This repository, including all associated workflows and automations, represents
