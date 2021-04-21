@@ -2,9 +2,9 @@
 
 **English** | [Español](docs/README_sp.md)
 
-## 🛑 This project is archived and is not being actively maintained 🛑
-
 # Cloud Run for Anthos Reference Web App
+
+## 🛑 This project is archived and is not being actively maintained 🛑
 
 This repository, including all associated workflows and automations, represents
 an opinionated set of best practices aimed at demonstrating a reference architecture

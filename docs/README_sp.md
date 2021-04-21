@@ -2,9 +2,9 @@
 
 [English](../README.md) | **Español**
 
-## 🛑 Este proyecto ha sido archivado y no mantiene actualmente 🛑
-
 # Aplicación Web de referencia para Cloud Run for Anthos
+
+## 🛑 Este proyecto ha sido archivado y no mantiene actualmente 🛑
 
 Este repositorio, que incluye todos los flujos de trabajo y automatizaciones asociados,
 representa un conjunto de mejores prácticas dirigidas a demostrar una arquitectura
