@@ -4,6 +4,8 @@
 
 # Cloud Run for Anthos Reference Web App
 
+## 🛑 This project is archived and is not being actively maintained 🛑
+
 This repository, including all associated workflows and automations, represents
 an opinionated set of best practices aimed at demonstrating a reference architecture
 for building a web application on Google Cloud using Cloud Run for Anthos.
